@@ -1,14 +1,20 @@
-// Only export the provider component
 import React, { useState, useEffect } from "react";
 import { AuthContext } from "./AuthContext";
 
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(
-    JSON.parse(localStorage.getItem("currentUser")) || null
-  );
+
+  const [currentUser, setCurrentUser] = useState(() => {
+    const storedUser = localStorage.getItem("currentUser");
+    if (!storedUser || storedUser === "undefined") return null;
+    return JSON.parse(storedUser);
+  });
 
   useEffect(() => {
-    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    if (currentUser) {
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem("currentUser");
+    }
   }, [currentUser]);
 
   return (

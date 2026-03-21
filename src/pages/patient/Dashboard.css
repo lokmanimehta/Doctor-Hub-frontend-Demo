@@ -88,8 +88,8 @@
 
 /* --- APPOINTMENT CARD --- */
 .priority-apt-card-top {
-  background: var(--p-dark);
-  color: white;
+  background:rgb(249, 255, 169);
+  color: rgb(0, 0, 0);
   padding: 25px;
   border-radius: 24px;
   margin-bottom: 30px;

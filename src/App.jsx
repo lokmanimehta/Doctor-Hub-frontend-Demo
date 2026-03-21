@@ -180,6 +180,8 @@ import HospitalsModule from "./pages/admin/HospitalsModule";
 import LabsModule from "./pages/doctor/Labs";
 import FeedbackPage from "./pages/admin/FeedbackPage";
 import AdsManagement from "./pages/admin/AdsManagement";
+import Hospitals from "./pages/patient/Hospitals";
+import LabsPage from "./pages/patient/LabsPage";
 
 
 function App() {
@@ -241,7 +243,9 @@ function App() {
     <Route path="finddoctors" element={<FindDoctors/>} />
 
   <Route path="mydoctors" element={<MyDoctors/>} />
+   <Route path="hospitals" element={<Hospitals/>} />
 <Route path="doctorsprofile/:id" element={<Doctorprofile />} />
+<Route path="labs" element={<LabsPage />} />
   <Route path="records" element={<MedicalRecords/>} />
   <Route path="prescriptions" element={<Prescriptions/>} />
   <Route path="lab-reports" element={<Labreports/>} />

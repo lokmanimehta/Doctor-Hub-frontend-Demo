@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./AdminHeader.css";
-
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
+import { useAuthActions } from "../../services/authService";
 const AdminHeader = ({ isCollapsed, setIsCollapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -9,7 +11,8 @@ const AdminHeader = ({ isCollapsed, setIsCollapsed }) => {
   const user = JSON.parse(localStorage.getItem("currentUser"));
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
+  const { setCurrentUser } = useContext(AuthContext);
+const { logoutUser } = useAuthActions(setCurrentUser);
   // 🔴 IMPORTANT: Doctor header jaisa click-outside fix
   const dropdownRef = useRef(null);
 
@@ -29,10 +32,10 @@ const AdminHeader = ({ isCollapsed, setIsCollapsed }) => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    setDropdownOpen(false);
-    navigate("/");
-  };
+  
+  setDropdownOpen(false);
+  logoutUser(); // ✅ hook ke andar sab handle ho jayega
+};
 
   const pageTitles = {
   "/admin/dashboard": "Dashboard Overview",

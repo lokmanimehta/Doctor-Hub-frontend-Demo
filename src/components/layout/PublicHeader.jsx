@@ -1,18 +1,25 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Header.css";
+import { AuthContext } from "../../context/AuthContext";
 
 const Header = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const { currentUser, setCurrentUser } = useContext(AuthContext);
 
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+ const handleLogout = () => {
 
-  const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    navigate("/login");
-  };
+  localStorage.removeItem("currentUser");
+
+  setCurrentUser(null);
+
+  setOpen(false);
+
+  navigate("/");
+
+};
 
   // 🔥 Close dropdown when clicking outside
   useEffect(() => {
@@ -33,7 +40,7 @@ const Header = () => {
       </div>
 
       {/* 🔥 NOT LOGGED IN */}
-      {!user && (
+      {!currentUser && (
         <div className="auth-buttons">
           <button onClick={() => navigate("/login")}>Login</button>
           <button className="signup" onClick={() => navigate("/signup")}>
@@ -43,10 +50,10 @@ const Header = () => {
       )}
 
       {/* 🔥 LOGGED IN */}
-      {user && (
+      {currentUser && (
         <div className="profile-wrapper" ref={dropdownRef}>
           <img
-            src={user.profileImage || "https://i.pravatar.cc/40"}
+            src={currentUser.profileImage || "https://i.pravatar.cc/40"}
             alt="profile"
             className="profile-img"
             onClick={() => setOpen(!open)}
@@ -55,15 +62,15 @@ const Header = () => {
           {open && (
             <div className="profile-dropdown">
               <div className="user-info">
-                <strong>{user.fullName}</strong>
-                <span>{user.role}</span>
+                <strong>{currentUser.fullName}</strong>
+                <span>{currentUser.role}</span>
               </div>
 
               <ul>
-                <li onClick={() => navigate(`/${user.role.toLowerCase()}/dashboard`)}>
+                <li onClick={() => navigate(`/${currentUser.role.toLowerCase()}/dashboard`)}>
                   Dashboard
                 </li>
-                <li onClick={() => navigate(`/${user.role.toLowerCase()}/profile`)}>
+                <li onClick={() => navigate(`/${currentUser.role.toLowerCase()}/profile`)}>
                   Update Profile
                 </li>
                 <li className="logout" onClick={handleLogout}>

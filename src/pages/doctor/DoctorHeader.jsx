@@ -76,13 +76,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./DoctorHeader.css";
-
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
+import { useAuthActions } from "../../services/authService";
 const DoctorHeader = ({ setIsMobileOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef(null); // Ab ye pure header ya right section ko track karega
-  
+  const { setCurrentUser } = useContext(AuthContext);
+const { logoutUser } = useAuthActions(setCurrentUser);
   const user = JSON.parse(localStorage.getItem("currentUser"));
 
   // Click outside to close dropdown fix
@@ -98,11 +101,10 @@ const DoctorHeader = ({ setIsMobileOpen }) => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    setDropdownOpen(false); // Close dropdown before navigating
-    navigate("/");
-  };
-
+  
+  setDropdownOpen(false);
+  logoutUser(); // ✅ hook ke andar sab handle ho jayega
+};
   const routeTitles = {
     "/doctor/dashboard": "Dashboard",
     "/doctor/appointments": "My Appointments",

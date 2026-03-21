@@ -15,9 +15,11 @@ import {
   FiHelpCircle,   // Help
   FiChevronLeft,
   FiChevronRight,
-  FiX
+  FiX,
+  
 } from "react-icons/fi";
 import "./PatientSidebar.css";
+import { FaHospital } from "react-icons/fa";
 import Logo from "../../assets/images/logo.png"
 
 // 🔥 IMPORT YOUR DUMMY DATA
@@ -48,14 +50,17 @@ const PatientSidebar = ({
       { name: "Appointments", path: "/patient/appointments", icon: <FiCalendar />, badge: appointmentBadge },
       { name: "Find Doctors", path: "/patient/finddoctors", icon: <FiUsers /> },
       { name: "Past Consultations", path: "/patient/mydoctors", icon: <FiUsers /> },
+      { name: "Hospitals", path: "/patient/hospitals", icon: <FaHospital /> },
     ]
   },
   {
     groupName: "Medical Vault",
     items: [
+      
       { name: "Medical Records", path: "/patient/records", icon: <FiShield /> }, // 👈 Shield for safety
-      { name: "Prescriptions", path: "/patient/prescriptions", icon: <FiClipboard />, badge: prescriptionBadge }, // 👈 Clipboard
-      { name: "Lab Reports", path: "/patient/lab-reports", icon: <FiActivity />, badge: reportBadge }, // 👈 Activity for labs
+      { name: "Prescriptions", path: "/patient/prescriptions", icon: <FiClipboard />, badge: prescriptionBadge },
+      { name: "Labs", path: "/patient/labs", icon: <FiActivity />  }, // 👈 Clipboard
+      { name: "Lab Reports", path: "/patient/lab-reports", icon: <FiFileText />, badge: reportBadge }, // 👈 Activity for labs
     ]
   },
   {

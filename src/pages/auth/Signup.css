@@ -108,6 +108,15 @@
   width: 100%;
 }
 
+.show-hide-icon{
+position:absolute;
+right:16px;
+top:50%;
+transform:translateY(-50%);
+cursor:pointer;
+font-size:18px;
+color:#6b7280;
+}
 .input-icon {
   position: absolute;
   left: 16px;
@@ -117,10 +126,54 @@
   pointer-events: none;
   z-index: 10;
 }
+.selected-tags{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+margin-bottom:6px;
+}
+
+.tag{
+background:#10b981;
+color:white;
+padding:6px 10px;
+border-radius:20px;
+font-size:12px;
+display:flex;
+align-items:center;
+gap:6px;
+font-weight:500;
+}
+
+.tag button{
+display:flex;
+align-items:center;
+justify-content:center;
+
+width:18px;
+height:18px;
+
+background:white;
+color:#10b981;
+
+border:none;
+border-radius:50%;
+
+font-size:12px;
+font-weight:bold;
+cursor:pointer;
+
+transition:all 0.2s ease;
+}
+
+.tag button:hover{
+background:#059669;
+color:white;
+}
 
 .auth-input {
   width: 100% !important;
-  padding: 14px 16px 14px 48px !important; /* Forces text to start after icon */
+  padding:14px 44px 14px 48px !important; /* Forces text to start after icon */
   background: #f9fafb;
   border: 1.5px solid #f3f4f6;
   border-radius: 14px;
@@ -215,6 +268,51 @@
   box-shadow: 0 10px 15px rgba(16, 185, 129, 0.2);
   transition: 0.2s;
 }
+.selected-tags{
+display:flex;
+flex-wrap:wrap;
+gap:6px;
+margin-bottom:5px;
+}
+
+.tag{
+background:#10b981;
+color:white;
+padding:4px 10px;
+border-radius:20px;
+font-size:12px;
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+.tag button{
+background:none;
+border:none;
+color:white;
+cursor:pointer;
+font-weight:bold;
+}
+.signup-btn:hover {
+  background: var(--primary-dark);
+}
+.resend-btn {
+  width: 100%;
+  background: var(--primary);
+  color: white;
+  padding: 16px;
+  border-radius: 14px;
+  font-weight: 700;
+  border: none;
+  margin-top: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 10px 15px rgba(16, 185, 148, 0.2);
+  transition: 0.2s;
+}
 
 .signup-btn:hover {
   background: var(--primary-dark);
@@ -258,4 +356,204 @@
 @media (max-width: 1024px) {
   .auth-wrapper { grid-template-columns: 1fr; max-width: 500px; }
   .auth-visual { display: none; }
+}
+.otp-section{
+margin-top:20px;
+text-align:center;
+}
+.otp-section button{
+margin-top:12px;
+}
+
+.otp-section h3{
+margin-bottom:10px;
+}
+
+.otp-section p{
+color:#64748b;
+margin-bottom:20px;
+}
+@media (max-width:768px){
+
+.auth-form-section{
+padding:30px 20px;
+}
+
+.input-group{
+grid-template-columns:1fr;
+gap:12px;
+}
+
+.full-width{
+grid-column:span 1;
+}
+
+.signup-btn,
+.resend-btn{
+padding:14px;
+font-size:14px;
+}
+
+.auth-wrapper{
+border-radius:20px;
+}
+
+}
+
+/* --- Professional Animated Checkbox (Signup) --- */
+.terms-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 15px;
+  margin-bottom: 25px;
+  width: 100%;
+}
+
+/* Container for the animated checkbox */
+.checkbox-wrapper-12 {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0; /* Mobile par checkbox chota na ho */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkbox-wrapper-12 .cbx {
+  width: 24px;
+  height: 24px;
+  position: relative;
+}
+
+.checkbox-wrapper-12 .cbx input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #bfbfc0;
+  border-radius: 50%; /* Circle look */
+  appearance: none;
+  cursor: pointer;
+  z-index: 3;
+  background: transparent;
+  outline: none;
+  margin: 0;
+}
+
+.checkbox-wrapper-12 .cbx input:checked {
+  background: #10b981; /* Signup theme green */
+  border-color: #10b981;
+  animation: jelly 0.6s ease;
+}
+
+.checkbox-wrapper-12 .cbx svg {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 4;
+  pointer-events: none;
+  width: 14px;
+  height: 13px;
+}
+
+.checkbox-wrapper-12 .cbx svg path {
+  stroke: #fff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 19;
+  stroke-dashoffset: 19;
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+.checkbox-wrapper-12 .cbx input:checked ~ svg path {
+  stroke-dashoffset: 0;
+}
+
+.terms-checkbox label {
+  font-size: 14px;
+  color: #64748b;
+  cursor: pointer;-webkit-user-select: none;
+  user-select: none;
+  font-weight: 500;
+}
+
+.terms-checkbox label span {
+  color: #10b981;
+  font-weight: 700;
+}
+/* Base popup */
+.popup-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 9999;
+  animation: slideIn 0.3s ease;
+}
+
+/* SUCCESS */
+.success-toast {
+  background-color: #10b981;   /* green */
+  color: #ffffff;              /* white text */
+}
+
+/* ERROR */
+.error-toast {
+  background-color: #ef4444;   /* red */
+  color: #e40000;
+}
+.popup-toast {
+  background: black !important;
+  color: yellow !important;
+}
+
+/* animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+/* Jelly Keyframes */
+@keyframes jelly {
+  0% { transform: scale(1, 1); }
+  30% { transform: scale(1.25, 0.75); }
+  40% { transform: scale(0.75, 1.25); }
+  50% { transform: scale(1.15, 0.85); }
+  65% { transform: scale(0.95, 1.05); }
+  75% { transform: scale(1.05, 0.95); }
+  100% { transform: scale(1, 1); }
+}
+
+/* Mobile Adjustment */
+@media (max-width: 480px) {
+  .terms-checkbox label {
+    font-size: 13px;
+  }
+}
+/* Browser ka default eye icon hatane ke liye */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+/* Chrome/Safari ke liye (agar version support kare) */
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
 }

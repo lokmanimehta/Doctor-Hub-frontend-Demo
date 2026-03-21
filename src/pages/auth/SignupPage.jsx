@@ -1,476 +1,3 @@
-// import React, { useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import "./Signup.css";
-
-// const SignupPage = () => {
-//   const navigate = useNavigate();
-//   const [role, setRole] = useState("patient");
-//   const [fullName, setFullName] = useState("");
-//   const [email, setEmail] = useState("");
-//   const [mobile, setMobile] = useState("");
-//   const [specialization, setSpecialization] = useState("");
-//   const [credentials, setCredentials] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [confirmPassword, setConfirmPassword] = useState("");
-
-//   const suggestionsData = {
-//     specialization: ["Cardiology", "Dermatology", "Neurology", "Pediatrics", "Orthopedics", "General Physician", "Psychiatry", "Radiology", "Oncology", "Gastroenterology"],
-//     credentials: ["MBBS", "MD", "MS", "BDS", "DNB", "FRCS", "PhD", "MCh"]
-//   };
-
-//   const [filteredSpecs, setFilteredSpecs] = useState([]);
-//   const [filteredCreds, setFilteredCreds] = useState([]);
-//   const [activeField, setActiveField] = useState(null);
-
-//   const [popupMessage, setPopupMessage] = useState("");
-//   const [popupType, setPopupType] = useState("");
-
-//   const handleInputChange = (value, type) => {
-//     if (type === "specialization") {
-//       setSpecialization(value);
-//       const filtered = suggestionsData.specialization.filter(item =>
-//         item.toLowerCase().includes(value.toLowerCase())
-//       );
-//       setFilteredSpecs(value ? filtered : []);
-//     } else {
-//       setCredentials(value);
-//       const filtered = suggestionsData.credentials.filter(item =>
-//         item.toLowerCase().includes(value.toLowerCase())
-//       );
-//       setFilteredCreds(value ? filtered : []);
-//     }
-//     setActiveField(type);
-//   };
-
-//   // ✅ VALIDATION FUNCTION ADDED
-//   const validateForm = () => {
-
-//     if (fullName.trim().length < 3) {
-//       showPopup("Full Name must be at least 3 characters", "error");
-//       return false;
-//     }
-
-//     const emailRegex = /^\S+@\S+\.\S+$/;
-//     if (!emailRegex.test(email)) {
-//       showPopup("Enter a valid email address", "error");
-//       return false;
-//     }
-
-//     const mobileRegex = /^[0-9]{10}$/;
-//     if (!mobileRegex.test(mobile)) {
-//       showPopup("Mobile number must be 10 digits", "error");
-//       return false;
-//     }
-
-//     if (password.length < 6) {
-//       showPopup("Password must be at least 6 characters", "error");
-//       return false;
-//     }
-
-//     if (password !== confirmPassword) {
-//       showPopup("Passwords do not match", "error");
-//       return false;
-//     }
-
-//     if (role === "doctor") {
-//       if (credentials.trim() === "") {
-//         showPopup("Credentials are required for doctor", "error");
-//         return false;
-//       }
-
-//       if (specialization.trim() === "") {
-//         showPopup("Specialization is required for doctor", "error");
-//         return false;
-//       }
-//     }
-
-//     return true;
-//   };
-
-//   const handleSignup = async (e) => {
-//     e.preventDefault();
-
-//     // ✅ CALL VALIDATION HERE
-//     if (!validateForm()) return;
-
-//     const newUser = {
-//       fullName,
-//       email,
-//       mobile,
-//       password,
-//       role: role.toUpperCase(),
-//       specialization: role === "doctor" ? specialization : null,
-//       credentials: role === "doctor" ? credentials : null,
-//     };
-
-//     try {
-//       const response = await fetch("http://localhost:8080/api/auth/signup", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify(newUser),
-//       });
-
-//       if (!response.ok) {
-//         const errorMsg = await response.text();
-//         showPopup(errorMsg, "error");
-//         return;
-//       }
-
-//       showPopup("Signup successful! Redirecting to login...", "success");
-//       setTimeout(() => navigate("/login"), 2500);
-
-//     } catch {
-//       showPopup("Server not reachable. Try again later.", "error");
-//     }
-//   };
-
-//   const showPopup = (message, type) => {
-//     setPopupMessage(message);
-//     setPopupType(type);
-//     setTimeout(() => setPopupMessage(""), 2500);
-//   };
-
-//   return (
-//     <div className="signup-wrapper">
-//       <div className="signup-page">
-//         <div className="signup-left">
-//           <img
-//             src={role === "patient" ? "src/assets/images/patientlogin.png" : "src/assets/images/doctorlogin.png"}
-//             alt="Signup Illustration"
-//             className="auth-img"
-//           />
-//         </div>
-
-//         <div className="signup-right">
-//           {popupMessage && (
-//             <div className={`popup-card ${popupType}`}>
-//               <p>{popupMessage}</p>
-//             </div>
-//           )}
-
-//           <form className="signup-card" onSubmit={handleSignup}>
-//             <h2>Sign Up</h2>
-
-//             <p className="switch-role">
-//               Are you a {role === "patient" ? "doctor" : "patient"}?{" "}
-//               <span onClick={() => setRole(role === "patient" ? "doctor" : "patient")}>
-//                 Register here
-//               </span>
-//             </p>
-
-//             <div className="form-grid">
-//               <input type="text" placeholder="Full Name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
-//               <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-//               <input type="text" placeholder="Mobile Number" value={mobile} onChange={(e) => setMobile(e.target.value)} />
-
-//               {role === "doctor" && (
-//                 <>
-//                   <div className="specialization-wrapper">
-//                     <input
-//                       type="text"
-//                       placeholder="Credentials (e.g., MBBS, MD)"
-//                       value={credentials}
-//                       onChange={(e) => handleInputChange(e.target.value, "credentials")}
-//                       onFocus={() => setActiveField("credentials")}
-//                     />
-//                     {activeField === "credentials" && filteredCreds.length > 0 && (
-//                       <ul className="suggestions-list">
-//                         {filteredCreds.map((item, idx) => (
-//                           <li key={idx} onClick={() => { setCredentials(item); setActiveField(null); }}>
-//                             {item}
-//                           </li>
-//                         ))}
-//                       </ul>
-//                     )}
-//                   </div>
-
-//                   <div className="specialization-wrapper">
-//                     <input
-//                       type="text"
-//                       placeholder="Specialization (e.g., Cardiology)"
-//                       value={specialization}
-//                       onChange={(e) => handleInputChange(e.target.value, "specialization")}
-//                       onFocus={() => setActiveField("specialization")}
-//                     />
-//                     {activeField === "specialization" && filteredSpecs.length > 0 && (
-//                       <ul className="suggestions-list">
-//                         {filteredSpecs.map((item, idx) => (
-//                           <li key={idx} onClick={() => { setSpecialization(item); setActiveField(null); }}>
-//                             {item}
-//                           </li>
-//                         ))}
-//                       </ul>
-//                     )}
-//                   </div>
-//                 </>
-//               )}
-
-//               <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-//               <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-//             </div>
-
-//             <button type="submit" className="signup-btn">Sign Up</button>
-
-//             <p className="login-text">
-//               Already have an account?{" "}
-//               <span onClick={() => navigate("/login")}>Login</span>
-//             </p>
-//           </form>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default SignupPage;
-
-
- 
-
-// import React, { useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import "./Signup.css";
-
-// import patientImg from "../../assets/images/patientlogin.png";
-// import doctorImg from "../../assets/images/doctorlogin.png";
-
-// const SignupPage = () => {
-//   const navigate = useNavigate();
-//   const [role, setRole] = useState("patient");
-//   const [fullName, setFullName] = useState("");
-//   const [email, setEmail] = useState("");
-//   const [mobile, setMobile] = useState("");
-//   const [specialization, setSpecialization] = useState("");
-//   const [credentials, setCredentials] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [confirmPassword, setConfirmPassword] = useState("");
-
-//   const suggestionsData = {
-//     specialization: [
-//       "Cardiology", "Dermatology", "Neurology", "Pediatrics",
-//       "Orthopedics", "General Physician", "Psychiatry",
-//       "Radiology", "Oncology", "Gastroenterology"
-//     ],
-//     credentials: ["MBBS", "MD", "MS", "BDS", "DNB", "FRCS", "PhD", "MCh"]
-//   };
-
-//   const [filteredSpecs, setFilteredSpecs] = useState([]);
-//   const [filteredCreds, setFilteredCreds] = useState([]);
-//   const [activeField, setActiveField] = useState(null);
-
-//   const [popupMessage, setPopupMessage] = useState("");
-//   const [popupType, setPopupType] = useState("");
-
-//   const showPopup = (message, type) => {
-//     setPopupMessage(message);
-//     setPopupType(type);
-//     setTimeout(() => setPopupMessage(""), 2500);
-//   };
-
-//   const handleInputChange = (value, type) => {
-//     if (type === "specialization") {
-//       setSpecialization(value);
-//       const filtered = suggestionsData.specialization.filter(item =>
-//         item.toLowerCase().includes(value.toLowerCase())
-//       );
-//       setFilteredSpecs(value ? filtered : []);
-//     } else {
-//       setCredentials(value);
-//       const filtered = suggestionsData.credentials.filter(item =>
-//         item.toLowerCase().includes(value.toLowerCase())
-//       );
-//       setFilteredCreds(value ? filtered : []);
-//     }
-//     setActiveField(type);
-//   };
-
-//   const validateForm = () => {
-//     if (fullName.trim().length < 3) {
-//       showPopup("Full Name must be at least 3 characters", "error");
-//       return false;
-//     }
-
-//     const emailRegex = /^\S+@\S+\.\S+$/;
-//     if (!emailRegex.test(email)) {
-//       showPopup("Enter a valid email address", "error");
-//       return false;
-//     }
-
-//     const mobileRegex = /^[0-9]{10}$/;
-//     if (!mobileRegex.test(mobile)) {
-//       showPopup("Mobile number must be 10 digits", "error");
-//       return false;
-//     }
-
-//     if (password.length < 6) {
-//       showPopup("Password must be at least 6 characters", "error");
-//       return false;
-//     }
-
-//     if (password !== confirmPassword) {
-//       showPopup("Passwords do not match", "error");
-//       return false;
-//     }
-
-//     if (role === "doctor") {
-//       if (!credentials.trim()) {
-//         showPopup("Credentials required for doctor", "error");
-//         return false;
-//       }
-
-//       if (!specialization.trim()) {
-//         showPopup("Specialization required for doctor", "error");
-//         return false;
-//       }
-//     }
-
-//     return true;
-//   };
-
-//   const handleSignup = (e) => {
-//     e.preventDefault();
-//     if (!validateForm()) return;
-
-//     const users = JSON.parse(localStorage.getItem("users")) || [];
-
-//     if (users.find((u) => u.email === email)) {
-//       showPopup("User already exists!", "error");
-//       return;
-//     }
-
-//     const newUser = {
-//       fullName,
-//       email,
-//       mobile,
-//       password,
-//       role: role.toUpperCase(),
-//       specialization: role === "doctor" ? specialization : null,
-//       credentials: role === "doctor" ? credentials : null,
-//     };
-
-//     users.push(newUser);
-//     localStorage.setItem("users", JSON.stringify(users));
-
-//     showPopup("Signup successful! Redirecting to login...", "success");
-
-//     setTimeout(() => navigate("/login"), 2500);
-//   };
-
-//   return (
-//     <div className="signup-wrapper">
-//       <div className="signup-page">
-
-//         {/* LEFT IMAGE */}
-//         <div className="signup-left">
-//           <img
-//             src={role === "patient" ? patientImg : doctorImg}
-//             alt="Signup Illustration"
-//             className="auth-img"
-//           />
-//         </div>
-
-//         {/* RIGHT FORM */}
-//         <div className="signup-right">
-
-//           {/* POPUP MESSAGE */}
-//           {popupMessage && (
-//             <div className={`popup-card ${popupType}`}>
-//               {popupMessage}
-//             </div>
-//           )}
-
-//           <form className="signup-card" onSubmit={handleSignup}>
-//             <h2>Sign Up</h2>
-
-//             <p className="switch-role">
-//               Are you a {role === "patient" ? "doctor" : "patient"}?{" "}
-//               <span onClick={() => setRole(role === "patient" ? "doctor" : "patient")}>
-//                 Register here
-//               </span>
-//             </p>
-
-//             <div className="form-grid">
-//               <input type="text" placeholder="Full Name"
-//                 value={fullName}
-//                 onChange={(e) => setFullName(e.target.value)} />
-
-//               <input type="email" placeholder="Email"
-//                 value={email}
-//                 onChange={(e) => setEmail(e.target.value)} />
-
-//               <input type="text" placeholder="Mobile Number"
-//                 value={mobile}
-//                 onChange={(e) => setMobile(e.target.value)} />
-
-//               {role === "doctor" && (
-//                 <>
-//                   <div className="specialization-wrapper">
-//                     <input
-//                       type="text"
-//                       placeholder="Credentials (e.g., MBBS, MD)"
-//                       value={credentials}
-//                       onChange={(e) => handleInputChange(e.target.value, "credentials")}
-//                       onFocus={() => setActiveField("credentials")}
-//                     />
-//                     {activeField === "credentials" && filteredCreds.length > 0 && (
-//                       <ul className="suggestions-list">
-//                         {filteredCreds.map((item, idx) => (
-//                           <li key={idx} onClick={() => { setCredentials(item); setActiveField(null); }}>
-//                             {item}
-//                           </li>
-//                         ))}
-//                       </ul>
-//                     )}
-//                   </div>
-
-//                   <div className="specialization-wrapper">
-//                     <input
-//                       type="text"
-//                       placeholder="Specialization (e.g., Cardiology)"
-//                       value={specialization}
-//                       onChange={(e) => handleInputChange(e.target.value, "specialization")}
-//                       onFocus={() => setActiveField("specialization")}
-//                     />
-//                     {activeField === "specialization" && filteredSpecs.length > 0 && (
-//                       <ul className="suggestions-list">
-//                         {filteredSpecs.map((item, idx) => (
-//                           <li key={idx} onClick={() => { setSpecialization(item); setActiveField(null); }}>
-//                             {item}
-//                           </li>
-//                         ))}
-//                       </ul>
-//                     )}
-//                   </div>
-//                 </>
-//               )}
-
-//               <input type="password" placeholder="Password"
-//                 value={password}
-//                 onChange={(e) => setPassword(e.target.value)} />
-
-//               <input type="password" placeholder="Confirm Password"
-//                 value={confirmPassword}
-//                 onChange={(e) => setConfirmPassword(e.target.value)} />
-//             </div>
-
-//             <button type="submit" className="signup-btn">Sign Up</button>
-
-//             <p className="login-text">
-//               Already have an account? <span onClick={() => navigate("/login")}>Login</span>
-//             </p>
-//           </form>
-
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default SignupPage;
-
-
-
-
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -478,20 +5,30 @@ import {
   User, Mail, Phone, Briefcase, GraduationCap, Lock, ArrowRight, Stethoscope, HeartPulse 
 } from "lucide-react";
 import "./Signup.css"; 
-
+// import { signupUser } from "../../services/authService";
 // High-res images for premium look
 import patientImg from "../../assets/images/patientlogin.png";
 import doctorImg from "../../assets/images/doctorlogin.png";
-
+// import api from "../../services/api"
 const SignupPage = () => {
   const navigate = useNavigate();
+  const [signupStep, setSignupStep] = useState("form");
+const [emailForOtp, setEmailForOtp] = useState("");
+const [otp, setOtp] = useState("");
   const [role, setRole] = useState("patient");
+  const [loading,setLoading] = useState(false);
+  const [timer,setTimer] = useState(60);
+  const [specInput, setSpecInput] = useState("");
+const [credInput, setCredInput] = useState("");
+const [showPassword, setShowPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const [acceptedTerms,setAcceptedTerms] = useState(false)
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     mobile: "",
-    specialization: "",
-    credentials: "",
+    specialization: [],
+credentials: [],
     password: "",
     confirmPassword: ""
   });
@@ -509,70 +46,278 @@ const SignupPage = () => {
   const [filteredCreds, setFilteredCreds] = useState([]);
   const [activeField, setActiveField] = useState(null);
   const [popup, setPopup] = useState({ message: "", type: "", visible: false });
+  
 
   const showPopup = (message, type) => {
     setPopup({ message, type, visible: true });
-    setTimeout(() => setPopup({ ...popup, visible: false }), 3000);
+    setTimeout(() => {
+  setPopup(prev => ({ ...prev, visible: false }));
+}, 3000);
   };
-
+   
   const handleInputChange = (e, type) => {
-    const value = e.target.value;
-    setFormData({ ...formData, [type]: value });
 
-    if (type === "specialization" || type === "credentials") {
-      const dataKey = type === "specialization" ? "specialization" : "credentials";
-      const filtered = suggestionsData[dataKey].filter(item =>
-        item.toLowerCase().includes(value.toLowerCase())
-      );
-      if (type === "specialization") setFilteredSpecs(value ? filtered : []);
-      else setFilteredCreds(value ? filtered : []);
-      setActiveField(type);
-    }
-  };
+  const value = e.target.value.toLowerCase()
 
+  if(type === "specialization"){
+
+    setSpecInput(value)
+
+    const filtered = suggestionsData.specialization.filter(item =>
+      item.toLowerCase().includes(value)
+    )
+
+    setFilteredSpecs(filtered)
+    setActiveField("specialization")
+
+  }
+
+  if(type === "credentials"){
+
+    setCredInput(value)
+
+    const filtered = suggestionsData.credentials.filter(item =>
+      item.toLowerCase().includes(value)
+    )
+
+    setFilteredCreds(filtered)
+    setActiveField("credentials")
+
+  }
+
+}
   const validateForm = () => {
     const { fullName, email, mobile, password, confirmPassword, credentials, specialization } = formData;
     if (fullName.trim().length < 3) { showPopup("Full Name must be at least 3 characters", "error"); return false; }
     if (!/^\S+@\S+\.\S+$/.test(email)) { showPopup("Enter a valid email address", "error"); return false; }
-    if (!/^[0-9]{10}$/.test(mobile)) { showPopup("Mobile number must be 10 digits", "error"); return false; }
-    if (password.length < 6) { showPopup("Password must be at least 6 characters", "error"); return false; }
-    if (password !== confirmPassword) { showPopup("Passwords do not match", "error"); return false; }
+    if (!/^[6-9]\d{9}$/.test(mobile)) { showPopup("Mobile number must be 10 digits", "error"); return false; }
+if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[@#$%^&+=!]).{8,}$/.test(password)) {
+  showPopup("Password must contain uppercase, lowercase, number and special character", "error");
+  return false;
+}    if (password !== confirmPassword) { showPopup("Passwords do not match", "error"); return false; }
     if (role === "doctor") {
-      if (!credentials.trim()) { showPopup("Credentials required for doctor", "error"); return false; }
-      if (!specialization.trim()) { showPopup("Specialization required for doctor", "error"); return false; }
-    }
+
+  if (credentials.length === 0) {
+    showPopup("Please select at least one credential", "error");
+    return false;
+  }
+
+  if (specialization.length === 0) {
+    showPopup("Please select at least one specialization", "error");
+    return false;
+  }
+
+}
     return true;
   };
 
-  const handleSignup = (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+// const handleSignup = async (e) => {
+//   e.preventDefault();
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    if (users.find((u) => u.email === formData.email)) { 
-      showPopup("User already exists!", "error"); 
-      return; 
+//   if (!validateForm()) return;
+
+//   try {
+//     const payload = {
+//       fullName: formData.fullName,
+//       email: formData.email,
+//       mobile: formData.mobile,
+//       password: formData.password,
+//       acceptedTerms: acceptedTerms,
+//       role: role.toUpperCase(),
+// specialization: role === "doctor"
+//   ?  formData.specialization : [],
+// credentials: role === "doctor" ? formData.credentials : []
+//     };
+
+//     setLoading(true);
+
+// await signupUser(payload);
+
+// setLoading(false);
+
+//     setEmailForOtp(formData.email);
+
+//     showPopup("📧 OTP sent to your email", "success");
+
+//     setSignupStep("otp");
+//     setTimer(60);
+
+// const interval = setInterval(()=>{
+//    setTimer(prev=>{
+//       if(prev===1){
+//          clearInterval(interval);
+//          return 0;
+//       }
+//       return prev-1;
+//    });
+// },1000);
+
+//   } catch (err) {
+//     showPopup(err.message || "Signup failed", "error");
+//   }
+// };
+
+const handleSignup = async (e) => {
+  e.preventDefault();
+
+  if (!validateForm()) return;
+
+  try {
+    setLoading(true);
+
+    // ✅ Dummy signup users (simulate DB)
+    const dummyUsers = JSON.parse(localStorage.getItem("dummyUsers")) || [];
+
+    // ❌ check duplicate email
+    const exists = dummyUsers.find(
+      (u) => u.email === formData.email
+    );
+
+    if (exists) {
+      throw new Error("User already exists with this email");
     }
 
     const newUser = {
-      ...formData,
+      fullName: formData.fullName,
+      email: formData.email,
+      mobile: formData.mobile,
+      password: formData.password,
       role: role.toUpperCase(),
-      specialization: role === "doctor" ? formData.specialization : null,
-      credentials: role === "doctor" ? formData.credentials : null,
+      specialization: role === "doctor" ? formData.specialization : [],
+      credentials: role === "doctor" ? formData.credentials : []
     };
 
-    users.push(newUser);
-    localStorage.setItem("users", JSON.stringify(users));
-    showPopup("Account created successfully! ✨", "success");
+    // ✅ store in localStorage (dummy DB)
+    dummyUsers.push(newUser);
+    localStorage.setItem("dummyUsers", JSON.stringify(dummyUsers));
 
-    setTimeout(() => navigate("/login"), 2500);
-  };
+    setEmailForOtp(formData.email);
 
+    showPopup("📧 OTP sent (dummy)", "success");
+
+    setSignupStep("otp");
+    setTimer(60);
+
+    // ✅ fake OTP timer
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev === 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+  } catch (err) {
+    showPopup(err.message, "error");
+  } finally {
+    setLoading(false);
+  }
+};
+// const verifyOtp = async () => {
+
+//   if (!otp) {
+//     showPopup("Please enter OTP", "error");
+//     return;
+//   }
+
+//   try {
+
+//     await api.post("/auth/verify-otp", {
+//       email: emailForOtp,
+//       otp
+//     });
+
+//     showPopup("🎉 Account verified successfully!", "success");
+
+//     setTimeout(() => {
+//       navigate("/login");
+//     }, 2000);
+
+//   } catch (err) {
+//     showPopup(err.message || "OTP verification failed", "error");
+//   }
+
+// };
+
+const verifyOtp = async () => {
+  if (!otp) {
+    showPopup("Please enter OTP", "error");
+    return;
+  }
+
+  try {
+    // ✅ Dummy OTP always "123456"
+    if (otp !== "123456") {
+      throw new Error("Invalid OTP");
+    }
+
+    showPopup("🎉 Account verified successfully!", "success");
+
+    setTimeout(() => {
+      navigate("/login");
+    }, 1500);
+
+  } catch (err) {
+    showPopup(err.message || "OTP verification failed", "error");
+  }
+};
+// const resendOtp = async () => {
+
+//   try{
+
+//     await api.post("/auth/resend-otp",{
+//   email: emailForOtp
+// })
+
+    
+
+//     showPopup("🔁 OTP sent again", "success")
+//     setTimer(60)
+
+// const interval = setInterval(()=>{
+//    setTimer(prev=>{
+//       if(prev===1){
+//          clearInterval(interval)
+//          return 0
+//       }
+//       return prev-1
+//    })
+// },1000)
+//   }catch(err){
+//  showPopup(err.message || "Error occurred","error")
+// }
+// }
+const resendOtp = async () => {
+  try {
+    showPopup("🔁 Dummy OTP resent (use 123456)", "success");
+
+    setTimer(60);
+
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev === 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+  } catch (err) {
+    showPopup(err.message || "Error occurred", "error");
+  }
+};
   return (
     <div className="auth-container">
       {popup.visible && (
         <div className={`popup-toast ${popup.type === "success" ? "success-toast" : "error-toast"}`}>
-          {popup.type === "success" ? <HeartPulse size={20}/> : <Lock size={20}/>}
+          {/* {popup.type === "success" ? <HeartPulse size={20}/> : <Lock size={20}/>} */}
+          {popup.type === "success" 
+  ? <HeartPulse size={20} color="#fff"/> 
+  : <Lock size={20} color="#fff"/>
+}
           {popup.message}
         </div>
       )}
@@ -600,6 +345,7 @@ const SignupPage = () => {
             <p>Join our professional healthcare community today.</p>
           </div>
 
+          {signupStep === "form" && (
           <form onSubmit={handleSignup}>
             <div className="input-group">
               <div className="input-wrapper full-width">
@@ -627,92 +373,283 @@ const SignupPage = () => {
               <div className="input-wrapper">
                 <Phone className="input-icon" size={18} />
                 <input 
-                  type="text" 
-                  className="auth-input"
-                  placeholder="Mobile Number" 
-                  value={formData.mobile}
-                  onChange={(e) => setFormData({...formData, mobile: e.target.value})}
-                />
+  type="tel"
+  className="auth-input"
+  placeholder="Mobile Number"
+  value={formData.mobile}
+  onChange={(e)=>setFormData({...formData,mobile:e.target.value})}
+/>
               </div>
 
               {role === "doctor" && (
-                <>
-                  <div className="input-wrapper relative">
-                    <GraduationCap className="input-icon" size={18} />
-                    <input 
-                      type="text" 
-                      className="auth-input"
-                      placeholder="Credentials (e.g. MBBS)" 
-                      value={formData.credentials} 
-                      onChange={(e) => handleInputChange(e, "credentials")}
-                      onFocus={() => setActiveField("credentials")}
-                    />
-                    {activeField === "credentials" && filteredCreds.length > 0 && (
-                      <ul className="suggestions-list">
-                        {filteredCreds.map((item, idx) => (
-                          <li key={idx} onClick={() => { setFormData({...formData, credentials: item}); setActiveField(null); }}>{item}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
+<>
+{/* Credentials */}
 
-                  <div className="input-wrapper relative">
-                    <Stethoscope className="input-icon" size={18} />
-                    <input 
-                      type="text" 
-                      className="auth-input"
-                      placeholder="Specialization" 
-                      value={formData.specialization} 
-                      onChange={(e) => handleInputChange(e, "specialization")}
-                      onFocus={() => setActiveField("specialization")}
-                    />
-                    {activeField === "specialization" && filteredSpecs.length > 0 && (
-                      <ul className="suggestions-list">
-                        {filteredSpecs.map((item, idx) => (
-                          <li key={idx} onClick={() => { setFormData({...formData, specialization: item}); setActiveField(null); }}>{item}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                </>
-              )}
+<div className="full-width">
+
+<div className="selected-tags">
+{formData.credentials.map((cred,index)=>(
+<span key={index} className="tag">
+{cred}
+<button
+type="button"
+onClick={()=>{
+setFormData({
+...formData,
+credentials: formData.credentials.filter((_,i)=>i!==index)
+})
+}}
+>
+&#10005;
+</button>
+</span>
+))}
+</div>
+
+<div className="input-wrapper relative">
+<GraduationCap className="input-icon" size={18} />
+
+<input
+type="text"
+className="auth-input"
+placeholder="Credentials (e.g. MBBS)"
+value={credInput}
+onChange={(e)=>handleInputChange(e,"credentials")}
+onFocus={()=>{
+setActiveField("credentials")
+setFilteredCreds(suggestionsData.credentials)
+}}
+/>
+
+{activeField==="credentials" && filteredCreds.length>0 && (
+<ul className="suggestions-list">
+{filteredCreds.map((item,idx)=>(
+<li
+key={idx}
+onClick={()=>{
+
+if(!formData.credentials.includes(item)){
+setFormData({
+...formData,
+credentials:[...formData.credentials,item]
+})
+}
+
+setCredInput("")
+setActiveField(null)
+
+}}
+>
+{item}
+</li>
+))}
+</ul>
+)}
+
+</div>
+
+</div>
+
+
+{/* Specialization */}
+
+<div className="full-width">
+
+<div className="selected-tags">
+{formData.specialization.map((spec,index)=>(
+<span key={index} className="tag">
+{spec}
+
+<button
+type="button"
+onClick={()=>{
+setFormData({
+...formData,
+specialization: formData.specialization.filter((_,i)=>i!==index)
+})
+}}
+>
+&#10005;
+</button>
+
+</span>
+))}
+</div>
+
+<div className="input-wrapper relative">
+<Stethoscope className="input-icon" size={18} />
+
+<input
+type="text"
+className="auth-input"
+placeholder="Specialization"
+value={specInput}
+onChange={(e)=>handleInputChange(e,"specialization")}
+onFocus={()=>{
+setActiveField("specialization")
+setFilteredSpecs(suggestionsData.specialization)
+}}
+/>
+
+{activeField==="specialization" && filteredSpecs.length>0 && (
+<ul className="suggestions-list">
+
+{filteredSpecs.map((item,idx)=>(
+<li
+key={idx}
+onClick={()=>{
+
+if(!formData.specialization.includes(item)){
+setFormData({
+...formData,
+specialization:[...formData.specialization,item]
+})
+}
+
+setSpecInput("")
+setActiveField(null)
+
+}}
+>
+{item}
+</li>
+))}
+
+</ul>
+)}
+
+</div>
+
+</div>
+
+</>
+)}
 
               <div className="input-wrapper">
-                <Lock className="input-icon" size={18} />
-                <input 
-                  type="password" 
-                  className="auth-input"
-                  placeholder="Create Password" 
-                  value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                />
-              </div>
+  <Lock className="input-icon" size={18} />
+  <input 
+    type={showPassword ? "text" : "password"}
+    className="auth-input"
+    placeholder="Create Password" 
+    value={formData.password}
+    onChange={(e) => setFormData({...formData, password: e.target.value})}
+  />
+  <span
+    className="show-hide-icon"
+    onClick={() => setShowPassword(prev => !prev)}
+  >
+    {showPassword ? "🙈" : "👁️"}
+  </span>
+</div>
 
               <div className="input-wrapper">
-                <Lock className="input-icon" size={18} />
-                <input 
-                  type="password" 
-                  className="auth-input"
-                  placeholder="Confirm Password" 
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                />
-              </div>
+  <Lock className="input-icon" size={18} />
+  <input 
+    type={showConfirmPassword ? "text" : "password"}
+    className="auth-input"
+    placeholder="Confirm Password" 
+    value={formData.confirmPassword}
+    onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+  />
+  <span
+    className="show-hide-icon"
+    onClick={() => setShowConfirmPassword(prev => !prev)}
+  >
+    {showConfirmPassword ? "🙈" : "👁️"}
+  </span>
+</div>
             </div>
-              <div className="terms-checkbox">
-  <input type="checkbox" id="terms" required />
-  <label htmlFor="terms">
+            <div className="terms-checkbox">
+  <div className="checkbox-wrapper-12">
+    <div className="cbx">
+      <input
+        id="terms-cbx"
+        type="checkbox"
+        checked={acceptedTerms}
+        onChange={() => setAcceptedTerms(!acceptedTerms)}
+        required
+      />
+      <label htmlFor="terms-cbx"></label>
+      <svg width="15" height="14" viewBox="0 0 15 14" fill="none">
+        <path d="M2 8.36364L6.23077 12L13 2"></path>
+      </svg>
+    </div>
+  </div>
+  <label htmlFor="terms-cbx">
     I agree to <span>Terms & Privacy Policy</span>
   </label>
 </div>
-            <button type="submit" className="signup-btn">
-              Sign Up <ArrowRight size={20} />
+            <button type="submit" className="signup-btn"  disabled={loading}>
+              {loading ? "Creating Account..." : "Sign Up"} <ArrowRight size={20} />
             </button>
 
             <p className="footer-text">
               Already have an account? <span onClick={() => navigate("/login")}>Login Now</span>
             </p>
           </form>
+          )}
+          {signupStep === "otp" && (
+
+<div className="otp-section">
+
+  <h3>Verify OTP</h3>
+  <p>Enter OTP sent to {emailForOtp}</p>
+
+  <div className="input-wrapper">
+    <input
+  type="text"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  placeholder="Enter OTP"
+  value={otp}
+  maxLength={6}
+  onChange={(e)=>{
+  const value = e.target.value.replace(/\D/g,"")
+  setOtp(value)
+}}
+  className="auth-input"
+/>
+  </div>
+
+  <button className="signup-btn" onClick={verifyOtp}>
+    Verify OTP
+  </button>
+
+  <button
+  className="resend-btn"
+  onClick={resendOtp}
+  disabled={timer>0}
+>
+  {timer>0 ? `Resend in ${timer}s` : "Resend OTP"}
+</button>
+<button
+  className="back-btn-premium group"
+  type="button"
+  onClick={() => setSignupStep("form")}
+>
+  <div className="back-btn-icon-box">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 1024 1024"
+      height="25px"
+      width="25px"
+    >
+      <path
+        d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"
+        fill="#000000"
+      ></path>
+      <path
+        d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"
+        fill="#000000"
+      ></path>
+    </svg>
+  </div>
+  <p className="back-btn-text">Go Back</p>
+</button>
+
+</div>
+
+)}
         </div>
       </div>
     </div>

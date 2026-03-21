@@ -59,7 +59,7 @@ const PendingVerifications = () => {
 
                 {/* Ignore instantly removes card */}
                 <button className="btn-ignore" onClick={() => handleIgnore(doc.id)}>
-                  Ignore
+                  ❌
                 </button>
               </div>
             </div>

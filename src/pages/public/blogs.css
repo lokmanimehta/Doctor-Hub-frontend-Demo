@@ -69,7 +69,7 @@
 .main-content { position: relative; z-index: 1; }
 .blogs-hero { 
   text-align: center; /* Center aligning the text */
-  padding: 60px 41% 40px; 
+  padding: 60px 39% 40px; 
   max-width: auto;
   margin: 0 auto; /* Keeps hero section centered */
 }.section-header h2 { font-size: 30px; font-weight: 800; }
@@ -167,7 +167,103 @@
 
 .footer-desc { color: #cbd5e1; font-size: 14px; line-height: 1.6; max-width: 300px; }
 .footer-contact-info p { margin-bottom: 12px; color: #cbd5e1; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+.example-1 {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0;
+  margin: 15px 0 0 0;
+  list-style: none;
+  background-color: transparent;
+  height: auto;
+  width: auto;
+}
 
+.example-1 .icon-content {
+  margin-right: 15px;
+  position: relative;
+  display: inline-block; /* Ensure container is properly sized */
+}
+
+.example-1 .icon-content .tooltip {
+  position: absolute;
+  bottom: 125%; /* icon ke upar */
+  left: 50%;
+  transform: translateX(-50%);
+
+  background-color: #ffffff;
+  color: #000000;
+
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+
+  border-radius: 6px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+
+  width: max-content;   /* IMPORTANT */
+  max-width: 200px;     /* safety for long text */
+
+  white-space: nowrap;
+
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease;
+
+  z-index: 9999;
+}
+.example-1 .icon-content .tooltip::before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+
+  width: 8px;
+  height: 8px;
+
+  background: #ffffff;
+
+  transform: translateX(-50%) rotate(45deg);
+}
+/* Hover position */
+.example-1 .icon-content:hover .tooltip {
+  opacity: 1;
+  visibility: visible;
+  bottom: 150%;
+}
+
+.example-1 .icon-content:hover .tooltip {
+  opacity: 1;
+  visibility: visible;
+  top: -55px; /* Hover par perfect distance */
+}
+
+.example-1 .icon-content .link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  text-decoration: none !important;
+}
+
+.example-1 .icon-content .link svg {
+  width: 22px;
+  height: 22px;
+  fill: #fff;
+  transition: all 0.3s ease;
+}
+
+
+/* Hover Effects */
+.example-1 .icon-content .link[data-social="facebook"]:hover { background-color: #1877F2; }
+.example-1 .icon-content .link[data-social="instagram"]:hover { background-color:  #e1306c; }
+.example-1 .icon-content .link[data-social="linkedin"]:hover { background-color: #0077B5; }
+.example-1 .icon-content .link[data-social="whatsapp"]:hover { background-color: #25D366; }
 /* --- MOBILE 3-COLUMN HORIZONTAL FIX --- */
 @media (max-width: 768px) {
   .footer-container { 
@@ -568,4 +664,18 @@
     .modal-header-info h2 { font-size: 24px; }
     .content-paragraph { font-size: 16px; }
     .modal-image-header { height: 250px; }
+}
+/* Update your existing media query */
+@media (max-width: 768px) {
+  .blogs-hero { 
+    padding: 40px 15px 20px; /* Mobile par padding aur kam */
+  }
+  
+  .section-header h2 { 
+    font-size: 28px;        /* Mobile par heading ka size stable rahega */
+  }
+
+  .section-header p {
+    font-size: 14px;        /* Choti screen ke liye thoda chota font */
+  }
 }

@@ -1,0 +1,622 @@
+:root {
+    --primary-color: #10B981;
+    --primary-dark: #059669;
+    --dark-blue: #1A3352;
+    --bg-gray: #F4F7F6;
+    --text-gray: #64748b;
+    --text-dark: #0f172a;
+    --white: #ffffff;
+    --border: #e2e8f0;
+    --shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* --- RESET --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+body {
+    background: var(--bg-gray);
+    color: var(--text-dark);
+}
+
+/* =========================
+/* =========================
+1️⃣ TOP SEARCH SECTION (Fixed Overlap & Spacking)
+========================= */
+.top-search-section {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    /* Ensure it takes enough space for its children */
+    min-height: fit-content; 
+}
+
+.search-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
+}
+
+.global-search-input {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    outline: none;
+}
+
+.global-search-input:focus {
+    border-color: var(--primary-color);
+}
+
+.filter-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap; 
+    /* Ye margin niche wale content (All Hospitals) ko dhakka dega */
+    margin-bottom: 5px; 
+}
+
+.filter-select {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    /* Mobile standard: 2 boxes per row */
+    flex: 1 1 calc(50% - 10px); 
+    min-width: 140px;
+    appearance: none; /* Custom arrow looks better */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 1em;
+}
+
+.reset-filter-btn {
+    flex: 1 1 100%; 
+    background: #f1f5f9;
+    color: var(--text-dark);
+    border: 1px solid var(--border);
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.reset-filter-btn:hover {
+    background: #e2e8f0;
+}
+
+/* =========================
+2️⃣ HOSPITAL CARD LIST (Spacings)
+========================= */
+.hospital-card-list {
+    max-width: 1200px;
+    margin: 0 auto; /* Margin top removed because section padding is enough */
+    padding: 20px;
+}
+
+.hospital-card-list h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--text-dark);
+    /* Safeguard to ensure heading is never hidden */
+    clear: both; 
+}
+
+/* Desktop optimization */
+@media(min-width: 768px) {
+    .filter-select {
+        flex: 0 1 auto;
+        min-width: 160px;
+    }
+    .reset-filter-btn {
+        flex: 0 1 auto;
+        padding: 10px 25px;
+        margin-left: auto; /* Push to right on desktop */
+    }
+    .filter-row {
+        flex-wrap: nowrap; /* No wrapping on big screens */
+    }
+}
+
+.hospitals-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.hosp-standard-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.hosp-card-img {
+    width: 100%;
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hosp-card-img img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+
+.rating-tag {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 12px;
+    color: #f59e0b;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.hosp-card-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.hosp-card-info h3 {
+    font-size: 16px;
+    color: black;
+}
+
+.loc-text {
+    font-size: 13px;
+    color: var(--text-gray);
+}
+
+.hosp-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    margin: 8px 0;
+    color: #475569;
+}
+
+.bed-types {
+    font-size: 12px;
+    color: var(--text-gray);
+    margin-bottom: 10px;
+}
+
+.view-details-btn {
+    width: 100%;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.view-details-btn:hover {
+    background: var(--primary-dark);
+}
+
+/* =========================
+3️⃣ MODAL & FORM
+========================= */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 10px;
+}
+
+.booking-modal {
+    background: white;
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    border-radius: 20px;
+    overflow-y: auto;
+    position: relative;
+    padding: 20px;
+}
+
+.modal-close {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    border: none;
+    font-size: 24px;
+    background: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* MODAL FLEX FOR INFO + FORM */
+.modal-flex {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.modal-info-side {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-hero-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+/* IMAGE GALLERY */
+.modal-gallery{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+    flex-wrap:wrap;
+}
+
+.modal-gallery img{
+    width:70px;
+    height:60px;
+    object-fit:cover;
+    border-radius:6px;
+    cursor:pointer;
+    border:1px solid #eee;
+}
+
+/* ARROWS INITIALLY HIDDEN */
+.arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.4);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 50%;
+    z-index: 10;
+    display: none; /* initially hidden */
+}
+
+.arrow.left { left: 10px; }
+.arrow.right { right: 10px; }
+
+.modal-header-info {
+    display: flex;
+    gap: 12px;
+    margin-top: 15px;
+    align-items: center;
+}
+
+.hosp-logo-mini {
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #eee;
+}
+
+.hosp-logo-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.star-span {
+    color: #f59e0b;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.about-section h4,
+.depts-section h4,
+.facilities-section h4 {
+    font-size: 14px;
+    margin: 15px 0 8px;
+    color: black;
+}
+
+.about-section p {
+    font-size: 13px;
+    color: var(--text-gray);
+    line-height: 1.5;
+}
+
+.icon-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.dept-icon-item {
+    text-align: center;
+    background: #f8fafc;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid #f1f5f9;
+}
+
+.dept-icon-item span {
+    font-size: 16px;
+    display: block;
+}
+
+.dept-icon-item small {
+    font-size: 10px;
+    color: var(--text-gray);
+}
+
+.modal-form-side {
+    padding: 20px;
+    background: #fcfdfe;
+}
+
+.modal-form-side h3 {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.form-select,
+.form-input,
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+}
+
+.bed-availability-ui {
+    margin: 15px 0;
+}
+
+.green-text {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.progress-bar {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-color);
+}
+
+.book-bed-btn {
+    width: 100%;
+    background: var(--primary-color);
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+}
+
+/* =========================
+4️⃣ SUCCESS CONFIRMATION
+========================= */
+.success-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 10001;
+}
+
+.success-toast {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 350px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-top: 4px solid var(--primary-color);
+}
+
+/* =========================
+5️⃣ IMAGE FULL PREVIEW
+========================= */
+.full-preview-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    padding: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.full-preview-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.full-preview-img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+    object-fit: contain;
+    position: relative;
+    z-index: 1;
+}
+
+/* Close button & arrows initially hidden */
+.preview-close-btn,
+.full-preview-arrow {
+    display: none;
+}
+
+/* Show only when overlay active */
+.full-preview-overlay.active .preview-close-btn,
+.full-preview-overlay.active .full-preview-arrow {
+    display: block;
+}
+
+.preview-close-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    font-size: 28px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    z-index: 10001;
+}
+
+.full-preview-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.4);
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    font-size: 22px;
+    cursor: pointer;
+    border-radius: 50%;
+    z-index: 10001;
+}
+
+.full-preview-arrow.left { left: 15px; }
+.full-preview-arrow.right { right: 15px; }
+
+/* =========================
+6️⃣ DESKTOP RESPONSIVENESS
+========================= */
+/* =========================
+DESKTOP RESPONSIVENESS (min-width: 768px)
+========================= */
+@media(min-width: 768px) {
+
+  /* Hospital cards: grid layout */
+  .hospitals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 25px;
+  }
+
+  /* Modal flex: side by side info + form */
+  .modal-flex {
+      flex-direction: row;
+      min-height: 500px;
+      gap: 20px;
+  }
+
+  /* Modal info side (left) */
+  .modal-info-side {
+      flex: 1.2;
+      border-right: 1px solid var(--border);
+      border-bottom: none;
+      overflow-y: auto;
+  }
+
+  /* Modal form side (right) */
+  .modal-form-side {
+      flex: 0.8;
+  }
+
+  /* Gallery grid: 4 columns on desktop */
+  .icon-grid {
+      grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Hero image height slightly bigger */
+  .modal-hero-img {
+      height: 220px;
+  }
+
+  /* Modal gallery images bigger */
+  .modal-gallery img {
+      width: 70px;
+      height: 60px;
+  }
+
+  /* Font sizes bigger for desktop */
+  .global-search-input,
+  .filter-select,
+  .form-select,
+  .form-input,
+  textarea {
+      font-size: 14px;
+  }
+
+  .view-details-btn,
+  .book-bed-btn {
+      font-size: 14px;
+      padding: 12px;
+  }
+  .hospital-card-list {
+        padding-top: 0; /* Resetting since the flow is now natural */
+    }
+    
+    .filter-row {
+        margin-bottom: 10px; /* Space between filters and the "All Hospitals" text */
+    }
+}

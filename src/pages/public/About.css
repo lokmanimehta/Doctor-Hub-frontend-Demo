@@ -4,7 +4,7 @@
   --primary-dark: #059669;
   --bg-soft: #f8fafc;
   --text-dark: #000000;
-  --text-light: #64748b;
+  --text-light: #000000;
   --border: #e2e8f0;
   --white: #ffffff;
 }
@@ -493,7 +493,103 @@
 
 .footer-desc { color: #cbd5e1; font-size: 14px; line-height: 1.6; max-width: 300px; }
 .footer-contact-info p { margin-bottom: 12px; color: #cbd5e1; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+.example-1 {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0;
+  margin: 15px 0 0 0;
+  list-style: none;
+  background-color: transparent;
+  height: auto;
+  width: auto;
+}
 
+.example-1 .icon-content {
+  margin-right: 15px;
+  position: relative;
+  display: inline-block; /* Ensure container is properly sized */
+}
+
+.example-1 .icon-content .tooltip {
+  position: absolute;
+  bottom: 125%; /* icon ke upar */
+  left: 50%;
+  transform: translateX(-50%);
+
+  background-color: #ffffff;
+  color: #000000;
+
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+
+  border-radius: 6px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+
+  width: max-content;   /* IMPORTANT */
+  max-width: 200px;     /* safety for long text */
+
+  white-space: nowrap;
+
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease;
+
+  z-index: 9999;
+}
+.example-1 .icon-content .tooltip::before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+
+  width: 8px;
+  height: 8px;
+
+  background: #ffffff;
+
+  transform: translateX(-50%) rotate(45deg);
+}
+/* Hover position */
+.example-1 .icon-content:hover .tooltip {
+  opacity: 1;
+  visibility: visible;
+  bottom: 150%;
+}
+
+.example-1 .icon-content:hover .tooltip {
+  opacity: 1;
+  visibility: visible;
+  top: -55px; /* Hover par perfect distance */
+}
+
+.example-1 .icon-content .link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  text-decoration: none !important;
+}
+
+.example-1 .icon-content .link svg {
+  width: 22px;
+  height: 22px;
+  fill: #fff;
+  transition: all 0.3s ease;
+}
+
+
+/* Hover Effects */
+.example-1 .icon-content .link[data-social="facebook"]:hover { background-color: #1877F2; }
+.example-1 .icon-content .link[data-social="instagram"]:hover { background-color:  #e1306c; }
+.example-1 .icon-content .link[data-social="linkedin"]:hover { background-color: #0077B5; }
+.example-1 .icon-content .link[data-social="whatsapp"]:hover { background-color: #25D366; }
 /* --- MOBILE 3-COLUMN HORIZONTAL FIX --- */
 /* ==========================================
    ABOUT US - MOBILE PREMIUM FIX (768px)
@@ -735,4 +831,50 @@
   font-size: 14px; /* Fixed from 52px to 14px */
   color: #ffffff !important; /* Pure white */
   opacity: 0.8;
+}
+@media (max-width: 600px) {
+  .main-footer {
+    padding: 40px 5% 20px; /* Side padding kam kar di */
+  }
+
+  .footer-container { 
+    /* Desktop ki tarah columns ko ek line mein lane ke liye */
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important; 
+    gap: 10px !important;
+    text-align: left !important;
+    align-items: start !important;
+  }
+
+  /* Logo section ko full width rakhte hain taaki niche ke 3 columns balanced dikhein */
+  .footer-column.brand-col {
+    grid-column: span 3;
+    margin-bottom: 15px;
+    text-align: center; /* Logo aur description center mein ache lagenge */
+  }
+
+  .footer-column h4 {
+    font-size: 13px; /* Size chota kiya taaki wrap na ho */
+    margin-bottom: 10px;
+    white-space: nowrap; /* Heading ko ek line mein rakhne ke liye */
+  }
+
+  .footer-list li, 
+  .footer-contact-info p {
+    font-size: 11px; /* Mobile ke liye optimized font size */
+    margin-bottom: 6px;
+    line-height: 1.4;
+    word-break: break-word; /* Lambe emails ya address wrap ho jayenge */
+  }
+
+  /* Social icons ko thoda chota kiya mobile ke liye */
+  .example-1 .icon-content a {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .example-1 .icon-content a svg {
+    width: 18px;
+    height: 18px;
+  }
 }

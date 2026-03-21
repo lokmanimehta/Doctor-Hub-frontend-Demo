@@ -1,17 +1,27 @@
 import React, { useState, useEffect, useRef } from "react";import "./PatientHeader.css";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation  } from "react-router-dom";
 import { FiMenu, FiUser, FiLogOut } from "react-icons/fi"; 
-
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
+import { useAuthActions } from "../../services/authService";
 const PatientHeader = ({ setIsMobileOpen, isCollapsed }) => {
   const [open, setOpen] = useState(false);
-  const user = JSON.parse(localStorage.getItem("currentUser"));
   const location = useLocation();
-  const dropdownRef = useRef(null); // Click outside ke liye ref
+  const dropdownRef = useRef(null);
+const { currentUser, setCurrentUser } = useContext(AuthContext);
+
+const { logoutUser } = useAuthActions(setCurrentUser);
+   // Click outside ke liye ref
+ 
+
+
   
   const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    window.location.href = "/";
-  };
+  setOpen(false);
+  logoutUser(); 
+  // ✅ context update + redirect handled inside hook
+};
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -29,8 +39,10 @@ const PatientHeader = ({ setIsMobileOpen, isCollapsed }) => {
     "/patient/mydoctors": "My Doctor's",
     "/patient/records": "Medical Record's",
     "/patient/profile": "My Profile Setting's",
-    "/patient/prescriptions": "Prescription's",
+     "/patient/prescriptions": "Prescription's",
+    "/patient/labs": "All Labs's",
     "/patient/lab-reports": "Lab Report's",
+  
     "/patient/health-summary": "Health Summary",
     "/patient/reminders": "Reminder's",
     "/patient/notifications": "Notification's",
@@ -64,8 +76,8 @@ const PatientHeader = ({ setIsMobileOpen, isCollapsed }) => {
         {open && (
           <div className="profile-dropdown">
             <div className="dropdown-user-card">
-              <p className="user-name-dropdown">{user?.fullName || "Patient"}</p>
-              <span className="user-role-dropdown">{user?.role || "User"}</span>
+              <p className="user-name-dropdown">{currentUser?.fullName || "Patient"}</p>
+              <span className="user-role-dropdown">{currentUser?.role || "User"}</span>
             </div>
             
             <div className="premium-divider"></div>
