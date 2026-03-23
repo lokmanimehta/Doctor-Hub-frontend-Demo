@@ -376,7 +376,10 @@
   align-items: center;
   color: white;
 }
-
+.news-submit-btn{
+  background-color:  #059669 !important;
+  color: #ffffff !important;
+}
 .news-input-box {
   display: flex;
   background: white;

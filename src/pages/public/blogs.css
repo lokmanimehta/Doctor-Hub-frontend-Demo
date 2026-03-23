@@ -68,16 +68,37 @@
 /* --- BLOG GRID --- */
 .main-content { position: relative; z-index: 1; }
 .blogs-hero { 
-  text-align: center; /* Center aligning the text */
-  padding: 60px 39% 40px; 
-  max-width: auto;
-  margin: 0 auto; /* Keeps hero section centered */
-}.section-header h2 { font-size: 30px; font-weight: 800; }
+  width: 100%;
+  text-align: center; 
+  padding: 30px 41px 70px; /* Padding kam kar di taaki text ko jagah mile */
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.section-header {
+  display: flex;
+  flex-direction: column; /* Text ko ek ke upar ek lane ke liye */
+  align-items: center;    /* Horizontal centering */
+  max-width: 800px;       /* Content zyada failay na */
+}
+
+.section-header h2 { 
+  font-size: 36px; 
+  font-weight: 800;
+  margin-bottom: 10px; 
+   margin-right: 100px; /* Heading aur Para ke beech gap */
+}
+
+.section-header p {
+  max-width: 600px;       /* Description text ki width control karne ke liye */
+  margin: 0 auto;
+}
 .section-header h2 span { color: var(--primary); }
 .accent-line { width: 50px; height: 4px; background: var(--primary); margin: 10px auto; border-radius: 10px; }
 @media (max-width: 768px) {
-  .blogs-hero { padding: 60px 109px 30px; }
-  .section-header h2 { font-size: 28px; }
+  .blogs-hero { padding: 60px 10px 30px; }
+  .section-header h2 { font-size: 28px;  margin-right: 70px;}
 }
 .blogs-grid-container {
   display: grid;

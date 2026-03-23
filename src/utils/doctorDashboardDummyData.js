@@ -23,3 +23,39 @@ export const doctorDashboardData = {
     "System update: Your profile has been verified",
   ],
 };
+
+export const doctorProfileDummy = {
+  fullName: "Dr. Raj Mehta",
+  email: "raj.mehta@gmail.com",
+  phone: "+91 9876543210",
+  specialization: "Cardiologist",
+  experience: 12,
+  gender: "Male",
+  about: "Experienced cardiologist with 12+ years in treating heart diseases.",
+  
+  councilName: "Medical Council of India",
+  registrationNumber: "MCI123456",
+  registrationYear: "2012",
+
+  clinics: [
+    {
+      clinicName: "Heart Care Clinic",
+      clinicAddress: "Andheri West, Mumbai",
+      consultationFee: 800,
+      availability: [
+        { day: "Monday", startTime: "09:00", endTime: "12:00" },
+        { day: "Wednesday", startTime: "10:00", endTime: "01:00" }
+      ]
+    }
+  ],
+
+  visitingPositions: [
+    {
+      location: "Apollo Hospital",
+      fees: 1200,
+      availability: [
+        { day: "Friday", startTime: "04:00", endTime: "07:00" }
+      ]
+    }
+  ]
+};

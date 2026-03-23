@@ -233,10 +233,9 @@ const AboutUs = () => {
     <div className="footer-column">
       <h4>Services</h4>
       <ul className="footer-list">
-        <li  onClick={() => navigate("/all-services")}>Find Doctors</li>
-        <li  onClick={() => navigate("/all-services")}>Hospitals</li>
-        <li  onClick={() => navigate("/all-services")}>Diagnostic Labs</li>
-        <li  onClick={() => navigate("/all-services")}>Online Pharmacy</li>
+          <li onClick={() => navigate("/all-services")}>Find Doctors</li>
+              <li onClick={() => navigate("/all-services")}>Find Hospitals</li>
+              <li onClick={() => navigate("/all-services")}>Find Labs</li>
       </ul>
     </div>
 
@@ -257,7 +256,7 @@ const AboutUs = () => {
       <h4>Contact Us</h4>
       <div className="footer-contact-info">
         <p>📍 Andheri West, Mumbai, MH</p>
-        <p>📞 +91 98765 43210</p>
+        <p>📞 +91 98765 - 43210</p>
         <p>✉️ support@dochub.com</p>
       </div>
     </div>

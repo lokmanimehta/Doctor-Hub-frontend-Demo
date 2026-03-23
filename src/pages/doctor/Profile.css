@@ -543,10 +543,245 @@
 .signature-box { margin-top: 20px; padding: 15px; background: #fff; border: 1px dashed #d1d5db; border-radius: 8px; }
 .subtext { font-size: 12px; color: #9ca3af; margin-top: 5px; }
 
-/* --- RESPONSIVE MEDIA QUERIES --- */
+/* Container Fix */
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto; /* Last column auto for button */
+    gap: 15px;
+    align-items: flex-end; /* Labels ke niche button align hoga */
+    position: relative;
+    padding: 15px;
+    background: #f9fafb;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+/* Remove Button styling */
+.remove-btn {
+    background: #fee2e2; /* Light red background */
+    color: #ef4444;      /* Red X color */
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: 0.2s;
+    margin-bottom: 5px; /* Select/Input ke barabar lane ke liye */
+}
+
+.remove-btn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* --- MOBILE FIRST (Responsive) --- */
+@media (max-width: 768px) {
+    .input-grid {
+        grid-template-columns: 1fr; /* Mobile par sab ek ke niche ek */
+        padding-top: 40px; /* X button ke liye space */
+    }
+
+    .remove-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        margin-bottom: 0;
+    }
+}
+/* Visiting Info ke top labels ke liye */
+.input-grid-basic {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Do barabar columns */
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+/* Mobile par isko single column kar dein */
+@media (max-width: 768px) {
+  .input-grid-basic {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+/* Ensure sub-label-header starts on a new line properly */
+.sub-label-header {
+  display: block;
+  width: 100%;
+  margin: 20px 0 10px;
+  clear: both;
+}/* --- RESPONSIVE MEDIA QUERIES --- */
 @media (max-width: 768px) {
   .input-grid, .view-grid { grid-template-columns: 1fr; }
   .doctor-header-top, .photo-upload-container { flex-direction: column; text-align: center; }
   .form-buttons-fixed { flex-direction: column; }
   .photo-preview { margin: 0 auto; }
+}
+/* ================================
+   🔥 FINAL MOBILE RESPONSIVE FIX
+================================ */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .profile-form,
+  .profile-view-container,
+  .profile-top-header {
+    max-width: 95%;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+
+  /* Page padding kam */
+  .doctor-profile-page {
+    padding: 12px;
+  }
+
+  /* Header stack */
+  .profile-top-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .edit-profile-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Form */
+  .profile-form {
+    padding: 15px;
+    border-radius: 12px;
+  }
+
+  /* Sections */
+  .section {
+    padding: 15px;
+  }
+
+  /* Grid -> column */
+  .input-grid {
+    grid-template-columns: 1fr !important;
+    padding: 12px;
+  }
+
+  .input-grid-basic {
+    grid-template-columns: 1fr;
+  }
+
+  /* File row stack */
+  .file-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Buttons full width */
+  .add-more-btn,
+  .save-btn,
+  .cancel-btn {
+    width: 100%;
+  }
+
+  /* Form buttons */
+  .form-buttons-fixed {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Avatar center */
+  .photo-upload-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* Doctor header */
+  .doctor-header-top {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  /* View cards grid */
+  .view-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Remove button floating */
+  .remove-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .input-grid {
+    position: relative;
+    padding-top: 35px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+
+  /* Text size adjust */
+  .doctor-profile-page h2 {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .profile-subtext {
+    font-size: 12px;
+    text-align: center;
+  }
+
+  /* Cards padding */
+  .view-card {
+    padding: 15px;
+  }
+
+  /* Buttons compact */
+  .save-btn,
+  .cancel-btn {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  /* Avatar smaller */
+  .photo-preview,
+  .view-avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  /* Inputs compact */
+  .profile-form input,
+  .profile-form textarea,
+  .profile-form select {
+    font-size: 13px;
+    padding: 9px 10px;
+  }
+
+  /* Multi block */
+  .multi-entry-block {
+    padding: 12px;
+  }
+
+  /* Entry titles */
+  .view-entry-title {
+    font-size: 13px;
+  }
+
+  .view-entry-sub {
+    font-size: 12px;
+  }
 }

@@ -370,7 +370,7 @@ const searchResults = useMemo(() => {
                 <span className="search-icon-hero">🔍</span>
                 <input
   type="text"
-  placeholder="Search doctors, diseases, clinics..."
+  placeholder="find doctor, hospitals, clicnis etc..."
   value={searchText}
   onChange={(e) => {
     setSearchText(e.target.value);
@@ -393,7 +393,7 @@ const searchResults = useMemo(() => {
               <button className="hero-search-btn">Find Doctor</button>
             </div>
             <div className="trending-tags">
-              <span className="trending-label">🔥 Trending Diseases :-</span>
+              <span className="trending-label">🔥 Trending  :-</span>
               <div className="tags-flex">
                 {trendingSearches.map((item, idx) => (
                   <span key={idx} className="trend-tag" onClick={() => {
@@ -681,9 +681,9 @@ const searchResults = useMemo(() => {
             <h4>Services</h4>
             <ul className="footer-list">
               <li onClick={() => navigate("/all-services")}>Find Doctors</li>
-              <li onClick={() => navigate("/all-services")}>Hospitals</li>
-              <li onClick={() => navigate("/all-services")}>Diagnostic Labs</li>
-              <li onClick={() => navigate("/all-services")}>Online Pharmacy</li>
+              <li onClick={() => navigate("/all-services")}>Find Hospitals</li>
+              <li onClick={() => navigate("/all-services")}>Find Labs</li>
+             
             </ul>
           </div>
 
@@ -702,7 +702,7 @@ const searchResults = useMemo(() => {
             <h4>Contact Us</h4>
             <div className="footer-contact-info">
               <p>📍 Andheri West, Mumbai, MH</p>
-              <p>📞 +91 98765 43210</p>
+              <p>📞 +91 98765 - 43210</p>
               <p>✉️ support@dochub.com</p>
             </div>
           </div>

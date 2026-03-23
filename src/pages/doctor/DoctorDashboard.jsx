@@ -1,157 +1,8 @@
-// import React from "react";
-// import { doctorDashboardData } from "../../utils/doctorDashboardDummyData";
-// import "./DoctorDashboard.css";
-// import { Bar, Pie } from "react-chartjs-2";
-// import {
-//   Chart as ChartJS,
-//   CategoryScale,
-//   LinearScale,
-//   BarElement,
-//   ArcElement,
-//   Tooltip,
-//   Legend,
-// } from "chart.js";
-// import { useNavigate } from "react-router-dom";
-
-// ChartJS.register(
-//   CategoryScale,
-//   LinearScale,
-//   BarElement,
-//   ArcElement,
-//   Tooltip,
-//   Legend
-// );
-
-// const DoctorDashboard = () => {
-//   const { stats, todaysAppointments } = doctorDashboardData;
-//   const navigate = useNavigate();
-
-//   // TEMP (later from backend)
-//   const profileCompletion = 65;
-
-//   const barData = {
-//     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-//     datasets: [
-//       {
-//         label: "New Patients",
-//         data: [12, 19, 8, 15, 22, 10],
-//         backgroundColor: "rgba(72, 187, 120, 0.7)",
-//         borderRadius: 6,
-//       },
-//     ],
-//   };
-
-//   const pieData = {
-//     labels: ["Visits", "Prescriptions", "Reports"],
-//     datasets: [
-//       {
-//         data: [45, 25, 30],
-//         backgroundColor: [
-//           "rgba(99, 179, 237, 0.7)",
-//           "rgba(248, 181, 149, 0.7)",
-//           "rgba(155, 165, 177, 0.7)",
-//         ],
-//         borderWidth: 0,
-//       },
-//     ],
-//   };
-
-//   return (
-//     <div className="doctor-dashboard">
-
-//       {/* ENHANCED PROFILE ALERT */}
-//       {profileCompletion < 100 && (
-//         <div className="profile-alert-card">
-//           <div className="profile-alert-left">
-//             <span className="alert-icon">⚠️</span>
-//             <div>
-//               <h4>Complete Your Profile</h4>
-//               <p>Your profile is {profileCompletion}% completed. Complete it to go live and accept appointments.</p>
-//             </div>
-//           </div>
-//           <div className="profile-alert-right">
-//             <div className="progress-container">
-//               <div
-//                 className="progress-fill"
-//                 style={{ width: `${profileCompletion}%` }}
-//               />
-//             </div>
-//             <button
-//               className="complete-profile-btn"
-//               onClick={() => navigate("/doctor/profile")}
-//             >
-//               Complete Profile
-//             </button>
-//           </div>
-//         </div>
-//       )}
-
-//       {/* STATS */}
-//       <div className="doctor-stats">
-//         <div className="doctor-card">
-//           <span>Total Patients</span>
-//           <h3>{stats.totalPatients}</h3>
-//         </div>
-//         <div className="doctor-card">
-//           <span>Today’s Appointments</span>
-//           <h3>{stats.todayAppointments}</h3>
-//         </div>
-//         <div className="doctor-card">
-//           <span>Pending Approvals</span>
-//           <h3>{stats.pendingApprovals}</h3>
-//         </div>
-//       </div>
-
-//       {/* TODAY APPOINTMENTS */}
-//       <div className="doctor-section">
-//         <h4>Today’s Appointments</h4>
-//         <table className="doctor-table">
-//           <thead>
-//             <tr>
-//               <th>Time</th>
-//               <th>Patient</th>
-//               <th>Status</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {todaysAppointments.map((a) => (
-//               <tr key={a.id}>
-//                 <td>{a.time}</td>
-//                 <td>{a.patient}</td>
-//                 <td>
-//                   <span className={`doctor-status ${a.status.toLowerCase()}`}>
-//                     {a.status}
-//                   </span>
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {/* CHARTS */}
-//       <div className="doctor-charts">
-//         <div className="chart-card">
-//           <h4>New Patients (Monthly)</h4>
-//           <Bar data={barData} />
-//         </div>
-//         <div className="chart-card">
-//           <h4>Records Distribution</h4>
-//           <Pie data={pieData} />
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default DoctorDashboard;
-
-
-
 
 import React from "react";
-import { doctorDashboardData } from "../../utils/doctorDashboardDummyData";
 import "./DoctorDashboard.css";
+import { doctorDashboardData } from "../../utils/doctorDashboardDummyData";
+import { calculateProfileCompletion } from "../../utils/profileCompletion";
 import { Bar, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -169,7 +20,24 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Le
 const DoctorDashboard = () => {
   const { stats, todaysAppointments } = doctorDashboardData;
   const navigate = useNavigate();
-  const profileCompletion = 65;
+  const [profileCompletion, setProfileCompletion] = React.useState(0);
+
+React.useEffect(() => {
+  const getProfileCompletion = () => {
+    const storedUser = JSON.parse(localStorage.getItem("currentUser")) || {};
+    const completion = calculateProfileCompletion(storedUser);
+    setProfileCompletion(completion);
+  };
+
+  getProfileCompletion();
+
+  window.addEventListener("storage", getProfileCompletion);
+
+  return () => {
+    window.removeEventListener("storage", getProfileCompletion);
+  };
+}, []);
+
 
   const chartOptions = {
     responsive: true,
@@ -204,25 +72,47 @@ const DoctorDashboard = () => {
   return (
     <div className="doctor-dashboard-container">
       {/* 1. PROFILE ALERT BOX */}
-      {profileCompletion < 100 && (
-        <div className="profile-alert-box">
-          <div className="alert-content-left">
-            <span className="icon-warning">⚠️</span>
-            <div className="alert-text-wrapper">
-              <h4>Complete Your Profile</h4>
-              <p>Your profile is {profileCompletion}% completed.</p>
-            </div>
-          </div>
-          <div className="alert-content-right">
-            <div className="custom-progress-bar">
-              <div className="progress-active" style={{ width: `${profileCompletion}%` }} />
-            </div>
-            <button className="btn-complete" onClick={() => navigate("/doctor/profile")}>
-              Complete Now
-            </button>
-          </div>
-        </div>
-      )}
+     {profileCompletion < 100 ? (
+  <div className="profile-alert-box">
+    <div className="alert-content-left">
+      <span className="icon-warning">⚠️</span>
+      <div className="alert-text-wrapper">
+        <h4>Complete Your Profile</h4>
+        <p>Your profile is {profileCompletion}% completed.</p>
+      </div>
+    </div>
+    <div className="alert-content-right">
+      <div className="custom-progress-bar">
+        <div
+          className="progress-active"
+          style={{ width: `${profileCompletion}%` }}
+        />
+      </div>
+      <button
+        className="btn-complete"
+        onClick={() => navigate("/doctor/profile")}
+      >
+        Complete Now
+      </button>
+    </div>
+  </div>
+) : (
+  <div className="profile-success-box">
+    <div className="success-left">
+      <span className="icon-success">✅</span>
+      <div>
+        <h4>Profile Completed</h4>
+        <p>Your profile is verified and live for patients.</p>
+      </div>
+    </div>
+
+    <div className="success-right">
+      <button onClick={() => navigate("/doctor/profile")}>
+        View Profile
+      </button>
+    </div>
+  </div>
+)}
 
       {/* 2. STATS CARDS */}
       <div className="stats-grid">

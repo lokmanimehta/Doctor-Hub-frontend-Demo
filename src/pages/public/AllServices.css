@@ -1231,3 +1231,31 @@ color:#64748b;
 }
 
 /* MOBILE */
+/* Services text ka color baaki navbar items jaisa black karne ke liye */
+.nav-item.dropdown-toggle span {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+/* Hover karne par green ho jaye consistent feel ke liye */
+.nav-item.dropdown-toggle:hover span {
+    color: var(--primary);
+}
+/* MOBILE VIEW GAP FIX */
+@media (max-width: 768px) {
+  .premium-services {
+    flex-direction: column; /* Cards ko ek ke niche ek lane ke liye */
+    gap: 15px;              /* Cards ke beech ka vertical space */
+    margin: 20px 0;
+  }
+
+  .premium-service-card {
+    width: 100%;            /* Mobile par card full width rahega */
+    padding: 16px;          /* Thoda compact padding */
+  }
+
+  .service-text p {
+    max-width: 100%;        /* Text ko poori jagah milne do */
+    font-size: 12px;
+  }
+}

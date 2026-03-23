@@ -426,7 +426,7 @@ a, a:hover, a:visited, a:active {
 .dropdown-item:hover { background: #f1f5f9; color: var(--primary); }
 
 /* Hero Section */
-.hero-section { padding: 15px 8% 40px; position: relative; z-index: 1; display: flex; align-items: center; }
+.hero-section { padding: 0 8% 0px; position: relative; z-index: 1; display: flex;align-items: end;margin-bottom: -20px; }
 .hero-container { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; width: 100%; }
 .hero-badge-top { display: inline-block; background: #ecfdf5; color: var(--primary); padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 700; margin-bottom: 15px; }
 .hero-content-main h2 { font-size: 3.2rem; line-height: 1.1; font-weight: 900; color: var(--text-dark); margin-bottom: 25px; }
@@ -438,7 +438,9 @@ a, a:hover, a:visited, a:active {
 .hero-search-btn { background: var(--primary); color: white; border: none; padding: 0 25px; border-radius: 12px; font-weight: 700; cursor: pointer; }
 
 .hero-visual { display: flex; justify-content: flex-end; }
-.hero-visual img { width: 100%; max-width: 420px; border-radius: 30px; }
+.hero-visual img { width: 100%; max-width: 420px; border-radius: 30px; display: block; /* Gap remove karne ke liye */
+  margin-bottom: -10px; /* Image ko container ke border ke thoda aur niche bhejo */
+  transform: translateY(10px);}
 
 /* ==========================================
    DOCTOR GRID (STRICT COLOR FIX)
@@ -515,19 +517,20 @@ a, a:hover, a:visited, a:active {
   font-weight: 700; font-size: 12px; cursor: pointer; 
 }
 /* Ad Banner */
-.hospital-ad-section { padding: 1px 8% 40px; z-index: 1; position: relative; }
+.hospital-ad-section { padding: 0 8% 40px; margin-top: -30px; /* Isse banner doctor ki image ke aur paas aa jayega */
+  z-index: 2; position: relative; }
 .hospital-ad-card { 
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: white; padding: 20px; border-radius: 24px;
+  background: linear-gradient(135deg,  #25906e 0%,  #32d9a1 100%);
+  color: rgb(255, 255, 255) !important; padding: 20px; border-radius: 24px;
   display: flex; justify-content: space-between; align-items: center;
   box-shadow: 0 20px 40px rgba(0,0,0,0.15);
   overflow: hidden;
 }
-.ad-badge { background: var(--primary); color: white; padding: 5px 14px; border-radius: 100px; font-size: 11px; font-weight: 800; margin-bottom: 12px; display: inline-block; }
-.ad-content-left h3 { font-size: 26px; font-weight: 800; margin-bottom: 10px; color: white;  }
-.ad-content-left p { color: #cbd5e1; font-size: 15px; max-width: 600px; }
+.ad-badge { background: var(--primary); color: white!important; padding: 5px 14px; border-radius: 100px; font-size: 11px; font-weight: 800; margin-bottom: 12px; display: inline-block; }
+.ad-content-left h3 { font-size: 26px; font-weight: 800; margin-bottom: 10px; color: white!important; }
+.ad-content-left p { color: #cbd5e1!important; font-size: 15px; max-width: 600px; }
 .visit-hosp-btn { background: white; color: #0f172a; border: none; padding: 14px 28px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; white-space: nowrap; }
-.visit-hosp-btn:hover { background: var(--primary); color: white; transform: scale(1.05); }
+.visit-hosp-btn:hover { background: var(--primary); color: white!important; transform: scale(1.05); }
 
 /* Specialties */
 .specialties-section { padding: 40px 8%; }
@@ -1225,4 +1228,108 @@ transform: translateY(0);
     width: 18px;
     height: 18px;
   }
+}
+/* --- MOBILE RESPONSIVE FIXES (BELOW 768px) --- */
+@media screen and (max-width: 768px) {
+  
+  /* 1. Hide Desktop Doctor Image on Mobile */
+  .hero-visual.desktop-only {
+    display: none !important;
+  }
+
+  /* 2. Fix Hero Container for Mobile */
+  .hero-container {
+    grid-template-columns: 1fr; /* Single column layout */
+    text-align: center;
+    gap: 20px;
+  }
+
+  .hero-content-main h2 {
+    font-size: 2.2rem; /* Mobile font size */
+    margin-bottom: 20px;
+  }
+
+ .search-box-centered {
+    flex-direction: column;
+    gap: 10px;
+    background: transparent; /* Yeh sahi hai agar aap sirf buttons ko separate dikhana chahte hain */
+    box-shadow: none;
+    border: none;
+}
+
+  .search-input-wrapper {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 10px;
+    
+  }
+
+  .hero-search-btn {
+    width: 100%;
+    padding: 15px;
+  }
+
+  /* 3. Refined Advertisement Banner for Mobile */
+  .hospital-ad-section {
+    padding: 20px 5%;
+    margin-top: 20px; /* Thoda gap top se */
+  }
+
+  .hospital-ad-card {
+    flex-direction: column; /* Content stack vertically */
+    text-align: center;
+    padding: 30px 20px;
+    gap: 15px;
+  }
+
+  .ad-content-left h3 {
+    font-size: 20px;
+    line-height: 1.3;
+  }
+
+  .ad-content-left p {
+    font-size: 13px;
+    margin-bottom: 15px;
+  }
+
+  .visit-hosp-btn {
+    width: 100%; /* Full width button */
+    font-size: 14px;
+    padding: 12px;
+  }
+  /* Media Query ke andar hi rakhein */
+
+.trend-tag {
+  background: #f1f5f9 !important; /* Light background */
+  color: #1e293b !important;    /* Dark text - Taki hamesha dikhe */
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap; /* Text wrap na ho */
+}
+
+/* Jab tag par click karein (Active state) */
+.trend-tag:active, .trend-tag:focus {
+  background: var(--primary) !important;
+  color: rgb(255, 255, 255) !important; /* Click hone par background green aur text white */
+  border-color: var(--primary);
+}
+
+/* Mobile par trending section ko center karne ke liye */
+
+
+.tags-flex {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 10px;
+}
+  
 }

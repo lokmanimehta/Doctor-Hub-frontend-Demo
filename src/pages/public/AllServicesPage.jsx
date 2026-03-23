@@ -162,7 +162,7 @@ const AllServicesPage = () => {
                 <div className="dropdown-item" onClick={() => navigate("/doctor/dashboard")}>For Doctors</div>
                 <div className="dropdown-item" onClick={() => navigate("/patient/dashboard")}>For Patients</div>
                 <div className="dropdown-divider"></div>
-                <div className="dropdown-item" onClick={() => navigate("/all-services")}>View All Services</div>
+                <div className="dropdown-item active-tab" onClick={() => navigate("/all-services")}>View All Services</div>
               </div>
             )}
           </div>
@@ -424,10 +424,9 @@ const AllServicesPage = () => {
           <div className="footer-column">
             <h4>Services</h4>
             <ul className="footer-list">
-              <li onClick={() => navigate("/all-services")}>Find Doctors</li>
-              <li onClick={() => navigate("/all-services")}>Hospitals</li>
-              <li onClick={() => navigate("/all-services")}>Diagnostic Labs</li>
-              <li onClick={() => navigate("/all-services")}>Online Pharmacy</li>
+                <li onClick={() => navigate("/all-services")}>Find Doctors</li>
+              <li onClick={() => navigate("/all-services")}>Find Hospitals</li>
+              <li onClick={() => navigate("/all-services")}>Find Labs</li>
             </ul>
           </div>
           <div className="footer-column">
@@ -444,7 +443,7 @@ const AllServicesPage = () => {
             <h4>Contact Us</h4>
             <div className="footer-contact-info">
               <p>📍 Andheri West, Mumbai, MH</p>
-              <p>📞 +91 98765 43210</p>
+              <p>📞 +91  98765 - 43210</p>
               <p>✉️ support@dochub.com</p>
             </div>
           </div>

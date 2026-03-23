@@ -1,152 +1,9 @@
-// import React, { useState } from "react";
-// import "./Profile.css";
 
-// const DoctorProfile = () => {
-//   const storedUser = JSON.parse(localStorage.getItem("currentUser"));
-
-//   const [form, setForm] = useState({
-//     fullName: storedUser?.fullName || "",
-//     email: storedUser?.email || "",
-//     phone: "",
-//     specialization: "",
-//     experience: "",
-//     gender:"",
-//     clinicName: "",
-//     clinicAddress: "",
-//     consultationFee: "",
-//     registrationNumber: "",
-//     about: "",
-//     govtIdType: "",
-//   });
-
-//   const [files, setFiles] = useState({
-//     govtId: null,
-//     degreeCert: null,
-//     registrationCert: null,
-//   });
-
-//   const handleChange = (e) => {
-//     setForm({ ...form, [e.target.name]: e.target.value });
-//   };
-
-//   const handleFileChange = (e) => {
-//     setFiles({ ...files, [e.target.name]: e.target.files[0] });
-//   };
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     alert("Profile saved (UI only – backend later)");
-//   };
-
-//   return (
-//     <div className="doctor-profile-page">
-//       <h2>Complete Your Profile</h2>
-//       <p className="profile-subtext">
-//         This information is required to activate appointments and go live.
-//       </p>
-
-//       <form className="profile-form" onSubmit={handleSubmit}>
-//         {/* BASIC INFO */}
-//         <div className="section">
-//           <h4>Basic Information</h4>
-
-//           <label>Full Name *</label>
-// <input
-//   name="fullName"
-//   value={form.fullName}
-//   onChange={handleChange}
-//   required
-// />
-
-// <label>Email *</label>
-// <input
-//   type="email"
-//   name="email"
-//   value={form.email}
-//   onChange={handleChange}
-//   required
-// />
-
-
-//           <label>Phone Number *</label>
-//           <input name="phone" onChange={handleChange} required />
-
-//           <label>Specialization *</label>
-//           <input name="specialization" onChange={handleChange} required />
-
-//           <label>Experience (Years) *</label>
-//           <input type="number" name="experience" onChange={handleChange} required />
-//           <label>Gender *</label>
-// <select name="gender" value={form.gender} onChange={handleChange} required>
-//   <option value="">Select Gender</option>
-//   <option value="Male">Male</option> 
-//   <option value="Female">Female</option>
-// </select>
-
-
-//         </div>
-
-//         {/* CLINIC INFO */}
-//         <div className="section">
-//           <h4>Clinic Information</h4>
-
-//           <label>Clinic Name *</label>
-//           <input name="clinicName" onChange={handleChange} required />
-
-//           <label>Clinic Address *</label>
-//           <textarea name="clinicAddress" onChange={handleChange} required />
-
-//           <label>Consultation Fee (₹) *</label>
-//           <input type="number" name="consultationFee" onChange={handleChange} required />
-//         </div>
-
-//         {/* DOCUMENTS */}
-//         <div className="section">
-//           <h4>Verification Documents</h4>
-
-//           <label>Government ID Type *</label>
-//           <select name="govtIdType" onChange={handleChange} required>
-//             <option value="">Select</option>
-//             <option value="AADHAAR">Aadhaar</option>
-//             <option value="PAN">PAN</option>
-//             <option value="PASSPORT">Passport</option>
-//           </select>
-
-//           <label>Upload Government ID *</label>
-//           <input type="file" name="govtId" onChange={handleFileChange} required />
-
-//           <label>Medical Degree Certificate *</label>
-//           <input type="file" name="degreeCert" onChange={handleFileChange} required />
-
-//           <label>Medical Council Registration Number *</label>
-//           <input name="registrationNumber" onChange={handleChange} required />
-
-//           <label>Registration Certificate *</label>
-//           <input type="file" name="registrationCert" onChange={handleFileChange} required />
-//         </div>
-
-//         {/* OPTIONAL */}
-//         <div className="section">
-//           <h4>About (Optional)</h4>
-//           <textarea
-//             name="about"
-//             placeholder="Tell patients about your experience (optional)"
-//             onChange={handleChange}
-//           />
-//         </div>
-
-//         <button type="submit" className="save-btn">
-//           Save Profile
-//         </button>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default DoctorProfile;
 
 import React, { useState } from "react";
 import "./Profile.css";
+import { calculateProfileCompletion } from "../../utils/profileCompletion";
+import { useNavigate } from "react-router-dom";
 
 const DoctorProfile = () => {
   // --- LOCAL STORAGE SE DATA NIKALNA ---
@@ -154,26 +11,61 @@ const DoctorProfile = () => {
   const storedUser = JSON.parse(localStorage.getItem("currentUser")) || {};
 
   // --- TOGGLE STATE FOR VIEW/EDIT ---
-  const [isEditing, setIsEditing] = useState(false);
-
+  
   // --- FORM STATE ---
   // Yaha storedUser ka data direct initialize ho raha hai taaki Edit mein dikhe
-  const [form, setForm] = useState({
-    fullName: storedUser.fullName || "",
-    email: storedUser.email || "",
-    phone: storedUser.phone || "",
-    specialization: storedUser.specialization || "",
-    experience: storedUser.experience || "",
-    gender: storedUser.gender || "",
-    about: storedUser.about || "",
-    profilePic: storedUser.profilePic || null, 
-    clinics: storedUser.clinics || [{ clinicName: "", clinicAddress: "", consultationFee: "" }],
-    visitingPositions: storedUser.visitingPositions || [],
-    councilName: storedUser.councilName || "", 
-    registrationNumber: storedUser.registrationNumber || "",
-    registrationYear: storedUser.registrationYear || "",
-  });
+  const [isEditing, setIsEditing] = useState(false);
 
+const navigate = useNavigate();
+// ✅ PEHLE FORM
+const [form, setForm] = useState({
+  fullName: storedUser.fullName || "",
+  email: storedUser.email || "",
+  phone: storedUser.phone || "",
+  specialization: storedUser.specialization || "",
+  experience: storedUser.experience || "",
+  gender: storedUser.gender || "",
+  about: storedUser.about || "",
+  profilePic: storedUser.profilePic || null,
+  clinics: storedUser.clinics || [{
+    clinicName: "",
+    clinicAddress: "",
+    consultationFee: "",
+    availability: [
+      { day: "", startTime: "", endTime: "" }
+    ]
+  }],
+  visitingPositions: (storedUser.visitingPositions || []).map(vp => ({
+    location: vp.location || "",
+    fees: vp.fees || "",
+    availability: vp.availability || [
+      { day: "", startTime: "", endTime: "" }
+    ]
+  })),
+  councilName: storedUser.councilName || "",
+  registrationNumber: storedUser.registrationNumber || "",
+  registrationYear: storedUser.registrationYear || "",
+});
+
+// ✅ AB YE NICHE AAYEGA
+
+
+const profileCompletion = calculateProfileCompletion(form);
+
+  const addAvailability = (clinicIndex) => {
+    const newClinics = [...form.clinics];
+    newClinics[clinicIndex].availability.push({
+      day: "",
+      startTime: "",
+      endTime: ""
+    });
+    setForm({ ...form, clinics: newClinics });
+  };
+  const handleAvailabilityChange = (clinicIndex, index, e) => {
+    const newClinics = [...form.clinics];
+    newClinics[clinicIndex].availability[index][e.target.name] = e.target.value;
+    setForm({ ...form, clinics: newClinics });
+  };
   // --- FILES STATE ---
   const [files, setFiles] = useState({
     signature: null,
@@ -201,8 +93,25 @@ const DoctorProfile = () => {
     setFiles({ ...files, [e.target.name]: e.target.files[0] });
   };
 
-  const addClinic = () => setForm({ ...form, clinics: [...form.clinics, { clinicName: "", clinicAddress: "", consultationFee: "" }] });
-  const addVisiting = () => setForm({ ...form, visitingPositions: [...form.visitingPositions, { location: "", time: "", fees: "" }] });
+  const addClinic = () => setForm({
+    ...form, clinics: [...form.clinics, {
+      clinicName: "",
+      clinicAddress: "",
+      consultationFee: "",
+      availability: [
+        { day: "", startTime: "", endTime: "" }
+      ]
+    }]
+  });
+  const addVisiting = () => setForm({
+    ...form, visitingPositions: [...form.visitingPositions, {
+      location: "",
+      fees: "",
+      availability: [
+        { day: "", startTime: "", endTime: "" }
+      ]
+    }]
+  });
   const addGovtId = () => setFiles({ ...files, govtIds: [...files.govtIds, { type: "", file: null }] });
   const addCert = () => setFiles({ ...files, certificates: [...files.certificates, { title: "", file: null }] });
 
@@ -211,7 +120,20 @@ const DoctorProfile = () => {
     newClinics[index][e.target.name] = e.target.value;
     setForm({ ...form, clinics: newClinics });
   };
-
+  const addVisitingAvailability = (vpIndex) => {
+    const newPositions = [...form.visitingPositions];
+    newPositions[vpIndex].availability.push({
+      day: "",
+      startTime: "",
+      endTime: ""
+    });
+    setForm({ ...form, visitingPositions: newPositions });
+  };
+  const handleVisitingAvailabilityChange = (vpIndex, index, e) => {
+    const newPositions = [...form.visitingPositions];
+    newPositions[vpIndex].availability[index][e.target.name] = e.target.value;
+    setForm({ ...form, visitingPositions: newPositions });
+  };
   const handleVisitingChange = (index, e) => {
     const newPositions = [...form.visitingPositions];
     newPositions[index][e.target.name] = e.target.value;
@@ -230,14 +152,47 @@ const DoctorProfile = () => {
   };
 
   // --- SUBMIT: LOCAL STORAGE MEIN DATA SAVE KARNA ---
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const updatedUserData = { ...storedUser, ...form };
-    localStorage.setItem("currentUser", JSON.stringify(updatedUserData));
-    alert("Profile updated successfully!");
-    setIsEditing(false);
-  };
+const handleSubmit = (e) => {
+  e.preventDefault();
 
+  for (let clinic of form.clinics) {
+    for (let slot of clinic.availability) {
+      if (!slot.day || !slot.startTime || !slot.endTime) {
+        alert("Please fill all availability fields");
+        return;
+      }
+
+      if (slot.startTime >= slot.endTime) {
+        alert("Start time must be before end time");
+        return;
+      }
+    }
+  }
+
+  // ✅ FIX: create updatedUserData
+  const updatedUserData = {
+  ...storedUser,
+  ...form
+};
+
+localStorage.setItem("currentUser", JSON.stringify(updatedUserData));
+
+  window.dispatchEvent(new Event("storage"));
+
+  alert("Profile updated successfully!");
+  setIsEditing(false);
+  navigate("/doctor/dashboard");
+};
+  const removeAvailability = (clinicIndex, index) => {
+    const newClinics = [...form.clinics];
+    newClinics[clinicIndex].availability.splice(index, 1);
+    setForm({ ...form, clinics: newClinics });
+  };
+  const removeVisitingAvailability = (vpIndex, index) => {
+    const newPositions = [...form.visitingPositions];
+    newPositions[vpIndex].availability.splice(index, 1);
+    setForm({ ...form, visitingPositions: newPositions });
+  };
   return (
     <div className="doctor-profile-page">
       <div className="profile-top-header">
@@ -332,6 +287,65 @@ const DoctorProfile = () => {
                 <textarea name="clinicAddress" value={clinic.clinicAddress} onChange={(e) => handleClinicChange(index, e)} required />
                 <label>Consultation Fee (₹) *</label>
                 <input type="number" name="consultationFee" value={clinic.consultationFee} onChange={(e) => handleClinicChange(index, e)} required />
+                <p className="sub-label-header">Availability</p>
+
+                {clinic.availability.map((slot, i) => (
+                  <div key={i} className="input-grid">
+
+                    <div>
+                      <label>Day</label>
+                      <select
+                        name="day"
+                        value={slot.day}
+                        onChange={(e) => handleAvailabilityChange(index, i, e)}
+                      >
+                        <option value="">Select Day</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label>Start Time</label>
+                      <input
+                        type="time"
+                        name="startTime"
+                        value={slot.startTime}
+                        onChange={(e) => handleAvailabilityChange(index, i, e)}
+                      />
+                    </div>
+
+                    <div>
+                      <label>End Time</label>
+                      <input
+                        type="time"
+                        name="endTime"
+                        value={slot.endTime}
+                        onChange={(e) => handleAvailabilityChange(index, i, e)}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="remove-btn"
+                      onClick={() => removeAvailability(index, i)}
+                    >
+                      ❌
+                    </button>
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  className="add-more-btn"
+                  onClick={() => addAvailability(index)}
+                >
+                  + Add Time Slot
+                </button>
               </div>
             ))}
             <button type="button" className="add-more-btn" onClick={addClinic}>+ Add Another Clinic</button>
@@ -341,21 +355,54 @@ const DoctorProfile = () => {
           <div className="section">
             <h4>Visiting Faculty Info</h4>
             {form.visitingPositions.map((vp, index) => (
-              <div key={index} className="multi-entry-block visiting">
-                <div className="input-grid">
+              <div key={index} className="multi-entry-block">
+                <p className="entry-tag">Visiting Location #{index + 1}</p>
+
+                {/* Location aur Fee ke liye alag grid */}
+                <div className="input-grid-basic">
                   <div>
                     <label>Visiting Location</label>
                     <input name="location" value={vp.location} placeholder="Hospital Name" onChange={(e) => handleVisitingChange(index, e)} />
-                  </div>
-                  <div>
-                    <label>Timings</label>
-                    <input name="time" value={vp.time} placeholder="e.g. Sat 10am-2pm" onChange={(e) => handleVisitingChange(index, e)} />
                   </div>
                   <div>
                     <label>Fee (₹)</label>
                     <input type="number" name="fees" value={vp.fees} onChange={(e) => handleVisitingChange(index, e)} />
                   </div>
                 </div>
+
+                <p className="sub-label-header">Availability</p>
+
+                {/* Availability loop ab clean dikhega */}
+                {(vp.availability || []).map((slot, i) => (
+                  <div key={i} className="input-grid">
+                    <div>
+                      <label>Day</label>
+                      <select name="day" value={slot.day} onChange={(e) => handleVisitingAvailabilityChange(index, i, e)}>
+                        <option value="">Select Day</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label>Start Time</label>
+                      <input type="time" name="startTime" value={slot.startTime} onChange={(e) => handleVisitingAvailabilityChange(index, i, e)} />
+                    </div>
+                    <div>
+                      <label>End Time</label>
+                      <input type="time" name="endTime" value={slot.endTime} onChange={(e) => handleVisitingAvailabilityChange(index, i, e)} />
+                    </div>
+                    <button type="button" className="remove-btn" onClick={() => removeVisitingAvailability(index, i)}>❌</button>
+                  </div>
+                ))}
+
+                <button type="button" className="add-more-btn" onClick={() => addVisitingAvailability(index)}>
+                  + Add Time Slot
+                </button>
               </div>
             ))}
             <button type="button" className="add-more-btn" onClick={addVisiting}>+ Add Visiting Hospital</button>
@@ -420,6 +467,7 @@ const DoctorProfile = () => {
         <div className="profile-view-container">
           <div className="view-card main-info-card">
             <div className="doctor-header-top">
+
               <div className="view-avatar">
                 {form.profilePic ? (
                   <img src={form.profilePic} alt="Doctor" className="avatar-img" />
@@ -427,18 +475,28 @@ const DoctorProfile = () => {
                   "👨‍⚕️"
                 )}
               </div>
+
               <div className="view-title-group">
-                <h3>{form.fullName || "Update Your Name"} <span className="verified-check">✔</span></h3>
-                <p className="view-spec">{form.specialization || "Set Specialization"}</p>
+                <h3>
+                  {form.fullName}
+                  {form.councilName && form.registrationNumber && (
+                    <span className="verified-check">✔ Verified</span>
+                  )}
+                </h3>
+
+                <p className="view-spec">{form.specialization}</p>
+
                 <div className="view-tags">
-                  <span>{form.experience || "0"} Years Exp</span>
-                  <span>{form.gender || "Gender"}</span>
+                  <span>{form.experience} Years Experience</span>
+                  <span>{form.gender}</span>
+                  <span>⭐ 4.5 Rating</span> {/* dummy */}
                 </div>
               </div>
             </div>
+
             {form.about && (
               <div className="view-about">
-                <p><strong>About:</strong> {form.about}</p>
+                <p>{form.about}</p>
               </div>
             )}
           </div>
@@ -463,6 +521,11 @@ const DoctorProfile = () => {
                   <p className="view-entry-title">{c.clinicName || "Clinic Name"}</p>
                   <p className="view-entry-sub">{c.clinicAddress || "Address"}</p>
                   <p className="view-fee">Fee: ₹{c.consultationFee || "0"}</p>
+                  {c.availability && c.availability.map((a, j) => (
+                    <p key={j} className="view-entry-sub">
+                      📅 {a.day} | ⏰ {a.startTime} - {a.endTime}
+                    </p>
+                  ))}
                 </div>
               ))}
             </div>
@@ -473,7 +536,11 @@ const DoctorProfile = () => {
                 {form.visitingPositions.map((v, i) => (
                   <div key={i} className="view-entry-item">
                     <p className="view-entry-title">{v.location}</p>
-                    <p className="view-entry-sub">🕒 {v.time}</p>
+                    {v.availability && v.availability.map((a, j) => (
+                      <p key={j} className="view-entry-sub">
+                        📅 {a.day} | ⏰ {a.startTime} - {a.endTime}
+                      </p>
+                    ))}
                     <p className="view-fee">Fee: ₹{v.fees}</p>
                   </div>
                 ))}
@@ -482,6 +549,17 @@ const DoctorProfile = () => {
           </div>
         </div>
       )}
+      {profileCompletion < 100 && (
+  <div className="profile-warning">
+    ⚠️ Your profile is {profileCompletion}% complete. Please complete it.
+  </div>
+)}
+
+{profileCompletion === 100 && (
+  <div className="profile-success">
+    ✅ Your profile is live for patients
+  </div>
+)}
     </div>
   );
 };

@@ -1,137 +1,147 @@
+/* Custom Properties - Enterprise Minimal Theme */
 :root {
   --primary: #0f766e;
+  --primary-light: #f0fdfa;
   --bg: #f8fafc;
   --white: #ffffff;
   --text-dark: #1e293b;
   --text-muted: #64748b;
+  --border: #e2e8f0;
   --shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 }
-*,
-*::before,
-*::after {
+
+*, *::before, *::after {
   box-sizing: border-box;
 }
+
 html, body {
   max-width: 100%;
   overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg);
 }
-/* Modal image size control */
-.modal-card img {
-  width: 100px;         /* Aap apne hisab se change kar sakte ho */
-  height: 100px;
-  border-radius: 12px;
-  object-fit: cover;
-  display: block;
-  margin: 0 auto 15px auto; /* Image ko center karne ke liye */
-}
-/* Layout */
+
+/* Layout Container */
 .find-doctor-container {
-  padding: 20px;
-  background: var(--bg);
-  min-height: 100vh;
-   max-width: 100%;
-  overflow-x: hidden;
+  padding: 100px 16px 40px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-h1 {
-  font-size: 28px;
-  margin-bottom: 16px;
+.find-doctor-container h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 20px;
 }
 
-/* Search */
-.doctor-search {
-  width: 100%;
-  max-width: 900px;
-  padding: 14px 16px;
-  border-radius: 14px;
-  border: 1px solid #e2e8f0;
-margin: 0 auto 16px auto;  display: block;
-}
+/* Search Wrapper */
 .search-wrapper {
-  max-width: 820px;
-  width: 100%;
-  margin: 0  16px auto;
-  padding-right: 12px;   /* 🔥 RIGHT SIDE SAFETY */
-  padding-left: 0;
+  margin-bottom: 24px;
 }
 
 .doctor-search {
   width: 100%;
-  padding: 14px 16px;
+  padding: 14px 18px;
   border-radius: 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
+  outline: none;
+  font-size: 16px;
+  background: var(--white);
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
-/* Tabs */
+
+.doctor-search:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1);
+}
+
+/* Specialty Tabs - Fixed Scrollbar Compatibility */
 .specialty-tabs {
   display: flex;
   gap: 10px;
   overflow-x: auto;
-  margin-bottom: 24px;
+  padding-bottom: 10px;
+  margin-bottom: 30px;
+  -ms-overflow-style: none;  /* IE/Edge */
+       /* Firefox */
+}
+
+.specialty-tabs::-webkit-scrollbar {
+  display: none;               /* Chrome/Safari */
 }
 
 .spec-chip {
-  padding: 8px 16px;
-  border-radius: 20px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  padding: 10px 20px;
+  border-radius: 25px;
+  background: var(--white);
+  border: 1px solid var(--border);
   cursor: pointer;
   white-space: nowrap;
+  font-weight: 500;
+  color: var(--text-dark);
+  transition: all 0.2s;
 }
 
 .spec-chip.active {
   background: var(--primary);
-  color: white;
+  color: var(--white);
+  border-color: var(--primary);
 }
 
-/* Rows */
+/* Doctor Rows - Fixed Scrollbar Compatibility */
 .doctor-rows {
   display: flex;
   flex-direction: column;
-  gap: 26px;
+  gap: 30px;
 }
 
 .doctor-row {
   display: flex;
-  gap: 18px;
+  gap: 20px;
   overflow-x: auto;
+  padding: 10px 5px;
   cursor: grab;
-  -webkit-user-select: none;
-  user-select: none;
-   max-width: 100%;
-}
-
-.doctor-row.dragging {
-  cursor: grabbing;
+  -ms-overflow-style: none;
+  
 }
 
 .doctor-row::-webkit-scrollbar {
   display: none;
 }
 
-/* Cards */
+.doctor-row.dragging {
+  cursor: grabbing;
+}
+
+/* Doctor Cards */
 .doctor-card {
-  flex: 0 0 340px;
-  background: white;
+  flex: 0 0 320px;
+  background: var(--white);
   border-radius: 20px;
-  padding: 14px;
+  padding: 16px;
   box-shadow: var(--shadow);
   cursor: pointer;
   display: flex;
-  gap: 14px;
+  gap: 16px;
   position: relative;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: 1px solid rgba(0,0,0,0.02);
 }
 
 .doctor-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
 }
 
 .card-left img {
-  width: 72px;
-  height: 72px;
+  width: 80px;
+  height: 80px;
   border-radius: 16px;
   object-fit: cover;
+  background: #f1f5f9;
 }
 
 .card-right {
@@ -142,9 +152,10 @@ margin: 0 auto 16px auto;  display: block;
 }
 
 .doc-name {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--text-dark);
+  margin: 0;
 }
 
 .spec {
@@ -156,12 +167,16 @@ margin: 0 auto 16px auto;  display: block;
 .row {
   font-size: 13px;
   color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .row.fee {
   font-weight: 700;
   color: var(--text-dark);
-  margin-top: 4px;
+  font-size: 15px;
+  margin-top: 5px;
 }
 
 .badge {
@@ -173,85 +188,202 @@ margin: 0 auto 16px auto;  display: block;
   font-size: 11px;
   padding: 4px 10px;
   border-radius: 12px;
+  font-weight: 600;
 }
 
-/* Modal */
-.doctor-modal {
+/* --- ENTERPRISE MODAL SYSTEM - Fixed Prefix Order --- */
+.doctor-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(8px); /* Prefix first */
+  backdrop-filter: blur(8px);         /* Standard last */
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  z-index: 999999;
+  padding: 16px;
 }
 
 .modal-card {
-  background: white;
-  width: 92%;
-  max-width: 440px;
-  padding: 24px;
-  border-radius: 22px;
+  background: var(--white);
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  border-radius: 24px;
   position: relative;
-  animation: pop 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
 }
 
-@keyframes pop {
-  from {
-    transform: scale(0.92);
-    opacity: 0;
-  }
+@keyframes modalPop {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-scroll-content {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .modal-close {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  background: #f1f5f9;
-  border: none;
-  width: 32px;
-  height: 32px;
+  top: 15px;
+  right: 15px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   cursor: pointer;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.modal-doc-img {
+  width: 110px;
+  height: 110px;
+  border-radius: 20px;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto 15px auto;
+  border: 4px solid #f1f5f9;
+}
+
+.modal-card h2 {
+  text-align: center;
+  font-size: 22px;
+  margin-bottom: 5px;
+}
+
+.modal-card .spec {
+  text-align: center;
+  display: block;
+  margin-bottom: 15px;
 }
 
 .about {
   font-size: 14px;
+  line-height: 1.6;
   color: var(--text-muted);
-  margin: 10px 0;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .modal-meta {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 6px;
-  font-size: 13px;
-  margin-top: 8px;
+  gap: 10px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 16px;
+  font-size: 14px;
 }
 
+/* Booking UI Components */
+.booking-doctor {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  padding: 15px;
+  background: var(--primary-light);
+  border-radius: 16px;
+  margin-bottom: 20px;
+}
+
+.booking-doctor img {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.booking-section {
+  margin-bottom: 20px;
+}
+
+.booking-section p {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 10px;
+  color: var(--text-dark);
+}
+
+.date-list, .slot-list {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.date-chip, .slot {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.date-chip.active, .slot.active {
+  background: var(--primary);
+  color: var(--white);
+  border-color: var(--primary);
+}
+
+.booking-section input,
+.booking-section select,
+.booking-section textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fafafa;
+  font-size: 14px;
+}
+
+/* Shared Buttons */
 .modal-actions {
   display: flex;
   gap: 12px;
-  margin-top: 18px;
+  margin-top: 25px;
 }
 
+/* Confirm Appointment Button */
 .primary-btn {
-  flex: 1;
-  padding: 14px;
-  background: var(--primary);
-  color: white;
-  border-radius: 14px;
-  border: none;
-  font-weight: 700;
-  cursor: pointer;
+  background: #0f766e !important; /* Aapka primary green color */
+  color: #ffffff;
 }
 
+/* Go Back Button */
 .secondary-btn {
-  flex: 1;
-  padding: 14px;
-  background: #f1f5f9;
-  border-radius: 14px;
-  border: none;
-  font-weight: 700;
-  cursor: pointer;
+  background: #f1f5f9!important; /* Light grey background */
+  color: #1e293b!important;    /* Dark text */
+}
+
+/* Agar aap confirm button ko hover par thoda dark karna chahte hain */
+.primary-btn:hover {
+  background: #0d665f;
+}
+
+.confirm-btn {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* Desktop Overrides */
+@media (min-width: 768px) {
+  .doctor-card {
+    flex: 0 0 350px;
+  }
+  .find-doctor-container h1 {
+    font-size: 32px;
+  }
 }
