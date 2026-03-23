@@ -211,3 +211,110 @@
     display: none;
   }
 }
+/* 🔥 BOOKING MODAL SAME AS FIND DOCTORS */
+
+.doctor-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+  padding: 16px;
+}
+
+.modal-card {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-scroll-content {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.booking-doctor {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  background: #f0fdfa;
+  padding: 15px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+}
+
+.booking-doctor img {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.booking-section {
+  margin-bottom: 20px;
+}
+
+.booking-section p {
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.date-list,
+.slot-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.date-chip,
+.slot {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  cursor: pointer;
+}
+
+.date-chip.active,
+.slot.active {
+  background: #0f766e;
+  color: white;
+}
+
+.booking-section input,
+.booking-section select,
+.booking-section textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fafafa;
+}
+
+.confirm-btn {
+  width: 100%;
+  margin-top: 10px;
+}

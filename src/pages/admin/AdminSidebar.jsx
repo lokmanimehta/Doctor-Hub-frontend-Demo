@@ -18,8 +18,8 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
     { name: "Labs", path: "/admin/labs", icon: "🧪" },
     { name: "Appointments", path: "/admin/appointments", icon: "📅" },
     { name: "System Logs", path: "/admin/system-logs", icon: "📑" },
-    { name: "Ads Management", path: "/admin/Ads Management", icon: "📢" },
-    { name: "Feedback", path: "/admin/FeedbackPage", icon: "💬" },
+    { name: "Ads-Management", path: "/admin/ads-management", icon: "📢" },
+    { name: "Feedback", path: "/admin/feedback", icon: "💬" },
     
   ];
 

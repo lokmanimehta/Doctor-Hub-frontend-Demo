@@ -1,12 +1,15 @@
-import React, { useState } from "react";
-import { FiUser, FiPhone, FiMail, FiActivity, FiAlertCircle, FiClipboard, FiEye, FiEyeOff, FiEdit2, FiCamera } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import { 
+  FiUser, FiPhone, FiMail, FiActivity, FiAlertCircle, 
+  FiClipboard, FiEye, FiEyeOff, FiEdit2, FiCamera, FiPlus 
+} from "react-icons/fi";
 import "./PatientProfile.css";
 
 const UpdateProfile = () => {
   const doctorData = JSON.parse(localStorage.getItem("doctorAddedPatient")) || {};
   const patientLoginData = JSON.parse(localStorage.getItem("currentUser")) || {};
 
-  // --- Naya state: View ya Edit mode toggle karne ke liye ---
+  // View or Edit mode toggle
   const [isEditing, setIsEditing] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -24,7 +27,7 @@ const UpdateProfile = () => {
     medications: patientLoginData.medications || "",
     emergencyName: patientLoginData.emergencyName || "",
     emergencyPhone: patientLoginData.emergencyPhone || "",
-    profileImage: patientLoginData.profileImage || "https://i.pravatar.cc/150", // Default image
+    profileImage: patientLoginData.profileImage || "https://i.pravatar.cc/150", 
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
@@ -35,6 +38,20 @@ const UpdateProfile = () => {
     current: false,
     new: false,
     confirm: false,
+  });
+
+  // Family Members State
+  const [familyMembers, setFamilyMembers] = useState(
+    JSON.parse(localStorage.getItem("familyMembers")) || []
+  );
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [newMember, setNewMember] = useState({
+    fullName: "",
+    age: "",
+    gender: "",
+    relation: "",
+    bloodGroup: "",
+    phone: "",
   });
 
   const validate = (field, value) => {
@@ -59,7 +76,6 @@ const UpdateProfile = () => {
     setErrors({ ...errors, [field]: error });
   };
 
-  // --- Naya function: Image upload handle karne ke liye ---
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -80,13 +96,40 @@ const UpdateProfile = () => {
     });
     setErrors(newErrors);
     if (Object.keys(newErrors).length === 0) {
-      console.log("Profile Updated:", formData);
+      localStorage.setItem("currentUser", JSON.stringify(formData));
       alert("Profile updated successfully!");
-      setIsEditing(false); // Update ke baad wapas view mode mein
+      setIsEditing(false);
     } else {
       alert("Fix errors before saving!");
     }
   };
+
+  const handleMemberChange = (field, value) => {
+    setNewMember({ ...newMember, [field]: value });
+  };
+
+  const handleAddMember = () => {
+    if (!newMember.fullName || !newMember.relation || !newMember.age || !newMember.gender) {
+      alert("Please fill all required fields (*)");
+      return;
+    }
+    const updatedMembers = [...familyMembers, { ...newMember, id: Date.now() }];
+    setFamilyMembers(updatedMembers);
+    localStorage.setItem("familyMembers", JSON.stringify(updatedMembers));
+    setNewMember({ fullName: "", age: "", gender: "", relation: "", bloodGroup: "", phone: "" });
+    setShowAddMember(false);
+  };
+
+  // Prevent background scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = showAddMember ? "hidden" : "auto";
+  }, [showAddMember]);
+
+  useEffect(() => {
+    const handleEsc = (e) => { if (e.key === "Escape") setShowAddMember(false); };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
 
   return (
     <div className="update-profile-container">
@@ -95,7 +138,7 @@ const UpdateProfile = () => {
         <p>{isEditing ? "Edit your details and complete your medical profile." : "Manage your personal and medical information."}</p>
       </div>
 
-      {/* --- View Mode: Jab isEditing false ho --- */}
+      {/* --- VIEW MODE --- */}
       {!isEditing ? (
         <div className="profile-view-section">
           <div className="profile-header-card">
@@ -121,23 +164,48 @@ const UpdateProfile = () => {
             <div className="view-card">
               <h4><FiPhone /> Contact</h4>
               <p><strong>Phone:</strong> {formData.phone || "N/A"}</p>
-              <p><strong>Emergency:</strong> {formData.emergencyName} ({formData.emergencyPhone})</p>
+              <p><strong>Emergency:</strong> {formData.emergencyName || "N/A"} ({formData.emergencyPhone || "N/A"})</p>
             </div>
             <div className="view-card full-span">
               <h4><FiActivity /> Medical Summary</h4>
-              <div className="medical-tags">
-                <p><strong>Symptoms:</strong> {formData.symptoms || "None"}</p>
-                <p><strong>Conditions:</strong> {formData.chronic || "None"}</p>
-                <p><strong>Allergies:</strong> {formData.allergies || "None"}</p>
+              <div className="medical-tags-grid">
+                <div className="tag-item"><strong>Symptoms:</strong> {formData.symptoms || "None"}</div>
+                <div className="tag-item"><strong>Conditions:</strong> {formData.chronic || "None"}</div>
+                <div className="tag-item"><strong>Allergies:</strong> {formData.allergies || "None"}</div>
+                <div className="tag-item"><strong>Medications:</strong> {formData.medications || "None"}</div>
               </div>
+            </div>
+          </div>
+
+          {/* Family List in View Mode */}
+          <div className="family-view-section">
+            <div className="family-header">
+              <h3>👨‍👩‍👧 Family Members</h3>
+              <button onClick={() => setShowAddMember(true)} className="add-member-btn">
+                <FiPlus /> Add Member
+              </button>
+            </div>
+            <div className="family-grid">
+              {familyMembers.length === 0 ? (
+                <p className="no-data">No family members added yet.</p>
+              ) : (
+                familyMembers.map((m) => (
+                  <div key={m.id} className="family-mini-card">
+                    <div className="member-icon">{m.fullName.charAt(0)}</div>
+                    <div className="member-info">
+                      <h5>{m.fullName}</h5>
+                      <span>{m.relation} • {m.age} Yrs</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
       ) : (
-        /* --- Edit Mode: Jab isEditing true ho --- */
+        /* --- EDIT MODE --- */
         <form className="update-profile-form" onSubmit={handleSubmit}>
           
-          {/* Profile Image Edit */}
           <div className="form-card profile-image-edit">
             <div className="avatar-edit-container">
                <img src={formData.profileImage} alt="Preview" className="edit-avatar-preview" />
@@ -149,10 +217,9 @@ const UpdateProfile = () => {
             <p>Click camera icon to change photo</p>
           </div>
 
-          {/* Personal Details */}
-          <div className="form-card">
-            <h3><FiUser /> Personal Details</h3>
-            <div className="form-row">
+          <div className="form-grid-layout">
+            <div className="form-card">
+              <h3><FiUser /> Personal Details</h3>
               <div className="form-group">
                 <label>Full Name <span className="mandatory">*</span></label>
                 <input
@@ -162,7 +229,7 @@ const UpdateProfile = () => {
                   onChange={(e) => handleChange("fullName", e.target.value)}
                 />
               </div>
-              <div className="form-row-inner">
+              <div className="form-row">
                 <div className="form-group">
                   <label>Age</label>
                   <input
@@ -183,120 +250,103 @@ const UpdateProfile = () => {
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Contact Info */}
-          <div className="form-card">
-            <h3><FiPhone /> Contact Info</h3>
-            <div className="form-group">
-              <label>Phone</label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => handleChange("phone", e.target.value)}
-              />
-              {errors.phone && <span className="error-msg">{errors.phone}</span>}
+            <div className="form-card">
+              <h3><FiPhone /> Contact Info</h3>
+              <div className="form-group">
+                <label>Phone</label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => handleChange("phone", e.target.value)}
+                />
+                {errors.phone && <span className="error-msg">{errors.phone}</span>}
+              </div>
+              <div className="form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                />
+                {errors.email && <span className="error-msg">{errors.email}</span>}
+              </div>
             </div>
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleChange("email", e.target.value)}
-              />
-              {errors.email && <span className="error-msg">{errors.email}</span>}
-            </div>
-          </div>
 
-          {/* Medical Info */}
-          <div className="form-card full-span">
-            <h3><FiActivity /> Medical Information</h3>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Blood Group</label>
-                <input type="text" value={formData.bloodGroup} onChange={(e) => handleChange("bloodGroup", e.target.value)} />
+            <div className="form-card full-span">
+              <h3><FiActivity /> Medical Information</h3>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Blood Group</label>
+                  <select value={formData.bloodGroup} onChange={(e) => handleChange("bloodGroup", e.target.value)}>
+                    <option value="">Select</option>
+                    <option>A+</option><option>B+</option><option>O+</option><option>AB+</option>
+                    <option>A-</option><option>B-</option><option>O-</option><option>AB-</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Current Symptoms</label>
+                  <input type="text" value={formData.symptoms} onChange={(e) => handleChange("symptoms", e.target.value)} placeholder="e.g. Fever, Cough" />
+                </div>
               </div>
               <div className="form-group">
-                <label>Current Symptoms</label>
-                <input type="text" value={formData.symptoms} onChange={(e) => handleChange("symptoms", e.target.value)} />
+                <label>Medical History / Notes</label>
+                <textarea value={formData.history} onChange={(e) => handleChange("history", e.target.value)} placeholder="Any past illnesses..." />
               </div>
-            </div>
-            <div className="form-group">
-              <label>Medical History / Notes</label>
-              <textarea value={formData.history} onChange={(e) => handleChange("history", e.target.value)} />
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Known Allergies</label>
-                <input type="text" value={formData.allergies} onChange={(e) => handleChange("allergies", e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label>Chronic Conditions</label>
-                <input type="text" value={formData.chronic} onChange={(e) => handleChange("chronic", e.target.value)} />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Past Surgeries</label>
-                <input type="text" value={formData.surgeries} onChange={(e) => handleChange("surgeries", e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label>Medications Taken</label>
-                <input type="text" value={formData.medications} onChange={(e) => handleChange("medications", e.target.value)} />
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Known Allergies</label>
+                  <input type="text" value={formData.allergies} onChange={(e) => handleChange("allergies", e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label>Chronic Conditions</label>
+                  <input type="text" value={formData.chronic} onChange={(e) => handleChange("chronic", e.target.value)} />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Emergency Contact */}
-          <div className="form-card">
-            <h3><FiAlertCircle /> Emergency Contact</h3>
-            <div className="form-group">
-              <label>Contact Name</label>
-              <input type="text" value={formData.emergencyName} onChange={(e) => handleChange("emergencyName", e.target.value)} />
+            <div className="form-card">
+              <h3><FiAlertCircle /> Emergency Contact</h3>
+              <div className="form-group">
+                <label>Contact Name</label>
+                <input type="text" value={formData.emergencyName} onChange={(e) => handleChange("emergencyName", e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>Contact Phone</label>
+                <input type="tel" value={formData.emergencyPhone} onChange={(e) => handleChange("emergencyPhone", e.target.value)} />
+                {errors.emergencyPhone && <span className="error-msg">{errors.emergencyPhone}</span>}
+              </div>
             </div>
-            <div className="form-group">
-              <label>Contact Phone</label>
-              <input type="tel" value={formData.emergencyPhone} onChange={(e) => handleChange("emergencyPhone", e.target.value)} />
-              {errors.emergencyPhone && <span className="error-msg">{errors.emergencyPhone}</span>}
-            </div>
-          </div>
 
-          {/* Password Section */}
-          <div className="form-card full-span">
-            <h3><FiMail /> Update Password</h3>
-            <div className="form-group password-group">
-              <label>Current Password</label>
-              <input
-                type={showPassword.current ? "text" : "password"}
-                value={formData.currentPassword}
-                onChange={(e) => handleChange("currentPassword", e.target.value)}
-              />
-              <span className="eye-icon" onClick={() => setShowPassword({ ...showPassword, current: !showPassword.current })}>
-                {showPassword.current ? <FiEyeOff /> : <FiEye />}
-              </span>
-            </div>
-            <div className="form-group password-group">
-              <label>New Password</label>
-              <input
-                type={showPassword.new ? "text" : "password"}
-                value={formData.newPassword}
-                onChange={(e) => handleChange("newPassword", e.target.value)}
-              />
-              <span className="eye-icon" onClick={() => setShowPassword({ ...showPassword, new: !showPassword.new })}>
-                {showPassword.new ? <FiEyeOff /> : <FiEye />}
-              </span>
-            </div>
-            <div className="form-group password-group">
-              <label>Confirm Password</label>
-              <input
-                type={showPassword.confirm ? "text" : "password"}
-                value={formData.confirmPassword}
-                onChange={(e) => handleChange("confirmPassword", e.target.value)}
-              />
-              <span className="eye-icon" onClick={() => setShowPassword({ ...showPassword, confirm: !showPassword.confirm })}>
-                {showPassword.confirm ? <FiEyeOff /> : <FiEye />}
-              </span>
-              {errors.confirmPassword && <span className="error-msg">{errors.confirmPassword}</span>}
+            <div className="form-card">
+              <h3><FiMail /> Update Password</h3>
+              <div className="form-group password-group">
+                <label>New Password</label>
+                <div className="pass-input-wrapper">
+                  <input
+                    type={showPassword.new ? "text" : "password"}
+                    value={formData.newPassword}
+                    onChange={(e) => handleChange("newPassword", e.target.value)}
+                  />
+                  <span className="eye-icon" onClick={() => setShowPassword({ ...showPassword, new: !showPassword.new })}>
+                    {showPassword.new ? <FiEyeOff /> : <FiEye />}
+                  </span>
+                </div>
+              </div>
+              <div className="form-group password-group">
+                <label>Confirm Password</label>
+                <div className="pass-input-wrapper">
+                  <input
+                    type={showPassword.confirm ? "text" : "password"}
+                    value={formData.confirmPassword}
+                    onChange={(e) => handleChange("confirmPassword", e.target.value)}
+                  />
+                  <span className="eye-icon" onClick={() => setShowPassword({ ...showPassword, confirm: !showPassword.confirm })}>
+                    {showPassword.confirm ? <FiEyeOff /> : <FiEye />}
+                  </span>
+                </div>
+                {errors.confirmPassword && <span className="error-msg">{errors.confirmPassword}</span>}
+              </div>
             </div>
           </div>
 
@@ -305,6 +355,92 @@ const UpdateProfile = () => {
             <button type="submit" className="save-btn"><FiClipboard /> Save Profile</button>
           </div>
         </form>
+      )}
+
+      {/* --- ADD FAMILY MEMBER MODAL --- */}
+      {showAddMember && (
+        <div className="modal-overlay" onClick={() => setShowAddMember(false)}>
+          <div className="modal-box advanced-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="header-content">
+                <h3>Add Family Member</h3>
+                <p>Complete details for bookings & records</p>
+              </div>
+              <button className="close-x" onClick={() => setShowAddMember(false)}>&times;</button>
+            </div>
+
+            <div className="modal-body-scroll">
+              <div className="form-group">
+                <label>Full Name <span className="mandatory">*</span></label>
+                <input
+                  type="text"
+                  placeholder="Enter name"
+                  value={newMember.fullName}
+                  onChange={(e) => handleMemberChange("fullName", e.target.value)}
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Age <span className="mandatory">*</span></label>
+                  <input
+                    type="number"
+                    value={newMember.age}
+                    onChange={(e) => handleMemberChange("age", e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Gender <span className="mandatory">*</span></label>
+                  <select value={newMember.gender} onChange={(e) => handleMemberChange("gender", e.target.value)}>
+                    <option value="">Select</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Relation <span className="mandatory">*</span></label>
+                  <select value={newMember.relation} onChange={(e) => handleMemberChange("relation", e.target.value)}>
+                    <option value="">Select</option>
+                    <option>Mother</option><option>Father</option><option>Wife</option>
+                    <option>Husband</option><option>Child</option><option>Sibling</option><option>Other</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Blood Group</label>
+                  <select value={newMember.bloodGroup} onChange={(e) => handleMemberChange("bloodGroup", e.target.value)}>
+                    <option value="">Select</option>
+                    <option>A+</option><option>B+</option><option>O+</option><option>AB+</option>
+                    <option>A-</option><option>B-</option><option>O-</option><option>AB-</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Phone Number (Optional)</label>
+                <input
+                  type="tel"
+                  placeholder="10 digit number"
+                  value={newMember.phone}
+                  onChange={(e) => handleMemberChange("phone", e.target.value)}
+                />
+              </div>
+              
+              <div className="info-box">
+                <FiAlertCircle />
+                <p>This member will be available for quick booking.</p>
+              </div>
+            </div>
+
+            <div className="modal-actions-sticky">
+              <button className="modal-cancel-btn" onClick={() => setShowAddMember(false)}>Cancel</button>
+              <button className="modal-save-btn" onClick={handleAddMember}>Add Member</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

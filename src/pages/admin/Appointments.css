@@ -234,16 +234,82 @@ td {
 .m-scroll-body { padding: 30px; overflow-y: auto; background: #fff; }
 
 /* Modal Info Boxes */
-.m-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+/* --- MODAL STYLING (The Premium Fix) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.7);-webkit-backdrop-filter: blur(10px); /* Add this line first */
+    backdrop-filter: blur(8px);
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 99999;
+    padding: 20px;
+}
+
+.premium-modal {
+    background: white;
+    width: 95%; /* Better for responsiveness */
+    max-width: 900px;
+    max-height: 90vh;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex; 
+    flex-direction: column;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+}
+
+/* FIX: Flexible Grid for Modal Info Boxes */
+.m-grid-3 { 
+    display: flex; 
+    flex-wrap: wrap; /* Yeh boxes ko neeche bhej dega agar space kam hui */
+    gap: 15px; 
+    margin-bottom: 30px; 
+    width: 100%;
+}
+
 .info-box { 
+    flex: 1; /* Equal width allocation */
+    min-width: 250px; /* Minimum width taaki text squash na ho */
     background: #f8fafc; 
     padding: 18px; 
     border-radius: 12px; 
     border: 1px solid #e2e8f0;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
-.info-box label { font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 800; display: block; margin-bottom: 10px; letter-spacing: 0.5px; }
-.info-box p { margin: 4px 0; color: var(--primary); font-size: 14px; }
+
+.info-box label { 
+    font-size: 11px; 
+    text-transform: uppercase; 
+    color: #64748b; 
+    font-weight: 800; 
+    display: block; 
+    margin-bottom: 8px; 
+    letter-spacing: 0.5px; 
+}
+
+.info-box p { 
+    margin: 0; 
+    color: var(--primary); 
+    font-size: 14px; 
+    font-weight: 600;
+    line-height: 1.5;
+    word-break: break-all; /* Emails ko break karega screen se bahar jane ke bajaye */
+    white-space: normal; 
+}
+
+/* Modal Responsive */
+@media (max-width: 768px) {
+    .info-box {
+        min-width: 100%; /* Mobile par full width */
+    }
+}
 .sub-text { color: #64748b !important; font-size: 12px !important; }
 
 /* Complaint Box Styling */

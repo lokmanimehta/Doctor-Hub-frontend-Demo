@@ -370,7 +370,7 @@ const searchResults = useMemo(() => {
                 <span className="search-icon-hero">🔍</span>
                 <input
   type="text"
-  placeholder="find doctor, hospitals, clicnis etc..."
+  placeholder="find doctor, hospitals, clinics etc..."
   value={searchText}
   onChange={(e) => {
     setSearchText(e.target.value);

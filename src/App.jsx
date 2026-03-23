@@ -133,7 +133,7 @@ import AboutUs from "./pages/public/About";
 import ContactUs from "./pages/public/Contact";
 import Blogs from "./pages/public/blogs";
 import AllServicesPage from "./pages/public/AllServicesPage";
-
+import "./styles/global.css";
 /* ADMIN PAGES */
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import DoctorsManagement from "./pages/admin/DoctorsManagement";
@@ -210,8 +210,8 @@ function App() {
         <Route path="appointments" element={<AdminAppointments />} />
         <Route path="profile" element={<AdminProfile />} />
         <Route path="system-logs" element={<SystemLogs />} />
-        <Route path="Ads Management" element={<AdsManagement />} />
-        <Route path="FeedbackPage" element={<FeedbackPage />} />
+        <Route path="ads-management" element={<AdsManagement />} />
+        <Route path="feedback" element={<FeedbackPage />} />
         
       </Route>
 
@@ -230,7 +230,7 @@ function App() {
       </Route>
 
       {/* --- PATIENT ROUTES --- */}
-      /* PATIENT ROUTES */
+     
 /* --- PATIENT ROUTES --- */
 <Route path="/patient/*" element={<PatientLayout />}>
   {/* Index route: Taaki sirf /patient likhne par bhi dashboard khule */}

@@ -432,10 +432,10 @@ a, a:hover, a:visited, a:active {
 .hero-content-main h2 { font-size: 3.2rem; line-height: 1.1; font-weight: 900; color: var(--text-dark); margin-bottom: 25px; }
 .hero-content-main h2 span { color: var(--primary); }
 
-.search-box-centered { display: flex; background: white; padding: 6px; border-radius: 15px; box-shadow: var(--shadow); border: 1px solid var(--border); max-width: 550px; margin-bottom: 20px; }
+.search-box-centered { display: flex; background: white; padding: 8px;gap: 10px; border-radius: 15px; box-shadow: var(--shadow); border: 1px solid var(--border); max-width: 550px; margin-bottom: 20px; }
 .search-input-wrapper { flex: 1; display: flex; align-items: center; padding: 0 12px; }
 .search-box-centered input { width: 100%; border: none; outline: none; padding: 12px 0; font-size: 15px; }
-.hero-search-btn { background: var(--primary); color: white; border: none; padding: 0 25px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+.hero-search-btn { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
 
 .hero-visual { display: flex; justify-content: flex-end; }
 .hero-visual img { width: 100%; max-width: 420px; border-radius: 30px; display: block; /* Gap remove karne ke liye */
@@ -709,15 +709,16 @@ transform: translateY(0);
   height: 42px;
   border-radius: 50%;
   color: #fff;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(230, 226, 226, 0.25); 
   transition: all 0.3s ease;
   text-decoration: none !important;
+  border: 1px solid rgba(239, 235, 235, 0.2);
 }
 
 .example-1 .icon-content .link svg {
   width: 22px;
   height: 22px;
-  fill: #fff;
+  fill: #ffffff !important;
   transition: all 0.3s ease;
 }
 
@@ -1331,5 +1332,58 @@ transform: translateY(0);
   gap: 10px;
   padding: 0 10px;
 }
+.modal-body-content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .info-row-item {
+        display: flex !important;
+        align-items: flex-start !important; /* Label aur text top se align rahenge */
+        gap: 8px !important;
+        margin-bottom: 10px !important;
+        width: 100%;
+        text-align: left !important;
+    }
+
+    /* Label (Education:, Experience:, etc.) */
+    .info-row-item strong, 
+    .info-row-item label {
+        min-width: 90px !important; /* Label ko fix width di taaki text ek line se start ho */
+        font-size: 13px !important;
+        color: #1e293b !important;
+        flex-shrink: 0; /* Label squeeze nahi hoga */
+    }
+
+    /* Data (MBBS, MD...) */
+    .info-row-item span,
+    .info-row-item p {
+        flex: 1; /* Bacha hua pura space data le lega */
+        font-size: 13px !important;
+        line-height: 1.4 !important;
+        color: #64748b !important;
+        word-break: break-word; /* Lambe words wrap ho jayenge */
+        margin: 0 !important;
+    }
+
+    /* 4. About Doctor Section */
+    .modal-about-section {
+        margin-top: 15px;
+        text-align: left !important;
+    }
+
+    .modal-about-section h4 {
+        font-size: 15px;
+        margin-bottom: 8px;
+        color: var(--primary);
+    }
+
+    .modal-about-section p {
+        font-size: 13px;
+        line-height: 1.5;
+        color: #64748b;
+    }
   
 }

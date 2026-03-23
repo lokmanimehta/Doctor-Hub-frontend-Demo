@@ -22,7 +22,7 @@ const Appointment = () => {
         critical: i % 4 === 0 ? "Yes" : "No",
         complaint: "Patient reports chronic chest pain and shortness of breath during physical activity.",
         age: 25 + (i % 15),
-        contact: "+91 98765-43210",
+        contact: "+91 98765-*****",
         email: "patient@example.com"
     }));
 
