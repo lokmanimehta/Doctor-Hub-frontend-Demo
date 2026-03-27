@@ -435,7 +435,7 @@ a, a:hover, a:visited, a:active {
 .search-box-centered { display: flex; background: white; padding: 8px;gap: 10px; border-radius: 15px; box-shadow: var(--shadow); border: 1px solid var(--border); max-width: 550px; margin-bottom: 20px; }
 .search-input-wrapper { flex: 1; display: flex; align-items: center; padding: 0 12px; }
 .search-box-centered input { width: 100%; border: none; outline: none; padding: 12px 0; font-size: 15px; }
-.hero-search-btn { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.hero-search-btn { background:  #10b981; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 750; cursor: pointer; white-space: nowrap; }
 
 .hero-visual { display: flex; justify-content: flex-end; }
 .hero-visual img { width: 100%; max-width: 420px; border-radius: 30px; display: block; /* Gap remove karne ke liye */
@@ -445,76 +445,144 @@ a, a:hover, a:visited, a:active {
 /* ==========================================
    DOCTOR GRID (STRICT COLOR FIX)
    ========================================== */
-.doctors-section { padding: 60px 8%; background: white; border-top: 1px solid var(--border); }
-
-.doctor-grid { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
-  gap: 20px; 
+/* SECTION PADDING FIX (LEFT-RIGHT SPACE BACK) */
+.doctors-section {
+  padding: 60px 8%;   /* 🔥 ye important hai */
+  background: white;
 }
 
-.doctor-card-pro { 
-  background: white; 
-  border-radius: 20px; 
-  border: 1px solid var(--border); 
-  overflow: hidden; 
-  transition: 0.3s; 
-  display: flex; 
-  flex-direction: column; 
+/* GRID */
+.doctor-grid-v3 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;   /* thoda premium spacing */
+  justify-content: flex-start;
+}
+
+/* CARD */
+.premium-v3-card {
+  flex: 0 0 calc(25% - 18px); /* 🔥 PERFECT 4 CARDS WITH GAP */
+  max-width: calc(25% - 18px);
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
   cursor: pointer;
-  color: var(--text-dark) !important;
+  transition: 0.3s;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
 }
 
-.doctor-card-pro:hover { 
-  transform: translateY(-5px); 
-  border-color: var(--primary); 
-  box-shadow: 0 15px 30px rgba(0,0,0,0.08); 
+.premium-v3-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
 }
 
-.doc-image-box { height: 180px; position: relative; }
-.doc-image-box img { width: 100%; height: 100%; object-fit: cover; }
-.doc-experience-badge { 
-  position: absolute; bottom: 10px; right: 10px; 
-  background: rgba(0, 0, 0, 0.7); color: white; 
-  padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; 
+/* IMAGE */
+.v3-card-top {
+  position: relative;
 }
 
-.doc-content-box { 
-  padding: 15px; flex: 1; display: flex; flex-direction: column; 
-  color: var(--text-dark) !important; 
+.v3-card-top img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
 }
 
-.doc-specialty-pill { 
-  background: #ecfdf5; color: var(--primary) !important; 
-  padding: 3px 10px; border-radius: 6px; font-size: 11px; 
-  font-weight: 800; width: fit-content; 
+/* 🔥 NEW PREMIUM RATING */
+.v3-rating {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #facc15; /* ⭐ yellow star */
+  background: transparent;
 }
 
-.doc-name-text { 
-  font-size: 17px; font-weight: 800; margin: 10px 0 5px; 
-  color: var(--text-dark) !important; /* Fixed Blue issue */
+/* BODY */
+.v3-card-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
-.doc-info-meta p { 
-  font-size: 13px; color: var(--text-light) !important; 
-  margin-bottom: 4px; 
+.v3-card-body h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
-.doc-fee-text { 
-  color: var(--text-dark) !important; 
-  font-weight: 800; font-size: 14px !important; margin-top: 5px; 
+.v3-spec {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 13px;
 }
 
-.doc-card-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto; padding-top: 15px; }
-.view-profile-pro { 
-  background: #f1f5f9; border: none; padding: 10px; 
-  border-radius: 10px; font-weight: 700; font-size: 12px; 
-  cursor: pointer; color: var(--text-dark) !important;
+.v3-loc,
+.v3-exp,
+.v3-fee {
+  font-size: 13px;
+  color: #64748b;
 }
-.book-now-pro { 
-  background: var(--primary); color: white !important; 
-  border: none; padding: 10px; border-radius: 10px; 
-  font-weight: 700; font-size: 12px; cursor: pointer; 
+
+/* BUTTON GROUP */
+.v3-btn-group {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+/* BUTTONS */
+.v3-btn-group{
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+}
+
+.v3-btn.secondary {
+  background: var(--primary-dark);
+  color: white;
+}
+.v3-btn.secondary1 {
+  background: var(--primary-dark);
+  color: white;
+}
+
+
+.section-header-pro h2 {
+  font-size: 32px;   /* 🔥 bada kiya */
+  font-weight: 800;
+  color: var(--text-dark);
+  text-align: center;
+}
+
+.section-header-pro h2 span {
+  color: var(--primary);
+}
+
+.section-header-pro {
+  text-align: center;
+  margin-bottom: 40px;  /* spacing increase */
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .premium-v3-card {
+    flex: 0 0 80%;
+    max-width: 80%;
+  }
+
+  .doctor-grid-v3 {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 10px;
+  }
 }
 /* Ad Banner */
 .hospital-ad-section { padding: 0 8% 40px; margin-top: -30px; /* Isse banner doctor ki image ke aur paas aa jayega */
@@ -1386,4 +1454,23 @@ transform: translateY(0);
         color: #64748b;
     }
   
+}
+.cost-image-box {
+  width: 100%;
+  height: 160px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.cost-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.card-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover; /* Isse image stretch nahi hogi */
+  display: block;
 }

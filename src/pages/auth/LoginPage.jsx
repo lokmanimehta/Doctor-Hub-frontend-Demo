@@ -7,6 +7,7 @@ import { forgotPassword, resetPassword  } from "../../services/authService";
 // import { loginUser } from "../../services/authService";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 const LoginPage = () => {
   const navigate = useNavigate();
 
@@ -317,11 +318,11 @@ const resetPasswordHandler = async () => {
   onChange={(e) => setPassword(e.target.value)}
   required
 />
- <span
+<span
   className="show-hide-icon"
   onClick={() => setShowPassword(prev => !prev)}
 >
-  {showPassword ? "🙈" : "👁️"}
+  {showPassword ? <FiEyeOff /> : <FiEye />}
 </span>
                 </div>
               </div>
@@ -433,34 +434,36 @@ const resetPasswordHandler = async () => {
     value={newPassword}
     onChange={(e) => setNewPassword(e.target.value)}
   />
-  <span
+ <span
   className="show-hide-icon"
   onClick={() => setShowNewPassword(prev => !prev)}
 >
-  {showNewPassword ? "🙈" : "👁️"}
+  {showNewPassword ? <FiEyeOff /> : <FiEye />}
 </span>
 </div>
     </div>
 
     <div className="input-field-group">
-      <label>Confirm Password</label>
+  <label>Confirm Password</label>
+  <div className="input-with-icon">
+    <span className="icon-slot">🔒</span>
 
-      <div className="input-with-icon">
-  <span className="icon-slot">🔒</span>
-  <input
-    type={showConfirmPassword ? "text" : "password"}
-    placeholder="Confirm Password"
-    value={confirmPassword}
-    onChange={(e) => setConfirmPassword(e.target.value)}
-  />
-  <span
-    className="show-hide-icon"
-    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-  >
-    {showConfirmPassword ? "🙈" : "👁️"}
-  </span>
+    <input
+      type={showConfirmPassword ? "text" : "password"}
+      placeholder="Confirm Password"
+      value={confirmPassword}
+      onChange={(e) => setConfirmPassword(e.target.value)}
+      required
+    />
+
+    <span
+      className="show-hide-icon"
+      onClick={() => setShowConfirmPassword(prev => !prev)}
+    >
+      {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+    </span>
+  </div>
 </div>
-    </div>
 
     <button
       className="auth-submit-btn"

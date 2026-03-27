@@ -154,7 +154,13 @@
   align-items: center;
   flex-shrink: 0; 
 }
+.sub-meta {
+  color: #fff; /* 🔥 pura text white */
+}
 
+.sub-meta span {
+  color: #fff; /* individual spans bhi white */
+}
 .header-actions { display: flex; gap: 15px; align-items: center; }
 
 .btn-call-lab {

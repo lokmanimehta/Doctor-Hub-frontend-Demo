@@ -75,12 +75,15 @@ const handleLogout = () => {
   { name: "Dental", icon: "🦷" },
   { name: "Eye Care", icon: "👁️" }
 ], []);
-  const costPackages = useMemo(() => [
+  
+
+const costPackages = useMemo(() => [
   { 
     title: "Maternity Care", 
     desc: "Luxury delivery suites & neonatal care.", 
     price: "45,000", 
-    icon: "🤰", 
+    // Image: Hospital newborn nursery / baby care
+    image: "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?auto=format&fit=crop&w=800&q=80",
     badge: "Trending",
     emi: "₹3,750/mo",
     features: ["Private Room", "Nursing", "Medicines"]
@@ -89,7 +92,8 @@ const handleLogout = () => {
     title: "Knee Surgery", 
     desc: "Robotic assisted with fast recovery.", 
     price: "1,20,000", 
-    icon: "🦴", 
+    // Image: Orthopedic surgeon / Knee X-ray/Scan focus
+    image: "https://images.pexels.com/photos/4226119/pexels-photo-4226119.jpeg?auto=compress&cs=tinysrgb&w=800",
     badge: "New",
     emi: "₹10,000/mo",
     features: ["Implants", "Physio", "Post-Op Care"]
@@ -98,7 +102,8 @@ const handleLogout = () => {
     title: "Heart Checkup", 
     desc: "Full cardiac screening & consultation.", 
     price: "4,999", 
-    icon: "❤️", 
+    // Image: Stethoscope on medical report
+    image: "https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?auto=compress&cs=tinysrgb&w=800",
     badge: "Essential",
     emi: "N/A",
     features: ["ECG/Echo", "Blood Tests", "Expert Opinion"]
@@ -107,12 +112,14 @@ const handleLogout = () => {
     title: "Transplant Care", 
     desc: "Advanced organ transplant center.", 
     price: "4,50,000", 
-    icon: "🏥", 
+    // Image: High-tech surgical theater
+    image: "https://images.pexels.com/photos/247786/pexels-photo-247786.jpeg?auto=compress&cs=tinysrgb&w=800",
     badge: "Specialist",
     emi: "₹37,500/mo",
     features: ["Pre-Op Tests", "ICU Support", "NABH Center"]
   }
 ], []);
+
 
   const trendingSearches = ["Fever", "Knee Pain", "Skin Allergy", "Diabetes"];
 
@@ -191,7 +198,7 @@ const searchResults = useMemo(() => {
       <div className="bg-blob blob-1"></div>
       <div className="bg-blob blob-2"></div>
 
-      {/* --- DOCTOR PROFILE MODAL --- */}
+       {/* --- DOCTOR PROFILE MODAL --- */}
       {selectedDoctor && (
         <div className="modal-overlay" onClick={() => setSelectedDoctor(null)}>
           <div className="profile-modal-card" onClick={(e) => e.stopPropagation()}>
@@ -497,33 +504,63 @@ const searchResults = useMemo(() => {
         </div>
       </section>
 
-      {/* --- DOCTOR GRID --- */}
-      <section className="doctors-section">
-        <div className="section-header-pro">
-          <h2>Expert <span>Healthcare Team</span></h2>
-          <div className="accent-line-small"></div>
+
+           {/* --- Doctor section --- */}
+       <section className="doctors-section">
+  <div className="section-header-pro">
+    <h2>Expert <span>Healthcare Team</span></h2>
+    <div className="accent-line-small"></div>
+  </div>
+
+  <div className="doctor-grid-v3">
+    {filteredDoctors.map((doc) => (
+      <div
+        key={doc.id}
+        className="premium-v3-card"
+        onClick={() => setSelectedDoctor(doc)}
+      >
+        {/* TOP IMAGE */}
+        <div className="v3-card-top">
+          <img src={doc.profileImage} alt={doc.name} />
+          <div className="v3-rating">⭐ 4.9</div>
         </div>
-        <div className="doctor-grid">
-          {filteredDoctors.map((doc) => (
-            <div key={doc.id} className="doctor-card-pro" onClick={() => setSelectedDoctor(doc)}>
-              <div className="doc-image-box">
-                <img src={doc.profileImage} alt={doc.name} />
-                <div className="doc-experience-badge">10+ Yrs Exp</div>
-              </div>
-              <div className="doc-content-box">
-                <span className="doc-specialty-pill">{doc.specialty}</span>
-                <h3 className="doc-name-text">{doc.name}</h3>
-                <p className="doc-loc">📍 {doc.city}</p>
-                <p className="doc-fee-text">💰 Fee: ₹{doc.fees || "500"}</p>
-                <div className="doc-card-footer">
-                  <button className="view-profile-pro">Details</button>
-                  <button className="book-now-pro" onClick={(e) => { e.stopPropagation(); navigate(`/book/${doc.id}`); }}>Book Now</button>
-                </div>
-              </div>
-            </div>
-          ))}
+
+        {/* BODY */}
+        <div className="v3-card-body">
+          <h3>{doc.name}</h3>
+          <p className="v3-spec">{doc.specialty}</p>
+          <p className="v3-loc">📍 {doc.city}</p>
+          <p className="v3-exp">💼 {doc.experience || 10}+ yrs</p>
+          <p className="v3-fee">💰 ₹{doc.fees || 500}</p>
+
+          {/* BUTTONS */}
+          <div className="v3-btn-group">
+            <button
+              className="v3-btn secondary1"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedDoctor(doc);
+              }}
+            >
+              View Details
+            </button>
+
+            <button
+              className="v3-btn secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/book/${doc.id}`);
+              }}
+            >
+              Book Now
+            </button>
+          </div>
         </div>
-      </section>
+      </div>
+    ))}
+  </div>
+</section>
+
 
       {/* --- PREMIUM COSTS SECTION WITH POPUP --- */}
 <section className="costs-section">
@@ -537,7 +574,9 @@ const searchResults = useMemo(() => {
     {costPackages.map((pkg, idx) => (
       <div key={idx} className="cost-card-styled" onClick={() => setSelectedCost(pkg)}>
         <div className="pkg-badge">{pkg.badge}</div>
-        <div className="cost-icon-circle">{pkg.icon}</div>
+        <div className="cost-image-box">
+  <img src={pkg.image} alt={pkg.title} />
+</div>
         <h4>{pkg.title}</h4>
         <p className="pkg-desc-text">{pkg.desc}</p>
         
@@ -562,7 +601,9 @@ const searchResults = useMemo(() => {
       <div className="cost-modal-card" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close-x" onClick={() => setSelectedCost(null)}>×</button>
         <div className="modal-header">
-          <div className="cost-icon-circle-large">{selectedCost.icon}</div>
+          <div className="cost-image-box">
+  <img src={selectedCost.image} alt={selectedCost.title} />
+</div>
           <h2>{selectedCost.title}</h2>
           <span className="pkg-badge">{selectedCost.badge}</span>
         </div>

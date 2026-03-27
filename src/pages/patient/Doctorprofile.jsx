@@ -15,11 +15,9 @@ export default function DoctorProfile() {
   const [showBooking, setShowBooking] = useState(false);
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedTime, setSelectedTime] = useState("");
-  const [patientName, setPatientName] = useState("");
-  const [age, setAge] = useState("");
-  const [gender, setGender] = useState("");
-  const [reason, setReason] = useState("");
-
+const selectedProfile = JSON.parse(localStorage.getItem("selectedProfile")) || null;
+  const bookingDate = new Date();
+bookingDate.setDate(bookingDate.getDate() + selectedDate);
   const doctor = useMemo(
     () => DOCTORS.find((d) => d.id === Number(id)),
     [id]
@@ -55,12 +53,19 @@ export default function DoctorProfile() {
             🏥 {doctor.clinicName}, {doctor.city}
           </p>
 
-          <button
-            className="book-btn"
-            onClick={() => setShowBooking(true)}
-          >
-            Book Appointment • ₹{doctor.fee}
-          </button>
+         <button
+  className="book-btn"
+  onClick={() => {
+    if (!selectedProfile) {
+      alert("Please select patient profile first");
+      navigate("/patient/profile");
+      return;
+    }
+    setShowBooking(true);
+  }}
+>
+  Book Appointment • ₹{doctor.fee}
+</button>
         </div>
       </div>
 
@@ -111,7 +116,15 @@ export default function DoctorProfile() {
         <div className="profile-actions">
           <button
             className="primary-btn"
-            onClick={() => setShowBooking(true)}
+            onClick={() => {
+  if (!selectedProfile) {
+    alert("Please select patient profile first");
+    navigate("/patient/profile");
+    return;
+  }
+
+  setShowBooking(true);
+}}
           >
             Book Appointment
           </button>
@@ -193,47 +206,62 @@ export default function DoctorProfile() {
 
               {/* FORM */}
               <div className="booking-section">
-                <p>Patient Info</p>
+  <p>Patient Info</p>
 
-                <input
-                  placeholder="Full Name"
-                  value={patientName}
-                  onChange={(e) => setPatientName(e.target.value)}
-                />
+  {selectedProfile ? (
+  <>
+    <h4>{selectedProfile.fullName}</h4>
+    <p>
+      {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
+    </p>
+  </>
+) : (
+  <p style={{color:"red"}}>No profile selected</p>
+)}
 
-                <input
-                  placeholder="Age"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                />
-
-                <select
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                >
-                  <option value="">Gender</option>
-                  <option>Male</option>
-                  <option>Female</option>
-                </select>
-
-                <textarea
-                  placeholder="Reason / Symptoms"
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                />
-              </div>
+  <button
+    className="change-member-btn"
+    onClick={() => navigate("/patient/profile")}
+  >
+    Change Member
+  </button>
+</div>
 
               <button
                 className="primary-btn confirm-btn"
-                onClick={() => {
-                  if (!selectedTime || !patientName) {
-                    alert("Fill required fields");
-                    return;
-                  }
+              onClick={() => {
 
-                  alert("Appointment Booked ✅");
-                  setShowBooking(false);
-                }}
+  // ✅ STEP 1: Profile check (FIRST)
+  if (!selectedProfile) {
+    alert("Please select patient profile first");
+    navigate("/patient/profile");
+    return;
+  }
+
+  // ✅ STEP 2: Time check
+  if (!selectedTime) {
+    alert("Please select time slot");
+    return;
+  }
+
+  // ✅ STEP 3: Create booking
+  const booking = {
+    doctorId: doctor.id,
+    doctorName: doctor.name,
+    patientId: selectedProfile.id,
+    patientName: selectedProfile.fullName,
+    relation: selectedProfile.relation,
+    time: selectedTime,
+    date: bookingDate.toDateString(),
+  };
+
+  const existing = JSON.parse(localStorage.getItem("appointments")) || [];
+
+  localStorage.setItem("appointments", JSON.stringify([...existing, booking]));
+
+  alert("Appointment Booked ✅");
+  setShowBooking(false);
+}}
               >
                 Confirm Appointment
               </button>

@@ -47,26 +47,47 @@ body {
   color: var(--text-dark);
 }
 
+/* --- UPDATED HEADER CSS --- */
+
 .header-nav {
   display: flex;
   gap: 25px;
   align-items: center;
 }
 
+/* Base style for all items */
 .nav-item {
   font-weight: 600;
   cursor: pointer;
   font-size: 14px;
   color: var(--text-dark);
   transition: 0.3s;
+  padding-bottom: 4px; /* Space for underline */
+  border-bottom: 2px solid transparent; /* To prevent jumping */
 }
 
+/* Hover effect */
 .nav-item:hover {
-  color: var(--primary);
+  color: #007664; /* Direct Green Color */
 }
 
+/* Active Tab: Text green aur underline dono ke liye */
 .active-tab {
-  color: var(--primary);
+  color: #007664 !important; 
+  border-bottom: 2px solid #007664 !important;
+}
+
+/* Dropdown menu ke andar ka item */
+.dropdown-item.active-tab {
+  color: #007664 !important;
+  border-bottom: none !important; /* Dropdown ke andar line nahi chahiye */
+  background-color: #f5fdfb; /* Halki green background for consistency */
+}
+
+/* Agar dropdown ke andar hover karein */
+.dropdown-item:hover {
+  color: #007664;
+  background-color: #f5fdfb;
 }
 
 /* --- HERO SECTION & TEXT CENTERED --- */
@@ -1229,7 +1250,21 @@ color:#64748b;
   font-size: 13px;
   cursor: pointer;
 }
+@media (max-width: 600px) {
+  .premium-services {
+    flex-direction: column;
+  }
 
+  .premium-service-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .premium-service-card button {
+    align-self: flex-end;
+  }
+}
 /* MOBILE */
 /* Services text ka color baaki navbar items jaisa black karne ke liye */
 .nav-item.dropdown-toggle span {
@@ -1258,4 +1293,180 @@ color:#64748b;
     max-width: 100%;        /* Text ko poori jagah milne do */
     font-size: 12px;
   }
+}
+/* 🔥 BOOKING MODAL (SEPARATE) */
+
+.booking-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);-webkit-backdrop-filter: blur(10px); /* Add this line first */
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+  padding: 16px;
+}
+
+.booking-modal-card {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.booking-scroll {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Close */
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background: white;
+  cursor: pointer;
+}
+
+/* Doctor */
+.booking-doctor {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #f0fdfa;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.booking-doctor img {
+  width: 55px;
+  height: 55px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+/* Sections */
+.booking-section {
+  margin-bottom: 18px;
+}
+
+.booking-section p {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* Date & slots */
+.date-list, .slot-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.date-chip, .slot {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  cursor: pointer;
+}
+
+.date-chip.active, .slot.active {
+  background: #0f766e;
+  color: white;
+  border-color: #0f766e;
+}
+
+/* Inputs */
+.booking-section input,
+.booking-section select,
+.booking-section textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fafafa;
+}
+
+/* Buttons */
+.confirm-btn {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.primary-btn {
+  background: #0f766e;
+  color: white;
+}
+
+.secondary-btn {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+.booking-modal {
+  width: 95%;
+  max-width: 1100px;
+  max-height: 90vh;   /* 🔥 IMPORTANT */
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.modal-flex {
+  display: flex;
+  overflow-y: auto;   /* 🔥 SCROLL YAHAN HOGA */
+  max-height: 90vh;
+}
+.modal-info-side,
+.modal-form-side {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;   /* 🔥 smooth scroll inside */
+  max-height: 90vh;
+}
+@media (max-width: 768px) {
+  .modal-flex {
+    flex-direction: column;  /* 🔥 vertical stack */
+  }
+
+  .modal-info-side,
+  .modal-form-side {
+    max-height: unset;
+    overflow: visible;
+  }
+
+  .booking-modal {
+    max-height: 95vh;
+  }
+}
+.booking-toggle {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.booking-toggle button {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background: #f9fafb;
+  cursor: pointer;
+}
+
+.booking-toggle button.active {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
 }

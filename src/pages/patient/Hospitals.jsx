@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import './Hospitals.css';
-
+import { useNavigate } from 'react-router-dom';
 const Hospitals = () => {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedHospital, setSelectedHospital] = useState(null);
@@ -11,54 +12,62 @@ const Hospitals = () => {
   const [specialityFilter, setSpecialityFilter] = useState("");
   const [preview, setPreview] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+  const selectedProfile = JSON.parse(localStorage.getItem("selectedProfile"));
+  const [bedType, setBedType] = useState("General Ward");
   const hospitalsData = [
     { id: 1, name: "Apollo Hospital", location: "Chennai, Tamil Nadu", rating: "4.8", image: "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c?q=80&w=800", depts: ["Cardiology", "Orthopedics", "Neurology", "Pediatrics", "General"], bedsAvailable: 23, totalBeds: 50 },
     { id: 2, name: "Manipal Hospital", location: "Bengaluru, Karnataka", rating: "4.6", image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800", depts: ["Oncology", "Orthopedics"], bedsAvailable: 12, totalBeds: 40 },
     { id: 3, name: "Fortis Healthcare", location: "Mumbai, Maharashtra", rating: "4.7", image: "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=800", depts: ["Pediatrics", "Surgery"], bedsAvailable: 18, totalBeds: 45 },
-    { id: 4, name: "Max Super Speciality", location: "Delhi, DL", rating: "4.5", images: [
+    {
+      id: 4, name: "Max Super Speciality", location: "Delhi, DL", rating: "4.5", images: [
         "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c",
         "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f",
         "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d",
         "https://images.unsplash.com/photo-1629909613654-28e377c37b09"
       ], depts: ["Gastro", "Cardiology"], bedsAvailable: 9, totalBeds: 30
     },
-    { id: 5, name: "Medanta Hospital", location: "Gurgaon, HR", rating: "4.9", images: [
+    {
+      id: 5, name: "Medanta Hospital", location: "Gurgaon, HR", rating: "4.9", images: [
         "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c",
         "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f",
         "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d",
         "https://images.unsplash.com/photo-1629909613654-28e377c37b09"
       ], depts: ["Neurology", "Urology"], bedsAvailable: 31, totalBeds: 60
     },
-    { id: 6, name: "Lilavati Hospital", location: "Mumbai, MH", rating: "4.4", images: [
+    {
+      id: 6, name: "Lilavati Hospital", location: "Mumbai, MH", rating: "4.4", images: [
         "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c",
         "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f",
         "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d",
         "https://images.unsplash.com/photo-1629909613654-28e377c37b09"
       ], depts: ["General", "ENT"], bedsAvailable: 15, totalBeds: 35
     },
-    { id: 7, name: "Cloudnine", location: "Pune, MH", rating: "4.7", images: [
+    {
+      id: 7, name: "Cloudnine", location: "Pune, MH", rating: "4.7", images: [
         "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c",
         "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f",
         "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d",
         "https://images.unsplash.com/photo-1629909613654-28e377c37b09"
       ], depts: ["Maternity", "Pediatrics"], bedsAvailable: 20, totalBeds: 40
     },
-    { id: 8, name: "Global Hospital", location: "Hyderabad, TS", rating: "4.3", images: [
+    {
+      id: 8, name: "Global Hospital", location: "Hyderabad, TS", rating: "4.3", images: [
         "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c",
         "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f",
         "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d",
         "https://images.unsplash.com/photo-1629909613654-28e377c37b09"
       ], depts: ["Multi-Speciality"], bedsAvailable: 27, totalBeds: 50
     },
-    { id: 9, name: "Aster CMI", location: "Bangalore, KA", rating: "4.8", images: [
+    {
+      id: 9, name: "Aster CMI", location: "Bangalore, KA", rating: "4.8", images: [
         "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c",
         "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f",
         "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d",
         "https://images.unsplash.com/photo-1629909613654-28e377c37b09"
       ], depts: ["Neuroscience"], bedsAvailable: 14, totalBeds: 30
     },
-    { id: 10, name: "Jaslok Hospital", location: "Mumbai, MH", rating: "4.6", images: [
+    {
+      id: 10, name: "Jaslok Hospital", location: "Mumbai, MH", rating: "4.6", images: [
         "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c",
         "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f",
         "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d",
@@ -73,12 +82,44 @@ const Hospitals = () => {
     setCurrentImageIndex(0);
   };
 
-  const handleConfirm = (e) => {
-    e.preventDefault();
-    setIsModalOpen(false);
-    setShowConfirmation(true);
+ const handleConfirm = (e) => {
+  e.preventDefault();
+
+  // ✅ SAFETY CHECK (VERY IMPORTANT)
+  if (!selectedHospital) {
+    alert("Something went wrong");
+    return;
+  }
+
+  // ✅ Profile check
+  if (!selectedProfile) {
+    alert("Please select patient profile first");
+    navigate("/patient/profile");
+    return;
+  }
+
+  // ✅ Create booking object
+  const booking = {
+    type: "HOSPITAL",
+    hospitalId: selectedHospital.id,
+    hospitalName: selectedHospital.name,
+    patientId: selectedProfile.id,
+    patientName: selectedProfile.fullName,
+    relation: selectedProfile.relation,
+    bedsRequested: bedType, // ✅ GOOD: dynamic ho gaya
+    date: new Date().toISOString(),
   };
 
+  const existing = JSON.parse(localStorage.getItem("appointments")) || [];
+
+  localStorage.setItem(
+    "appointments",
+    JSON.stringify([...existing, booking])
+  );
+
+  setIsModalOpen(false);
+  setShowConfirmation(true);
+};
   const handleReset = () => {
     setSearchText("");
     setLocationFilter("");
@@ -247,7 +288,11 @@ const Hospitals = () => {
                 <form onSubmit={handleConfirm}>
                   <div className="form-group">
                     <label>Bed Selection</label>
-                    <select className="form-select">
+                    <select 
+  className="form-select"
+  value={bedType}
+  onChange={(e) => setBedType(e.target.value)}
+>
                       <option>General Ward</option>
                       <option>Private Room</option>
                       <option>Deluxe Room</option>
@@ -268,13 +313,27 @@ const Hospitals = () => {
                     </div>
                   </div>
 
-                  <div className="form-group">
-                    <label>Admission Request Details</label>
-                    <textarea placeholder="Reason for admission" rows="3"></textarea>
-                  </div>
+                  <div className="booking-section">
+                    <p>Patient Info</p>
 
-                  <div className="form-group">
-                    <input type="text" className="form-input" placeholder="Emergency Contact Number" />
+                    {selectedProfile ? (
+                      <div className="selected-patient-card">
+                        <h4>{selectedProfile.fullName}</h4>
+                        <p>
+                          {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
+                        </p>
+                      </div>
+                    ) : (
+                      <p style={{ color: "red" }}>No profile selected</p>
+                    )}
+
+                    <button
+  type="button"
+  className="change-member-btn"
+  onClick={() => navigate("/patient/profile")}
+>
+                      Change Member
+                    </button>
                   </div>
 
                   <button type="submit" className="book-bed-btn">Book Bed Now</button>
@@ -292,7 +351,7 @@ const Hospitals = () => {
             <p style={{ fontWeight: 'bold', color: '#10B981' }}>Bed booked successfully ✅</p>
             <div style={{ fontSize: '13px', margin: '10px 0', color: '#666' }}>
               <p><strong>Hospital:</strong> {selectedHospital?.name}</p>
-              <p><strong>Type:</strong> ICU Bed</p>
+              <p><strong>Type:</strong> {bedType}</p>
             </div>
             <button className="view-details-btn" onClick={() => setShowConfirmation(false)}>Confirm</button>
           </div>
@@ -302,7 +361,7 @@ const Hospitals = () => {
       {/* IMAGE FULL PREVIEW */}
       {preview && (
         <div className="full-preview-overlay active" onClick={() => setPreview(null)}>
-          <img src={preview} className="full-preview-img" alt="Preview" onClick={(e) => e.stopPropagation()}/>
+          <img src={preview} className="full-preview-img" alt="Preview" onClick={(e) => e.stopPropagation()} />
           <button className="preview-close-btn" onClick={() => setPreview(null)}>×</button>
 
           {selectedHospital?.images?.length > 1 && (

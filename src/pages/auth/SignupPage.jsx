@@ -5,6 +5,7 @@ import {
   User, Mail, Phone, Briefcase, GraduationCap, Lock, ArrowRight, Stethoscope, HeartPulse 
 } from "lucide-react";
 import "./Signup.css"; 
+import { FiEye, FiEyeOff } from "react-icons/fi";
 // import { signupUser } from "../../services/authService";
 // High-res images for premium look
 import patientImg from "../../assets/images/patientlogin.png";
@@ -535,11 +536,10 @@ setActiveField(null)
     onChange={(e) => setFormData({...formData, password: e.target.value})}
   />
   <span
-    className="show-hide-icon"
-    onClick={() => setShowPassword(prev => !prev)}
-  >
-    {showPassword ? "🙈" : "👁️"}
-  </span>
+  className="show-hide-icon"
+  onClick={() => setShowConfirmPassword(prev => !prev)}>
+{showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+</span>
 </div>
 
               <div className="input-wrapper">
@@ -551,12 +551,12 @@ setActiveField(null)
     value={formData.confirmPassword}
     onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
   />
-  <span
-    className="show-hide-icon"
-    onClick={() => setShowConfirmPassword(prev => !prev)}
-  >
-    {showConfirmPassword ? "🙈" : "👁️"}
-  </span>
+ <span
+  className="show-hide-icon"
+  onClick={() => setShowPassword(prev => !prev)}
+>
+  {showPassword ? <FiEyeOff /> : <FiEye />}
+</span>
 </div>
             </div>
             <div className="terms-checkbox">

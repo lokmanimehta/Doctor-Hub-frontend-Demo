@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./FindDoctors.css";
 import { DOCTORS } from "../../utils/doctorsDummyprofileData";
@@ -22,11 +22,8 @@ export default function FindDoctors() {
   // Booking States
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedTime, setSelectedTime] = useState("");
-  const [patientName, setPatientName] = useState("");
-  const [age, setAge] = useState("");
-  const [gender, setGender] = useState("");
-  const [reason, setReason] = useState("");
-
+ const selectedProfile = JSON.parse(localStorage.getItem("selectedProfile"));
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   // Prevent background scroll when modal is open
   useEffect(() => {
     if (selected) {
@@ -37,31 +34,7 @@ export default function FindDoctors() {
     return () => { document.body.style.overflow = "auto"; };
   }, [selected]);
 
-  /* --- Drag Scroll Logic --- */
-  const isDown = useRef(false);
-  const startX = useRef(0);
-  const scrollLeft = useRef(0);
-
-  const handleMouseDown = (e) => {
-    isDown.current = true;
-    startX.current = e.pageX - e.currentTarget.offsetLeft;
-    scrollLeft.current = e.currentTarget.scrollLeft;
-    e.currentTarget.classList.add("dragging");
-  };
-
-  const handleMouseUpLeave = (e) => {
-    isDown.current = false;
-    e.currentTarget.classList.remove("dragging");
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDown.current) return;
-    e.preventDefault();
-    const x = e.pageX - e.currentTarget.offsetLeft;
-    const walk = (x - startX.current) * 1.5;
-    e.currentTarget.scrollLeft = scrollLeft.current - walk;
-  };
-
+  
   /* --- Filtering --- */
   const filteredDoctors = useMemo(() => {
     return DOCTORS.filter((d) => {
@@ -78,14 +51,83 @@ export default function FindDoctors() {
     setShowBooking(false);
   };
 
-  const handleConfirmBooking = () => {
-    if (!selectedTime || !patientName) {
-      alert("Please fill in the patient name and select a time slot.");
-      return;
-    }
-    alert("Appointment Booked Successfully! ✅");
-    closeModals();
+const handleConfirmBooking = () => {
+
+  // ✅ STEP 1: Profile check
+  if (!selectedProfile) {
+    alert("Please select patient profile first");
+    navigate("/patient/profile");
+    return;
+  }
+
+  // ✅ STEP 2: Time check
+  if (!selectedTime) {
+    alert("Please select time slot");
+    return;
+  }
+
+  // ✅ STEP 3: Proper date
+  const dateObj = new Date();
+  dateObj.setDate(dateObj.getDate() + selectedDate);
+
+  // ✅ STEP 4: Create booking
+  const booking = {
+    doctorId: selected.id,
+    doctorName: selected.name,
+    patientId: selectedProfile.id,
+    patientName: selectedProfile.fullName,
+    relation: selectedProfile.relation,
+    time: selectedTime,
+    date: dateObj.toISOString(),
   };
+
+  // ✅ STEP 5: Get existing bookings
+  const existing = JSON.parse(localStorage.getItem("appointments")) || [];
+
+  // ✅ STEP 6: Duplicate check
+  const alreadyBooked = existing.some(
+    (a) =>
+      a.doctorId === booking.doctorId &&
+      a.time === booking.time &&
+      a.date === booking.date
+  );
+
+  if (alreadyBooked) {
+    alert("Slot already booked ❌");
+    return;
+  }
+
+  // ✅ STEP 7: Save
+  localStorage.setItem("appointments", JSON.stringify([...existing, booking]));
+
+  alert("Appointment Booked ✅");
+
+  // ✅ STEP 8: Reset
+  setSelectedTime("");
+  setSelectedDate(0);
+
+  closeModals();
+};
+  
+const chunkDoctors = (arr, size) => {
+  const result = [];
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size));
+  }
+  return result;
+};
+
+const doctorRows = chunkDoctors(filteredDoctors, isMobile ? 5 : 4);
+
+
+useEffect(() => {
+  const handleResize = () => {
+    setIsMobile(window.innerWidth <= 768);
+  };
+
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
 
   return (
     <div className="find-doctor-container">
@@ -112,143 +154,191 @@ export default function FindDoctors() {
         ))}
       </div>
 
-      <div className="doctor-rows">
-        {[0, 1, 2].map((row) => (
-          <div
-            key={row}
-            className="doctor-row"
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUpLeave}
-            onMouseLeave={handleMouseUpLeave}
-            onMouseMove={handleMouseMove}
-          >
-            {filteredDoctors.slice(row * 8, row * 8 + 8).map((doc) => (
-              <div
-                key={doc.id}
-                className="doctor-card"
-                onClick={() => setSelected(doc)}
-              >
-                <div className="card-left">
-                  <img src={doc.image} alt={doc.name} />
-                </div>
-                <div className="card-right">
-                  <h3 className="doc-name">{doc.name}</h3>
-                  <p className="spec">{doc.specialty}</p>
-                  <div className="row">⭐ {doc.rating} • {doc.experience} yrs</div>
-                  <div className="row">📍 {doc.location}, {doc.city}</div>
-                  <div className="row fee">₹ {doc.fee}</div>
-                </div>
-                {doc.availableToday && <span className="badge">Today</span>}
-              </div>
-            ))}
+   {/* Doctor Grid */}
+<div className="doctor-grid">
+  {doctorRows.map((row, index) => (
+    <div className="doctor-row" key={index}>
+      {row.map((doc) => (
+        <div
+          key={doc.id}
+          className="premium-v3-card"
+          onClick={() => setSelected(doc)}
+        >
+          <div className="v3-card-top">
+            <img src={doc.image} alt={doc.name} />
+            <div className="v3-rating">⭐ {doc.rating}</div>
           </div>
-        ))}
-      </div>
+
+          <div className="v3-card-body">
+            <h3>{doc.name}</h3>
+            <p className="v3-spec">{doc.specialty}</p>
+            <p className="v3-loc">📍 {doc.location}, {doc.city}</p>
+            <p className="v3-exp">💼 {doc.experience} yrs experience</p>
+            <p className="v3-fee">💰 ₹{doc.fee}</p>
+
+            <button
+              className="v3-btn secondary"
+              onClick={(e) => {
+                e.stopPropagation(); // 🔥 important
+                setSelected(doc);
+                setShowBooking(true);
+              }}
+            >
+              Book Appointment
+            </button>
+          </div>
+
+          {doc.availableToday && (
+            <span className="v3-badge">Available Today</span>
+          )}
+        </div>
+      ))}
+    </div>
+  ))}
+</div>
 
       {/* --- UNIFIED MODAL SYSTEM --- */}
-      {selected && (
-        <div className="doctor-modal-overlay" onClick={closeModals}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={closeModals}>✕</button>
-            
-            <div className="modal-scroll-content">
-              {!showBooking ? (
-                /* Profile View */
-                <>
-                  <img src={selected.image} alt={selected.name} className="modal-doc-img" />
-                  <h2>{selected.name}</h2>
-                  <p className="spec">{selected.specialty}</p>
-                  <p className="about">{selected.about}</p>
+     {selected && !showBooking && (
+  <div className="modal-overlay" onClick={closeModals}>
+    <div className="profile-modal-card" onClick={(e) => e.stopPropagation()}>
 
-                  <div className="modal-meta">
-                    <span>🏥 <b>Clinic:</b> {selected.clinicName}</span>
-                    <span>📍 <b>Address:</b> {selected.clinicAddress}</span>
-                    <span>🗣 <b>Languages:</b> {selected.languages?.join(", ")}</span>
-                    <span>⭐ <b>Rating:</b> {selected.rating} ({selected.experience} yrs exp)</span>
-                    <span>💰 <b>Fee:</b> ₹ {selected.fee}</span>
-                  </div>
+      <button className="modal-close-x" onClick={closeModals}>×</button>
 
-                  <div className="modal-actions">
-                    <button className="primary-btn" onClick={() => setShowBooking(true)}>
-                      Book Appointment
-                    </button>
-                    <button className="secondary-btn" onClick={() => navigate(`/patient/doctorsprofile/${selected.id}`)}>
-                      Full Profile
-                    </button>
-                  </div>
-                </>
-              ) : (
-                /* Booking View */
-                <>
-                  <h2>Book Appointment</h2>
-                  <div className="booking-doctor">
-                    <img src={selected.image} alt={selected.name} />
-                    <div>
-                      <h3 style={{margin:0}}>{selected.name}</h3>
-                      <p style={{margin:0, fontSize:'13px', color:'var(--text-muted)'}}>{selected.clinicName}</p>
-                    </div>
-                  </div>
+      <div className="modal-header-top">
+        <img src={selected.image} className="modal-avatar" />
 
-                  <div className="booking-section">
-                    <p>Select Date</p>
-                    <div className="date-list">
-                      {[0, 1, 2, 3, 4].map((d) => {
-                        const date = new Date();
-                        date.setDate(date.getDate() + d);
-                        return (
-                          <button
-                            key={d}
-                            className={`date-chip ${selectedDate === d ? "active" : ""}`}
-                            onClick={() => setSelectedDate(d)}
-                          >
-                            {date.toDateString().slice(0, 10)}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+        <div className="modal-title-info">
+          <h2>{selected.name}</h2>
+          <span className="modal-spec-badge">{selected.specialty}</span>
+          <p>⭐ {selected.rating} ({selected.experience} yrs)</p>
+        </div>
+      </div>
 
-                  <div className="booking-section">
-                    <p>Select Time Slot</p>
-                    <div className="slot-list">
-                      {TIME_SLOTS.map((t) => (
-                        <button
-                          key={t}
-                          className={`slot ${selectedTime === t ? "active" : ""}`}
-                          onClick={() => setSelectedTime(t)}
-                        >
-                          {t}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+      <div className="modal-body-content">
+        <div className="info-row"><strong>🏥 Clinic:</strong> {selected.clinicName}</div>
+        <div className="info-row"><strong>📍 Address:</strong> {selected.clinicAddress}</div>
+        <div className="info-row"><strong>🗣 Languages:</strong> {selected.languages?.join(", ")}</div>
+        <div className="info-row"><strong>💰 Fee:</strong> ₹{selected.fee}</div>
 
-                  <div className="booking-section">
-                    <p>Patient Information</p>
-                    <input placeholder="Full Name" value={patientName} onChange={(e) => setPatientName(e.target.value)} />
-                    <div style={{display:'flex', gap:'10px'}}>
-                      <input placeholder="Age" type="number" value={age} onChange={(e) => setAge(e.target.value)} />
-                      <select value={gender} onChange={(e) => setGender(e.target.value)}>
-                        <option value="">Gender</option>
-                        <option>Male</option>
-                        <option>Female</option>
-                      </select>
-                    </div>
-                    <textarea placeholder="Reason / Symptoms" value={reason} onChange={(e) => setReason(e.target.value)} />
-                  </div>
+        <div className="modal-bio-box">
+          <strong>About Doctor:</strong>
+          <p>{selected.about}</p>
+        </div>
+      </div>
 
-                  <button className="primary-btn confirm-btn" onClick={handleConfirmBooking}>
-                    Confirm Appointment
-                  </button>
-                  <button className="secondary-btn confirm-btn" onClick={() => setShowBooking(false)} style={{marginTop:'8px'}}>
-                    Go Back
-                  </button>
-                </>
-              )}
-            </div>
+      <div className="modal-actions">
+        <button 
+          className="primary-modal-btn"
+          onClick={() => setShowBooking(true)}
+        >
+          Book Appointment
+        </button>
+
+        <button
+          className="secondary-btn"
+          onClick={() =>
+            navigate(`/patient/doctorsprofile/${selected.id}`)
+          }
+        >
+          Full Profile
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}{selected && showBooking && (
+  <div className="booking-modal-overlay" onClick={() => setShowBooking(false)}>
+    <div className="booking-modal-card" onClick={(e) => e.stopPropagation()}>
+
+      <button className="modal-close" onClick={() => setShowBooking(false)}>✕</button>
+
+      <div className="booking-scroll">
+
+        <h2>Book Appointment</h2>
+
+        <div className="booking-doctor">
+          <img src={selected.image} />
+          <div>
+            <h3>{selected.name}</h3>
+            <p>{selected.clinicName}</p>
           </div>
         </div>
-      )}
+
+        {/* DATE */}
+        <div className="booking-section">
+          <p>Select Date</p>
+          <div className="date-list">
+            {[0,1,2,3,4].map((d) => {
+              const date = new Date();
+              date.setDate(date.getDate() + d);
+              return (
+                <button
+                  key={d}
+                  className={`date-chip ${selectedDate === d ? "active" : ""}`}
+                  onClick={() => setSelectedDate(d)}
+                >
+                  {date.toDateString().slice(0, 10)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* TIME */}
+        <div className="booking-section">
+          <p>Select Time Slot</p>
+          <div className="slot-list">
+            {TIME_SLOTS.map((t) => (
+              <button
+                key={t}
+                className={`slot ${selectedTime === t ? "active" : ""}`}
+                onClick={() => setSelectedTime(t)}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* FORM */}
+       <div className="booking-section">
+  <p>Patient Info</p>
+
+ {selectedProfile ? (
+  <>
+    <h4>{selectedProfile.fullName}</h4>
+    <p>
+      {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
+    </p>
+  </>
+) : (
+  <p style={{color:"red"}}>No profile selected</p>
+)}
+
+  <button
+    className="change-member-btn"
+    onClick={() => navigate("/patient/profile")}
+  >
+    Change Member
+  </button>
+</div>
+
+        <button className="primary-btn confirm-btn" onClick={handleConfirmBooking}>
+          Confirm Appointment
+        </button>
+
+        <button 
+          className="secondary-btn confirm-btn"
+          onClick={() => setShowBooking(false)}
+        >
+          Go Back
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
+            
     </div>
   );
 }

@@ -16,7 +16,17 @@
   font-family: 'Inter', sans-serif;
   padding: 20px;
 }
+.show-hide-icon {
+  cursor: pointer;
+  font-size: 18px;
+  color: #64748b; /* subtle grey */
+  display: flex;
+  align-items: center;
+}
 
+.show-hide-icon:hover {
+  color: var(--primary);
+}
 .auth-wrapper {
   width: 100%;
   max-width: 1100px;

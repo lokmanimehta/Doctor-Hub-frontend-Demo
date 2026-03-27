@@ -8,7 +8,8 @@ import "./PatientProfile.css";
 const UpdateProfile = () => {
   const doctorData = JSON.parse(localStorage.getItem("doctorAddedPatient")) || {};
   const patientLoginData = JSON.parse(localStorage.getItem("currentUser")) || {};
-
+//   const doctor = JSON.parse(localStorage.getItem("selectedDoctor")) || {};
+// const user = JSON.parse(localStorage.getItem("currentUser"));
   // View or Edit mode toggle
   const [isEditing, setIsEditing] = useState(false);
 
@@ -39,7 +40,7 @@ const UpdateProfile = () => {
     new: false,
     confirm: false,
   });
-
+  
   // Family Members State
   const [familyMembers, setFamilyMembers] = useState(
     JSON.parse(localStorage.getItem("familyMembers")) || []
@@ -53,7 +54,24 @@ const UpdateProfile = () => {
     bloodGroup: "",
     phone: "",
   });
+  const selfProfile = {
+  id: patientLoginData.id || 1,
+  fullName: patientLoginData.fullName,
+  age: patientLoginData.age,
+  gender: patientLoginData.gender,
+  relation: "Self",
+  type: "SELF"
+};
 
+const allProfiles = [selfProfile, ...familyMembers];
+const [selectedProfile, setSelectedProfile] = useState(() => {
+  const saved = JSON.parse(localStorage.getItem("selectedProfile"));
+
+  if (saved) return saved;
+
+  localStorage.setItem("selectedProfile", JSON.stringify(selfProfile));
+  return selfProfile;
+});
   const validate = (field, value) => {
     switch (field) {
       case "phone":
@@ -177,6 +195,13 @@ const UpdateProfile = () => {
             </div>
           </div>
 
+          <div className="selected-member-banner">
+  <span>Booking for:</span>
+  <strong>{selectedProfile?.fullName}</strong>
+  <p>
+    {selectedProfile?.relation} • {selectedProfile?.age || "N/A"} yrs • {selectedProfile?.gender}
+  </p>
+</div>
           {/* Family List in View Mode */}
           <div className="family-view-section">
             <div className="family-header">
@@ -189,15 +214,28 @@ const UpdateProfile = () => {
               {familyMembers.length === 0 ? (
                 <p className="no-data">No family members added yet.</p>
               ) : (
-                familyMembers.map((m) => (
-                  <div key={m.id} className="family-mini-card">
-                    <div className="member-icon">{m.fullName.charAt(0)}</div>
-                    <div className="member-info">
-                      <h5>{m.fullName}</h5>
-                      <span>{m.relation} • {m.age} Yrs</span>
-                    </div>
-                  </div>
-                ))
+                allProfiles.map((m) => (
+ <div key={m.id} className="family-mini-card">
+ <div className="member-icon">
+  {m?.fullName?.charAt(0)?.toUpperCase() || "?"}
+</div>
+
+  <div className="member-info">
+    <h5>{m.fullName}</h5>
+    <span>{m.relation} • {m.age || "N/A"} Yrs</span>
+
+    <button
+  className={`select-btn ${selectedProfile?.id === m.id ? "active" : ""}`}
+  onClick={() => {
+    setSelectedProfile(m);
+    localStorage.setItem("selectedProfile", JSON.stringify(m));
+  }}
+>
+  {selectedProfile?.id === m.id ? "Selected ✅" : "Select"}
+</button>
+  </div>
+</div>
+))
               )}
             </div>
           </div>

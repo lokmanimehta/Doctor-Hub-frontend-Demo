@@ -318,3 +318,47 @@
   width: 100%;
   margin-top: 10px;
 }
+.change-member-btn {
+  margin-top: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #2563eb;
+  background: transparent;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover effect */
+.change-member-btn:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .change-member-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+.selected-patient-card {
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.selected-patient-card h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.selected-patient-card p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #64748b;
+}

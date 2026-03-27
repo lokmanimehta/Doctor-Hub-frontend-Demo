@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './LabsPage.css';
-
+import { useNavigate } from 'react-router-dom';
 const StandardToggle = ({ id, checked, onChange }) => {
   return (
     <label className="switch-container" htmlFor={id}>
@@ -21,17 +21,19 @@ const StandardToggle = ({ id, checked, onChange }) => {
     { id: 4, name: 'Thyrocare Labs', discount: '15% OFF', rating: '4.5 (90 Reviews)', loc: 'Andheri East, Mumbai | 3.1 km away', pickup: 'Available', time: 'Within 24 hours', price: '350' },
   ];
 const LabsPage = () => {
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState('Available Tests');
   const [selectedTests, setSelectedTests] = useState([1, 2, 3]); // IDs of tests
   const [testSearch, setTestSearch] = useState("");
   const [selectedPackages, setSelectedPackages] = useState([]);
 const [activeCategory, setActiveCategory] = useState(null);
-
+const [homePickup, setHomePickup] = useState(false);
 const [homePickupFilter, setHomePickupFilter] = useState(false);
 const [selectedReportTime, setSelectedReportTime] = useState([]);
 const [modalSearch, setModalSearch] = useState("");
 const [priceRange, setPriceRange] = useState(5000);
+const selectedProfile = JSON.parse(localStorage.getItem("selectedProfile"));
   // Modal scroll lock
   useEffect(() => {
     if (showModal) {
@@ -99,7 +101,7 @@ const [priceRange, setPriceRange] = useState(5000);
   const gst = Math.round(subtotal * 0.05); // 5% Medical GST
   const serviceCharge = 50;
   const pickupFee = 120;
-  const grandTotal = subtotal + gst + serviceCharge + pickupFee;
+  const grandTotal = subtotal + gst + serviceCharge + (homePickup ? pickupFee : 0);
 const filteredLabs = labData.filter(lab => {
   const matchSearch = testSearch
     ? lab.name.toLowerCase().includes(testSearch.toLowerCase()) ||
@@ -118,7 +120,45 @@ lab.loc.toLowerCase().includes(testSearch.toLowerCase())
 
   return matchSearch && matchPickup && matchTime && matchPrice;
 });
+const handleLabBooking = () => {
 
+  // ✅ Safety check
+  if (!selectedProfile) {
+    alert("Please select patient profile first");
+    return;
+  }
+
+  if (selectedTests.length === 0 && selectedPackages.length === 0) {
+    alert("Please select at least one test or package");
+    return;
+  }
+
+  // ✅ Create booking object
+  const booking = {
+    type: "LAB",
+    labName: "Aarogya Diagnostic Center", // later dynamic
+    patientId: selectedProfile.id,
+    patientName: selectedProfile.fullName,
+    relation: selectedProfile.relation,
+   tests: allAvailableTests.filter(t => selectedTests.includes(t.id)),
+packages: packagesData.filter(p => selectedPackages.includes(p.id)),
+    homePickup: homePickup,
+    totalAmount: grandTotal,
+    date: new Date().toISOString(),
+  };
+
+  // ✅ Save in localStorage
+  const existing = JSON.parse(localStorage.getItem("appointments")) || [];
+
+  localStorage.setItem(
+    "appointments",
+    JSON.stringify([...existing, booking])
+  );
+
+  alert("Lab Test Booked ✅");
+
+  setShowModal(false);
+};
   return (
     <div className="labs-view-container">
       {/* HERO SECTION */}
@@ -202,9 +242,9 @@ lab.loc.toLowerCase().includes(testSearch.toLowerCase())
             <div className="filter-group toggle-row-flex">
               <label>Home Pickup</label>
               <StandardToggle 
-  id="main-filter-hp"
-  checked={homePickupFilter}
-  onChange={() => setHomePickupFilter(!homePickupFilter)}
+  id="homePickup" 
+  checked={homePickup} 
+  onChange={() => setHomePickup(!homePickup)} 
 />
             </div>
 
@@ -352,13 +392,40 @@ onChange={(e) => setModalSearch(e.target.value)}
                          <strong>Home Sample Pickup</strong>
                          <p>Technician will visit your address</p>
                        </div>
-                       <StandardToggle id="modal-hp-toggle" />
+                       <StandardToggle 
+  id="homePickup" 
+  checked={homePickup} 
+  onChange={() => setHomePickup(!homePickup)} 
+/>
                     </div>
 
                     <div className="form-field">
                       <label>Pickup Address</label>
                       <textarea className="input-styled textarea" placeholder="Flat No, Building, Area Name..."></textarea>
                     </div>
+                   <div className="booking-section">
+  <p>Patient Info</p>
+
+  {selectedProfile ? (
+    <div className="selected-patient-card">
+      <h4>{selectedProfile.fullName}</h4>
+      <p>
+        {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
+      </p>
+    </div>
+  ) : (
+    <p style={{ color: "red" }}>No profile selected</p>
+  )}
+
+  {/* ✅ ADD THIS BUTTON */}
+  <button
+    type="button"
+    className="change-member-btn"
+    onClick={() => navigate("/patient/profile")}
+  >
+    Change Member
+  </button>
+</div>
                   </div>
                 )}
 
@@ -373,15 +440,17 @@ onChange={(e) => setModalSearch(e.target.value)}
                             <p>Includes 85+ parameters (Heart, Liver, Kidney...)</p>
                             <span className="pkg-price">₹{pkg.price}</span>
                           </div>
-                          <button 
+                          <button
   className="btn-add-pkg"
-onClick={() => {
-  if (!selectedPackages.includes(pkg.id)) {
-    setSelectedPackages([...selectedPackages, pkg.id]);
-  }
-}}
+  onClick={() => {
+    if (selectedPackages.includes(pkg.id)) {
+      setSelectedPackages(selectedPackages.filter(id => id !== pkg.id));
+    } else {
+      setSelectedPackages([...selectedPackages, pkg.id]);
+    }
+  }}
 >
-  Add
+  {selectedPackages.includes(pkg.id) ? "Remove" : "Add"}
 </button>
                         </div>
                       ))}
@@ -422,36 +491,30 @@ onClick={() => {
                       <p>"Good service, home collection was smooth."</p>
                     </div>
                   </div>
+                  
                 )}
+                
 
                 <div className="billing-summary-side">
-                  <div className="summary-card">
-                    <h4>Bill Details</h4>
-                    <div className="summary-row">
-                      <span>Test Subtotal</span>
-                      <span className="val">₹{subtotal}</span>
-                    </div>
-                    <div className="summary-row">
-                      <span>Medical Tax (GST 5%)</span>
-                      <span className="val">₹{gst}</span>
-                    </div>
-                    <div className="summary-row">
-                      <span>Service Charge</span>
-                      <span className="val">₹{serviceCharge}</span>
-                    </div>
-                    <div className="summary-row">
-                      <span>Home Pickup Fee</span>
-                      <span className="val">₹{pickupFee}</span>
-                    </div>
-                    
-                    <div className="grand-total-row">
-                      <span>Payable Amount</span>
-                      <span>₹{grandTotal}</span>
-                    </div>
-                    <button className="btn-confirm-booking">Confirm Booking</button>
-                    <p className="safe-text">🔒 100% Safe & Secure Payments</p>
-                  </div>
-                </div>
+  <div className="summary-card">
+    <h4>Bill Details</h4>
+    <div className="summary-row"><span>Test Subtotal</span><span>₹{subtotal}</span></div>
+    <div className="summary-row"><span>Medical Tax (GST 5%)</span><span>₹{gst}</span></div>
+    <div className="summary-row"><span>Service Charge</span><span>₹{serviceCharge}</span></div>
+    {/* Conditional Rendering */}
+    {homePickup && (
+      <div className="summary-row"><span>Home Pickup Fee</span><span>₹{pickupFee}</span></div>
+    )}
+    <div className="grand-total-row"><span>Payable Amount</span><span>₹{grandTotal}</span></div>
+    <button 
+  className="btn-confirm-booking"
+  onClick={handleLabBooking}
+>
+  Confirm Booking
+</button>
+    <p className="safe-text">🔒 100% Safe & Secure Payments</p>
+  </div>
+</div>
               </div>
             </div>
           </div>

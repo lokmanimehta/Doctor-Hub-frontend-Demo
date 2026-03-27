@@ -134,6 +134,8 @@ import ContactUs from "./pages/public/Contact";
 import Blogs from "./pages/public/blogs";
 import AllServicesPage from "./pages/public/AllServicesPage";
 import "./styles/global.css";
+import CareCoordinator from "./pages/public/CareCoordinator";
+import Insurance from "./pages/public/Insurance";
 /* ADMIN PAGES */
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import DoctorsManagement from "./pages/admin/DoctorsManagement";
@@ -195,7 +197,8 @@ function App() {
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/blogs" element={<Blogs />} />
       <Route path="/all-services" element={<AllServicesPage />} />
-
+      <Route path="/care-coordinator" element={<CareCoordinator />} />
+<Route path="/insurance" element={<Insurance />} />
 
       {/* --- ADMIN ROUTES --- */}
       <Route path="/admin/*" element={<AdminLayout />}>

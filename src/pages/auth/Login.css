@@ -134,7 +134,17 @@ label {
   margin-right: 12px;
   opacity: 0.5;
 }
+.show-hide-icon {
+  cursor: pointer;
+  font-size: 18px;
+  color: #64748b; /* subtle grey */
+  display: flex;
+  align-items: center;
+}
 
+.show-hide-icon:hover {
+  color: var(--primary);
+}
 .input-with-icon input {
   width: 100%;
   border: none;
