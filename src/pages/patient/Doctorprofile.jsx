@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, {  useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DOCTORS } from "../../utils/doctorsDummyprofileData";
 import "./Doctorprofile.css";
+import { useLocation } from "react-router-dom";
 
 const TIME_SLOTS = [
   "10:00 AM", "10:30 AM", "11:00 AM",
@@ -11,17 +12,15 @@ const TIME_SLOTS = [
 export default function DoctorProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-
+const location = useLocation();
+const doctorFromState = location.state;
   const [showBooking, setShowBooking] = useState(false);
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedTime, setSelectedTime] = useState("");
 const selectedProfile = JSON.parse(localStorage.getItem("selectedProfile")) || null;
   const bookingDate = new Date();
 bookingDate.setDate(bookingDate.getDate() + selectedDate);
-  const doctor = useMemo(
-    () => DOCTORS.find((d) => d.id === Number(id)),
-    [id]
-  );
+ const doctor = doctorFromState || DOCTORS.find((d) => d.id === Number(id));
 
   if (!doctor) {
     return (
@@ -37,7 +36,7 @@ bookingDate.setDate(bookingDate.getDate() + selectedDate);
 
       {/* HERO */}
       <div className="profile-hero">
-        <img src={doctor.image} alt={doctor.name} />
+        <img src={doctor.image || doctor.profileImage} alt={doctor.name} />
 
         <div className="hero-info">
           <h1>{doctor.name}</h1>
@@ -92,7 +91,7 @@ bookingDate.setDate(bookingDate.getDate() + selectedDate);
           </div>
           <div>
             <span>Languages</span>
-            <strong>{doctor.languages.join(", ")}</strong>
+            <strong>{doctor.languages?.join(", ") || "Not Available"}</strong>
           </div>
           <div>
             <span>Registration No</span>
@@ -107,10 +106,14 @@ bookingDate.setDate(bookingDate.getDate() + selectedDate);
         <section className="profile-section">
           <h2>Conditions Treated</h2>
           <div className="symptoms">
-            {doctor.symptoms.map((s, i) => (
-              <span key={i}>{s}</span>
-            ))}
-          </div>
+  {doctor.symptoms?.length > 0 ? (
+    doctor.symptoms.map((s, i) => (
+      <span key={i}>{s}</span>
+    ))
+  ) : (
+    <p>No data available</p>
+  )}
+</div>
         </section>
 
         <div className="profile-actions">

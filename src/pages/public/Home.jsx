@@ -26,6 +26,11 @@ const [showSearchResults, setShowSearchResults] = useState(false);
     const [selectedCost, setSelectedCost] = useState(null);
   const [selectedShowcase, setSelectedShowcase] = useState(null);
   const { logoutUser } = useAuthActions(setCurrentUser);
+  const [showBooking, setShowBooking] = useState(false);
+const [selectedDate, setSelectedDate] = useState(0);
+const [selectedTime, setSelectedTime] = useState("");
+
+const selectedProfile = JSON.parse(localStorage.getItem("selectedProfile"));
   // --- Auth State Logic ---
  
 const handleLogout = () => {
@@ -222,9 +227,26 @@ const searchResults = useMemo(() => {
                 <p>Top-rated expert in {selectedDoctor.specialty} with a focus on patient-centric care and advanced medical practices.</p>
               </div>
             </div>
-            <div className="modal-actions">
-              <button className="primary-modal-btn" onClick={() => navigate(`/book/${selectedDoctor.id}`)}>Book Appointment Now</button>
-            </div>
+           <div className="modal-actions">
+  <button 
+    className="primary-modal-btn"
+    onClick={() => setShowBooking(true)}
+  >
+    Book Appointment Now
+  </button>
+
+ <button 
+  className="secondary-modal-btn"
+  onClick={() => {
+    setSelectedDoctor(null);
+   navigate(`/patient/doctorsprofile/${selectedDoctor.id}`, {
+  state: selectedDoctor
+});
+  }}
+>
+  View Full Profile
+</button>
+</div>
           </div>
         </div>
       )}
@@ -450,14 +472,15 @@ const searchResults = useMemo(() => {
                   <div className="doc-card-footer">
                     <button className="view-profile-pro">Details</button>
                     <button
-                      className="book-now-pro"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/book/${doc.id}`);
-                      }}
-                    >
-                      Book Now
-                    </button>
+  className="v3-btn secondary"
+  onClick={(e) => {
+    e.stopPropagation();
+    setSelectedDoctor(doc);   // doctor set karo
+    setShowBooking(true);     // modal open karo
+  }}
+>
+  Book Now
+</button>
                   </div>
                 </div>
               </div>
@@ -549,7 +572,8 @@ const searchResults = useMemo(() => {
               className="v3-btn secondary"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/book/${doc.id}`);
+                setSelectedDoctor(doc);
+setShowBooking(true);
               }}
             >
               Book Now
@@ -663,6 +687,128 @@ const searchResults = useMemo(() => {
 )}
 </section>
 </>
+)}
+{selectedDoctor && showBooking && (
+  <div className="booking-modal-overlay" onClick={() => setShowBooking(false)}>
+    <div className="booking-modal-card" onClick={(e) => e.stopPropagation()}>
+
+      <button className="modal-close" onClick={() => setShowBooking(false)}>✕</button>
+
+      <div className="booking-scroll">
+
+        <h2>Book Appointment</h2>
+
+        <div className="booking-doctor">
+          <img src={selectedDoctor.image || selectedDoctor.profileImage} />
+          <div>
+            <h3>{selectedDoctor.name}</h3>
+            <p>{selectedDoctor.city}</p>
+          </div>
+        </div>
+
+        {/* DATE */}
+        <div className="booking-section">
+          <p>Select Date</p>
+          <div className="date-list">
+            {[0,1,2,3,4].map((d) => {
+              const date = new Date();
+              date.setDate(date.getDate() + d);
+              return (
+                <button
+                  key={d}
+                  className={`date-chip ${selectedDate === d ? "active" : ""}`}
+                  onClick={() => setSelectedDate(d)}
+                >
+                  {date.toDateString().slice(0, 10)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* TIME */}
+        <div className="booking-section">
+          <p>Select Time Slot</p>
+          <div className="slot-list">
+            {["10:00 AM","10:30 AM","11:00 AM","05:00 PM","05:30 PM","06:00 PM"].map((t) => (
+              <button
+                key={t}
+                className={`slot ${selectedTime === t ? "active" : ""}`}
+                onClick={() => setSelectedTime(t)}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* PATIENT */}
+        <div className="booking-section">
+          <p>Patient Info</p>
+
+          {selectedProfile ? (
+            <>
+              <h4>{selectedProfile.fullName}</h4>
+              <p>
+                {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
+              </p>
+            </>
+          ) : (
+            <p style={{color:"red"}}>No profile selected</p>
+          )}
+
+          <button
+            className="change-member-btn"
+            onClick={() => navigate("/patient/profile")}
+          >
+            Change Member
+          </button>
+        </div>
+
+        {/* CONFIRM */}
+        <button
+          className="primary-btn confirm-btn"
+          onClick={() => {
+
+            if (!selectedProfile) {
+              alert("Please select patient profile first");
+              navigate("/patient/profile");
+              return;
+            }
+
+            if (!selectedTime) {
+              alert("Please select time slot");
+              return;
+            }
+
+            const dateObj = new Date();
+            dateObj.setDate(dateObj.getDate() + selectedDate);
+
+            const booking = {
+              doctorId: selectedDoctor.id,
+              doctorName: selectedDoctor.name,
+              patientId: selectedProfile.id,
+              patientName: selectedProfile.fullName,
+              relation: selectedProfile.relation,
+              time: selectedTime,
+              date: dateObj.toISOString(),
+            };
+
+            const existing = JSON.parse(localStorage.getItem("appointments")) || [];
+
+            localStorage.setItem("appointments", JSON.stringify([...existing, booking]));
+
+            alert("Appointment Booked ✅");
+
+            setShowBooking(false);
+          }}
+        >
+          Confirm Appointment
+        </button>
+
+      </div>
+    </div>
+  </div>
 )}
       {/* --- FOOTER --- */}
       <footer className="main-footer">

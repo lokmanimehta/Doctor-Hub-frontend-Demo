@@ -438,8 +438,8 @@ a, a:hover, a:visited, a:active {
 .hero-search-btn { background:  #10b981; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 750; cursor: pointer; white-space: nowrap; }
 
 .hero-visual { display: flex; justify-content: flex-end; }
-.hero-visual img { width: 100%; max-width: 420px; border-radius: 30px; display: block; /* Gap remove karne ke liye */
-  margin-bottom: -10px; /* Image ko container ke border ke thoda aur niche bhejo */
+.hero-visual img { width: 100%; max-width: 400px; border-radius: 30px; display: block; /* Gap remove karne ke liye */
+  margin-bottom: -20px;  margin-top: -20px;/* Image ko container ke border ke thoda aur niche bhejo */
   transform: translateY(10px);}
 
 /* ==========================================
@@ -677,6 +677,44 @@ color: var(--text-muted);
 }
 .modal-avatar { width: 100px; height: 100px; border-radius: 20px; object-fit: cover; }
 .primary-modal-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 16px; }
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.primary-modal-btn {
+  flex: 1;
+  padding: 12px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.primary-modal-btn:hover {
+  opacity: 0.9;
+}
+
+.secondary-modal-btn {
+  flex: 1;
+  padding: 12px;
+  background: white;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.secondary-modal-btn:hover {
+  background: var(--primary);
+  color: white;
+}
 @keyframes slideUp {
 from{
 opacity:0;
