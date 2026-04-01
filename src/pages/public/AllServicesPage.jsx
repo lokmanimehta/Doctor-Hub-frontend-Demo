@@ -747,21 +747,21 @@ const AllServicesPage = () => {
               </div>
 
               {/* Form */}
-              <div className="booking-section">
-                <p>Patient Info</p>
+               <div className="booking-section">
+                <p className="section-label">Patient Info</p>
 
                 {selectedProfile ? (
-                  <>
+                  <div className="selected-patient-card">
                     <h4>{selectedProfile.fullName}</h4>
                     <p>
                       {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
                     </p>
-                  </>
+                  </div>
                 ) : (
-                  <p style={{ color: "red" }}>No profile selected</p>
+                  <div className="selected-patient-card" style={{ borderColor: '#fee2e2' }}>
+                    <p style={{ color: "#ef4444", margin: 0 }}>No profile selected</p>
+                  </div>
                 )}
-
-
               </div>
 
               <button className="primary-btn confirm-btn" onClick={handleConfirmBooking}>

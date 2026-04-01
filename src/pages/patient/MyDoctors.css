@@ -270,6 +270,45 @@ h1 {
 .booking-section {
   margin-top: 15px;
 }
+/* Container Box */
+.selected-patient-card {
+  background: #f8fafc !important; /* Light background */
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  padding: 14px 18px !important; /* Proper internal spacing */
+  margin-top: 10px !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+/* Name Style */
+.selected-patient-card h4 {
+  margin: 0 0 4px 0 !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  text-align: left !important; /* Align left for cleaner look */
+}
+
+/* Details Style (Resetting the global p style here) */
+.selected-patient-card p {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important; /* Not too bold */
+  color: #64748b !important; /* Muted grey like image 2 */
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Label above the box */
+.section-label {
+  display: block;
+  font-weight: 700;
+  font-size: 14px;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
 
 .date-chip,
 .slot {
