@@ -105,7 +105,7 @@ const LoginPage = () => {
           role: "DOCTOR",
           adminApproved: false,
           profile: {
-            fullName: "Dr. Ravi Gupta",
+            fullName: " Ravi Gupta",
             email: "doc1@test.com",
             phone: "",
             specialization: "",
@@ -133,7 +133,7 @@ const LoginPage = () => {
           role: "DOCTOR",
           adminApproved: false,
           profile: {
-            fullName: "Dr. Raj Sharma",
+            fullName: " Raj Sharma",
             email: "doc2@test.com",
             phone: "9876543210",
             specialization: "Cardiologist",
@@ -172,7 +172,7 @@ const LoginPage = () => {
           role: "DOCTOR",
           adminApproved: true, // 🔥 VERY IMPORTANT
           profile: {
-            fullName: "Dr. Priya Mehta",
+            fullName: " Priya Mehta",
             email: "doc3@test.com",
             phone: "9999999999",
             specialization: "Dermatologist",
