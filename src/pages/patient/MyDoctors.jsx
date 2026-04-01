@@ -119,7 +119,7 @@ export default function MyDoctors() {
   const doctorRows = chunkDoctors(filteredDoctors, 4);
   return (
     <div className="find-doctor-container">
-      <h1>My Doctors</h1>
+      
 
       <div className="search-wrapper">
         <input

@@ -174,7 +174,6 @@ import Feedback from "./pages/patient/Feedback";
 import Help from "./pages/patient/Help";
 import MedicalRecords from "./pages/patient/MedicalRecords";
 import FindDoctors from "./pages/patient/FindDoctors";
-import MyDoctors from "./pages/patient/MyDoctors";
 import Doctorprofile from "./pages/patient/Doctorprofile";
 import PendingDoctorModal from "./pages/admin/PendingDoctorModal";
 import UserManagement from "./pages/admin/UserManagement";
@@ -184,6 +183,7 @@ import FeedbackPage from "./pages/admin/FeedbackPage";
 import AdsManagement from "./pages/admin/AdsManagement";
 import Hospitals from "./pages/patient/Hospitals";
 import LabsPage from "./pages/patient/LabsPage";
+import MyDoctors from "./pages/patient/Mydoctors";
 
 
 function App() {

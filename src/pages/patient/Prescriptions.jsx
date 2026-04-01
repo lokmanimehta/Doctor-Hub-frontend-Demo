@@ -95,7 +95,7 @@ const Prescriptions = () => {
             {/* Header Section */}
             <header className="pres-header-premium">
                 <div className="header-titles">
-                    <h1>Medical Records Vault</h1>
+                    <h1>Prescriptions Vault</h1>
                     <p>AI-Powered medical history and instant digital prescriptions</p>
                 </div>
                 

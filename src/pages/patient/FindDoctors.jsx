@@ -131,7 +131,7 @@ export default function FindDoctors() {
 
   return (
     <div className="find-doctor-container">
-      <h1>Find Doctors</h1>
+      
 
       <div className="search-wrapper">
         <input

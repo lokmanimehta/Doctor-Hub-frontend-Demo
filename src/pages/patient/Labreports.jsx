@@ -132,8 +132,8 @@ const LabReports = () => {
     <div className="reports-page">
       <div className="reports-header">
         <div className="title-area">
-          <h1>Medical Vault</h1>
-          <p>Securely manage and share your laboratory results.</p>
+          <h1>Securely manage and share your laboratory results.</h1>
+         
         </div>
         <label className="primary-upload-btn" style={{ color: "white" }}>
           <Upload size={18} />

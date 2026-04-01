@@ -42,7 +42,7 @@ const { logoutUser } = useAuthActions(setCurrentUser);
      "/patient/prescriptions": "Prescription's",
     "/patient/labs": "All Labs's",
     "/patient/lab-reports": "Lab Report's",
-  
+  "/patient/hospitals":"All Hospitals",
     "/patient/health-summary": "Health Summary",
     "/patient/reminders": "Reminder's",
     "/patient/notifications": "Notification's",
