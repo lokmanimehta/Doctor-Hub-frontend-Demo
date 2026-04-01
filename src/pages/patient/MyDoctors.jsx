@@ -16,7 +16,7 @@ const RECENT_VISITS = DOCTORS.slice(0, 10).map((doc, i) => ({
   complaint: ["Headache", "Fever", "Back Pain", "Chest Pain"][i % 4],
 }));
 
-export default function MyDoctorss() {
+export default function MyDoctors() {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
@@ -119,7 +119,7 @@ export default function MyDoctorss() {
   const doctorRows = chunkDoctors(filteredDoctors, 4);
   return (
     <div className="find-doctor-container">
-      
+      <h1>My Doctors</h1>
 
       <div className="search-wrapper">
         <input
