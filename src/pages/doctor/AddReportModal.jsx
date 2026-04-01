@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./AddReportModal.css";
 
-const AddReportModal = ({ onClose }) => {
+const AddReportModal = ({ onClose, onSave }) => {
   const [reportName, setReportName] = useState("");
   const [file, setFile] = useState(null);
   const [notes, setNotes] = useState("");
@@ -14,16 +14,20 @@ const AddReportModal = ({ onClose }) => {
     };
   }, []);
 
-  const handleSave = () => {
-    // UI ONLY (future API)
-    console.log({
-      reportName,
-      file,
-      notes,
-    });
+ const handleSave = () => {
+  if (!reportName) return;
 
-    onClose();
-  };
+  const newReports = {
+  id: Date.now(),
+  date: new Date().toLocaleDateString(),
+  name: reportName,
+   notes: notes ,
+   files:file  // 🔥 FIX HERE
+}
+
+  onSave(newReports);
+  onClose();
+};
 
   return (
     <div className="modal-overlay">

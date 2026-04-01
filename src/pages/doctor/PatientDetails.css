@@ -168,3 +168,21 @@
   .tab-header { flex-direction: column; align-items: stretch; }
   .add-btn { text-align: center; }
 }
+/* Edit Button */
+.record-card button {
+  margin-top: 10px;
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background-color: #e6f4ea;
+  color: #2e7d32;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.record-card button:hover {
+  background-color: #c8e6c9;
+  transform: translateY(-1px);
+}

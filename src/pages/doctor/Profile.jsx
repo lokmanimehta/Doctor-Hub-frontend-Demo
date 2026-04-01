@@ -1,6 +1,6 @@
 
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Profile.css";
 import { calculateProfileCompletion } from "../../utils/profileCompletion";
 import { useNavigate } from "react-router-dom";
@@ -11,46 +11,60 @@ const DoctorProfile = () => {
   const storedUser = JSON.parse(localStorage.getItem("currentUser")) || {};
 
   // --- TOGGLE STATE FOR VIEW/EDIT ---
-  
+
   // --- FORM STATE ---
   // Yaha storedUser ka data direct initialize ho raha hai taaki Edit mein dikhe
   const [isEditing, setIsEditing] = useState(false);
 
-const navigate = useNavigate();
-// ✅ PEHLE FORM
-const [form, setForm] = useState({
-  fullName: storedUser.fullName || "",
-  email: storedUser.email || "",
-  phone: storedUser.phone || "",
-  specialization: storedUser.specialization || "",
-  experience: storedUser.experience || "",
-  gender: storedUser.gender || "",
-  about: storedUser.about || "",
-  profilePic: storedUser.profilePic || null,
-  clinics: storedUser.clinics || [{
-    clinicName: "",
-    clinicAddress: "",
-    consultationFee: "",
-    availability: [
-      { day: "", startTime: "", endTime: "" }
-    ]
-  }],
-  visitingPositions: (storedUser.visitingPositions || []).map(vp => ({
-    location: vp.location || "",
-    fees: vp.fees || "",
-    availability: vp.availability || [
-      { day: "", startTime: "", endTime: "" }
-    ]
-  })),
-  councilName: storedUser.councilName || "",
-  registrationNumber: storedUser.registrationNumber || "",
-  registrationYear: storedUser.registrationYear || "",
-});
+  const navigate = useNavigate();
+  // ✅ PEHLE FORM
+  const [form, setForm] = useState(() => {
+    const storedUser = JSON.parse(localStorage.getItem("currentUser")) || {};
 
-// ✅ AB YE NICHE AAYEGA
+    return {
+      fullName: storedUser.fullName || "",
+      email: storedUser.email || "",
+      phone: storedUser.phone || "",
+      specialization: storedUser.specialization || "",
+      experience: storedUser.experience || "",
+      gender: storedUser.gender || "",
+      about: storedUser.about || "",
+      profilePic: storedUser.profilePic || null,
+      clinics: storedUser.clinics || [{
+        clinicName: "",
+        clinicAddress: "",
+        consultationFee: "",
+        availability: [
+          { day: "", startTime: "", endTime: "" }
+        ]
+      }],
+      visitingPositions: (storedUser.visitingPositions || []).map(vp => ({
+        location: vp.location || "",
+        fees: vp.fees || "",
+        availability: vp.availability || [
+          { day: "", startTime: "", endTime: "" }
+        ]
+      })),
+      councilName: storedUser.councilName || "",
+      registrationNumber: storedUser.registrationNumber || "",
+      registrationYear: storedUser.registrationYear || "",
+    };
+  });
+  // ✅ AB YE NICHE AAYEGA
 
+  const [files, setFiles] = useState(() => {
+    const storedUser = JSON.parse(localStorage.getItem("currentUser")) || {};
 
-const profileCompletion = calculateProfileCompletion(form);
+    return storedUser.files || {
+      signature: null,
+      govtIds: [{ type: "", file: null }],
+      certificates: [{ title: "", file: null }],
+    };
+  });
+  const profileCompletion = calculateProfileCompletion(form, files);
+
+  const isProfileComplete = profileCompletion >= 80;
+  const isVerified = storedUser.adminApproved === true;
 
   const addAvailability = (clinicIndex) => {
     const newClinics = [...form.clinics];
@@ -67,11 +81,6 @@ const profileCompletion = calculateProfileCompletion(form);
     setForm({ ...form, clinics: newClinics });
   };
   // --- FILES STATE ---
-  const [files, setFiles] = useState({
-    signature: null,
-    govtIds: [{ type: "", file: null }],
-    certificates: [{ title: "", file: null }],
-  });
 
   // --- HANDLERS ---
   const handleChange = (e) => {
@@ -90,9 +99,19 @@ const profileCompletion = calculateProfileCompletion(form);
   };
 
   const handleFileChange = (e) => {
-    setFiles({ ...files, [e.target.name]: e.target.files[0] });
-  };
+    const file = e.target.files[0];
 
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFiles({
+          ...files,
+          [e.target.name]: reader.result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   const addClinic = () => setForm({
     ...form, clinics: [...form.clinics, {
       clinicName: "",
@@ -143,7 +162,20 @@ const profileCompletion = calculateProfileCompletion(form);
   const handleFileArrayChange = (index, e, category) => {
     const newArr = [...files[category]];
     if (e.target.type === "file") {
-      newArr[index].file = e.target.files[0];
+      const file = e.target.files[0];
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newArr[index].file = reader.result;
+
+          setFiles(prev => ({
+            ...prev,
+            [category]: newArr
+          }));
+        };
+        reader.readAsDataURL(file);
+      }
     } else {
       const field = category === "govtIds" ? "type" : "title";
       newArr[index][field] = e.target.value;
@@ -152,37 +184,64 @@ const profileCompletion = calculateProfileCompletion(form);
   };
 
   // --- SUBMIT: LOCAL STORAGE MEIN DATA SAVE KARNA ---
-const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!form.fullName) {
+      setPopup({
+        show: true,
+        type: "error",
+        message: "Full Name is required"
+      });
+      return;
+    }
 
-  for (let clinic of form.clinics) {
-    for (let slot of clinic.availability) {
-      if (!slot.day || !slot.startTime || !slot.endTime) {
-        alert("Please fill all availability fields");
-        return;
-      }
+    if (!form.email) {
+      setPopup({
+        show: true,
+        type: "error",
+        message: "Email is required"
+      });
+      return;
+    }
 
-      if (slot.startTime >= slot.endTime) {
-        alert("Start time must be before end time");
-        return;
+    for (let clinic of form.clinics) {
+      for (let slot of clinic.availability) {
+        if (!slot.day || !slot.startTime || !slot.endTime) {
+          setPopup({
+            show: true,
+            type: "error",
+            message: "Please fill all availability fields"
+          });
+          return;
+        }
+
+        if (slot.startTime >= slot.endTime) {
+          alert("Start time must be before end time");
+          return;
+        }
       }
     }
-  }
 
-  // ✅ FIX: create updatedUserData
-  const updatedUserData = {
-  ...storedUser,
-  ...form
-};
+    // ✅ FIX: create updatedUserData
+    const updatedUserData = {
+      ...storedUser,
+      ...form,
+      files // 🔥 IMPORTANT
+    };
+    localStorage.setItem("currentUser", JSON.stringify(updatedUserData));
 
-localStorage.setItem("currentUser", JSON.stringify(updatedUserData));
+    window.dispatchEvent(new Event("storage"));
 
-  window.dispatchEvent(new Event("storage"));
+    setPopup({
+      show: true,
+      type: "success",
+      message: "Profile updated successfully!"
+    });
 
-  alert("Profile updated successfully!");
-  setIsEditing(false);
-  navigate("/doctor/dashboard");
-};
+    setTimeout(() => {
+      navigate("/doctor/dashboard");
+    }, 2000);
+  };
   const removeAvailability = (clinicIndex, index) => {
     const newClinics = [...form.clinics];
     newClinics[clinicIndex].availability.splice(index, 1);
@@ -193,6 +252,21 @@ localStorage.setItem("currentUser", JSON.stringify(updatedUserData));
     newPositions[vpIndex].availability.splice(index, 1);
     setForm({ ...form, visitingPositions: newPositions });
   };
+  const [popup, setPopup] = useState({
+    show: false,
+    type: "", // success | error | warning
+    message: ""
+  });
+
+  useEffect(() => {
+    if (popup.show) {
+      const timer = setTimeout(() => {
+        setPopup(prev => ({ ...prev, show: false }));
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [popup.show]);
   return (
     <div className="doctor-profile-page">
       <div className="profile-top-header">
@@ -201,7 +275,18 @@ localStorage.setItem("currentUser", JSON.stringify(updatedUserData));
           <p className="profile-subtext">Manage your public identity and verification documents.</p>
         </div>
         {!isEditing && (
-          <button className="edit-profile-btn" onClick={() => setIsEditing(true)}>
+          <button
+            className="edit-profile-btn"
+            onClick={() => {
+              setIsEditing(true);
+
+              const storedUser = JSON.parse(localStorage.getItem("currentUser")) || {};
+              setForm(prev => ({
+                ...prev,
+                ...storedUser
+              }));
+            }}
+          >
             Edit Profile
           </button>
         )}
@@ -465,101 +550,87 @@ localStorage.setItem("currentUser", JSON.stringify(updatedUserData));
       ) : (
         /* --- VIEW MODE: DETAILED DOCTOR PROFILE --- */
         <div className="profile-view-container">
-          <div className="view-card main-info-card">
+          <div className="view-card">
             <div className="doctor-header-top">
-
               <div className="view-avatar">
-                {form.profilePic ? (
-                  <img src={form.profilePic} alt="Doctor" className="avatar-img" />
-                ) : (
-                  "👨‍⚕️"
-                )}
+                <img src={form.profilePic || "https://via.placeholder.com/150"} alt="Dr." className="avatar-img" />
               </div>
-
               <div className="view-title-group">
                 <h3>
                   {form.fullName}
-                  {form.councilName && form.registrationNumber && (
+                  {isVerified && (
                     <span className="verified-check">✔ Verified</span>
                   )}
                 </h3>
-
                 <p className="view-spec">{form.specialization}</p>
-
                 <div className="view-tags">
                   <span>{form.experience} Years Experience</span>
                   <span>{form.gender}</span>
-                  <span>⭐ 4.5 Rating</span> {/* dummy */}
+                  <span>⭐ 4.8 Rating</span>
                 </div>
               </div>
             </div>
 
-            {form.about && (
-              <div className="view-about">
-                <p>{form.about}</p>
-              </div>
-            )}
+            <div className="view-about">
+              <h4>About</h4>
+              <p>{form.about || "Experienced physician dedicated to patient care..."}</p>
+            </div>
           </div>
 
           <div className="view-grid">
-            <div className="view-card">
+            <div className="view-card info-sub-card">
               <h4>Contact & Verification</h4>
-              <div className="view-details">
-                <p><strong>📧 Email:</strong> {form.email}</p>
-                <p><strong>📞 Phone:</strong> {form.phone || "Not Provided"}</p>
-                <hr className="view-divider" />
-                <p><strong>Council:</strong> {form.councilName || "N/A"}</p>
-                <p><strong>Reg No:</strong> {form.registrationNumber || "N/A"}</p>
-                <p><strong>Year:</strong> {form.registrationYear || "N/A"}</p>
-              </div>
+              <div className="detail-row">📧 <strong>Email:</strong> {form.email}</div>
+              <div className="detail-row">📞 <strong>Phone:</strong> {form.phone}</div>
+              <hr style={{ border: '0', borderTop: '1px dashed #eee', margin: '15px 0' }} />
+              <div className="detail-row"><strong>Council:</strong> {form.councilName}</div>
+              <div className="detail-row"><strong>Reg No:</strong> {form.registrationNumber}</div>
+              <div className="detail-row"><strong>Year:</strong> {form.registrationYear}</div>
             </div>
 
-            <div className="view-card">
+            <div className="view-card info-sub-card">
               <h4>Clinics ({form.clinics.length})</h4>
-              {form.clinics.map((c, i) => (
-                <div key={i} className="view-entry-item">
-                  <p className="view-entry-title">{c.clinicName || "Clinic Name"}</p>
-                  <p className="view-entry-sub">{c.clinicAddress || "Address"}</p>
-                  <p className="view-fee">Fee: ₹{c.consultationFee || "0"}</p>
-                  {c.availability && c.availability.map((a, j) => (
-                    <p key={j} className="view-entry-sub">
-                      📅 {a.day} | ⏰ {a.startTime} - {a.endTime}
-                    </p>
-                  ))}
+              {form.clinics.map((clinic, index) => (
+                <div key={index} className="clinic-item">
+                  <span className="fee-tag">₹{clinic.consultationFee}</span>
+                  <strong>{clinic.clinicName}</strong>
+                  <div style={{ fontSize: '12px', color: '#666' }}>{clinic.clinicAddress}</div>
+                  <div style={{ fontSize: '11px', marginTop: '5px', color: '#10b981' }}>✔ CLINIC CERTIFIED</div>
                 </div>
               ))}
             </div>
 
-            {form.visitingPositions.length > 0 && (
-              <div className="view-card">
-                <h4>Visiting Positions</h4>
-                {form.visitingPositions.map((v, i) => (
-                  <div key={i} className="view-entry-item">
-                    <p className="view-entry-title">{v.location}</p>
-                    {v.availability && v.availability.map((a, j) => (
-                      <p key={j} className="view-entry-sub">
-                        📅 {a.day} | ⏰ {a.startTime} - {a.endTime}
-                      </p>
-                    ))}
-                    <p className="view-fee">Fee: ₹{v.fees}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="view-card info-sub-card">
+              <h4>Visiting Positions</h4>
+              {form.visitingPositions.length > 0 ? form.visitingPositions.map((vp, index) => (
+                <div key={index} className="clinic-item">
+                  <strong>{vp.location}</strong>
+                  <div style={{ fontSize: '12px', color: '#666' }}>Fee: ₹{vp.fees}</div>
+                  <div style={{ fontSize: '12px', fontWeight: '700', color: '#10b981', marginTop: '5px' }}>HOSPITAL ENDORSED</div>
+                </div>
+              )) : <p className="subtext">No positions added.</p>}
+            </div>
+          </div>
+
+          <div className="status-bar">
+            ✔ {
+              isProfileComplete
+                ? "Your profile is ready for patients"
+                : "Complete your profile to go live"
+            } | Completion: {profileCompletion}%
           </div>
         </div>
       )}
-      {profileCompletion < 100 && (
-  <div className="profile-warning">
-    ⚠️ Your profile is {profileCompletion}% complete. Please complete it.
-  </div>
-)}
-
-{profileCompletion === 100 && (
-  <div className="profile-success">
-    ✅ Your profile is live for patients
-  </div>
-)}
+      {popup.show && (
+        <div className={`popup ${popup.type}`}>
+          <div className="popup-content">
+            <p>{popup.message}</p>
+            <button onClick={() => setPopup({ ...popup, show: false })}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

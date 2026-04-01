@@ -1,4 +1,4 @@
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DOCTORS } from "../../utils/doctorsDummyprofileData";
 import "./Doctorprofile.css";
@@ -12,15 +12,15 @@ const TIME_SLOTS = [
 export default function DoctorProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-const location = useLocation();
-const doctorFromState = location.state;
+  const location = useLocation();
+  const doctorFromState = location.state;
   const [showBooking, setShowBooking] = useState(false);
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedTime, setSelectedTime] = useState("");
-const selectedProfile = JSON.parse(localStorage.getItem("selectedProfile")) || null;
+  const selectedProfile = JSON.parse(localStorage.getItem("selectedProfile")) || null;
   const bookingDate = new Date();
-bookingDate.setDate(bookingDate.getDate() + selectedDate);
- const doctor = doctorFromState || DOCTORS.find((d) => d.id === Number(id));
+  bookingDate.setDate(bookingDate.getDate() + selectedDate);
+  const doctor = doctorFromState || DOCTORS.find((d) => d.id === Number(id));
 
   if (!doctor) {
     return (
@@ -52,19 +52,19 @@ bookingDate.setDate(bookingDate.getDate() + selectedDate);
             🏥 {doctor.clinicName}, {doctor.city}
           </p>
 
-         <button
-  className="book-btn"
-  onClick={() => {
-    if (!selectedProfile) {
-      alert("Please select patient profile first");
-      navigate("/patient/profile");
-      return;
-    }
-    setShowBooking(true);
-  }}
->
-  Book Appointment • ₹{doctor.fee}
-</button>
+          <button
+            className="book-btn"
+            onClick={() => {
+              if (!selectedProfile) {
+                alert("Please select patient profile first");
+                navigate("/patient/profile");
+                return;
+              }
+              setShowBooking(true);
+            }}
+          >
+            Book Appointment • ₹{doctor.fee}
+          </button>
         </div>
       </div>
 
@@ -106,28 +106,28 @@ bookingDate.setDate(bookingDate.getDate() + selectedDate);
         <section className="profile-section">
           <h2>Conditions Treated</h2>
           <div className="symptoms">
-  {doctor.symptoms?.length > 0 ? (
-    doctor.symptoms.map((s, i) => (
-      <span key={i}>{s}</span>
-    ))
-  ) : (
-    <p>No data available</p>
-  )}
-</div>
+            {doctor.symptoms?.length > 0 ? (
+              doctor.symptoms.map((s, i) => (
+                <span key={i}>{s}</span>
+              ))
+            ) : (
+              <p>No data available</p>
+            )}
+          </div>
         </section>
 
         <div className="profile-actions">
           <button
             className="primary-btn"
             onClick={() => {
-  if (!selectedProfile) {
-    alert("Please select patient profile first");
-    navigate("/patient/profile");
-    return;
-  }
+              if (!selectedProfile) {
+                alert("Please select patient profile first");
+                navigate("/patient/profile");
+                return;
+              }
 
-  setShowBooking(true);
-}}
+              setShowBooking(true);
+            }}
           >
             Book Appointment
           </button>
@@ -174,7 +174,7 @@ bookingDate.setDate(bookingDate.getDate() + selectedDate);
               <div className="booking-section">
                 <p>Select Date</p>
                 <div className="date-list">
-                  {[0,1,2,3,4].map((d) => {
+                  {[0, 1, 2, 3, 4].map((d) => {
                     const date = new Date();
                     date.setDate(date.getDate() + d);
 
@@ -184,7 +184,7 @@ bookingDate.setDate(bookingDate.getDate() + selectedDate);
                         className={`date-chip ${selectedDate === d ? "active" : ""}`}
                         onClick={() => setSelectedDate(d)}
                       >
-                        {date.toDateString().slice(0,10)}
+                        {date.toDateString().slice(0, 10)}
                       </button>
                     );
                   })}
@@ -209,62 +209,57 @@ bookingDate.setDate(bookingDate.getDate() + selectedDate);
 
               {/* FORM */}
               <div className="booking-section">
-  <p>Patient Info</p>
+                <p>Patient Info</p>
 
-  {selectedProfile ? (
-  <>
-    <h4>{selectedProfile.fullName}</h4>
-    <p>
-      {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
-    </p>
-  </>
-) : (
-  <p style={{color:"red"}}>No profile selected</p>
-)}
+                {selectedProfile ? (
+                  <>
+                    <h4>{selectedProfile.fullName}</h4>
+                    <p>
+                      {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
+                    </p>
+                  </>
+                ) : (
+                  <p style={{ color: "red" }}>No profile selected</p>
+                )}
 
-  <button
-    className="change-member-btn"
-    onClick={() => navigate("/patient/profile")}
-  >
-    Change Member
-  </button>
-</div>
+               
+              </div>
 
               <button
                 className="primary-btn confirm-btn"
-              onClick={() => {
+                onClick={() => {
 
-  // ✅ STEP 1: Profile check (FIRST)
-  if (!selectedProfile) {
-    alert("Please select patient profile first");
-    navigate("/patient/profile");
-    return;
-  }
+                  // ✅ STEP 1: Profile check (FIRST)
+                  if (!selectedProfile) {
+                    alert("Please select patient profile first");
+                    navigate("/patient/profile");
+                    return;
+                  }
 
-  // ✅ STEP 2: Time check
-  if (!selectedTime) {
-    alert("Please select time slot");
-    return;
-  }
+                  // ✅ STEP 2: Time check
+                  if (!selectedTime) {
+                    alert("Please select time slot");
+                    return;
+                  }
 
-  // ✅ STEP 3: Create booking
-  const booking = {
-    doctorId: doctor.id,
-    doctorName: doctor.name,
-    patientId: selectedProfile.id,
-    patientName: selectedProfile.fullName,
-    relation: selectedProfile.relation,
-    time: selectedTime,
-    date: bookingDate.toDateString(),
-  };
+                  // ✅ STEP 3: Create booking
+                  const booking = {
+                    doctorId: doctor.id,
+                    doctorName: doctor.name,
+                    patientId: selectedProfile.id,
+                    patientName: selectedProfile.fullName,
+                    relation: selectedProfile.relation,
+                    time: selectedTime,
+                    date: bookingDate.toDateString(),
+                  };
 
-  const existing = JSON.parse(localStorage.getItem("appointments")) || [];
+                  const existing = JSON.parse(localStorage.getItem("appointments")) || [];
 
-  localStorage.setItem("appointments", JSON.stringify([...existing, booking]));
+                  localStorage.setItem("appointments", JSON.stringify([...existing, booking]));
 
-  alert("Appointment Booked ✅");
-  setShowBooking(false);
-}}
+                  alert("Appointment Booked ✅");
+                  setShowBooking(false);
+                }}
               >
                 Confirm Appointment
               </button>

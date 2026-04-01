@@ -1,15 +1,25 @@
 import React, { useState, useEffect } from "react";
 import "./AddVisitModal.css"; 
 
-const AddAppointmentModal = ({ onClose }) => {
+const AddAppointmentModal = ({ onClose, onSave  }) => {
   const [patientName, setPatientName] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
 
   const handleSave = () => {
-    console.log("Saving:", { patientName, date, time });
-    onClose();
-  };
+  if (!patientName || !date || !time) return;
+
+ const newAppointment = {
+  id: Date.now(),
+  date,
+  time,
+  patientName,   // 🔥 ADD THIS
+  status: "Scheduled"
+};
+
+  onSave(newAppointment);
+  onClose();
+};
 
   useEffect(() => {
     document.body.style.overflow = "hidden";

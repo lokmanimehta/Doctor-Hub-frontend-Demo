@@ -25,7 +25,10 @@ const DoctorDashboard = () => {
 React.useEffect(() => {
   const getProfileCompletion = () => {
     const storedUser = JSON.parse(localStorage.getItem("currentUser")) || {};
-    const completion = calculateProfileCompletion(storedUser);
+    const completion = calculateProfileCompletion(
+  storedUser,
+  storedUser.files
+);
     setProfileCompletion(completion);
   };
 
@@ -79,15 +82,19 @@ React.useEffect(() => {
       <div className="alert-text-wrapper">
         <h4>Complete Your Profile</h4>
         <p>Your profile is {profileCompletion}% completed.</p>
+        <p className="profile-hint">
+  {profileCompletion < 50 && "Complete your profile to get more patients"}
+  {profileCompletion >= 50 && profileCompletion < 100 && "Add documents to get verified"}
+</p>
       </div>
     </div>
     <div className="alert-content-right">
-      <div className="custom-progress-bar">
-        <div
-          className="progress-active"
-          style={{ width: `${profileCompletion}%` }}
-        />
-      </div>
+     <div className="custom-progress-bar">
+  <div
+    className="progress-active"
+    style={{ width: `${profileCompletion}%` }}
+  />
+</div>
       <button
         className="btn-complete"
         onClick={() => navigate("/doctor/profile")}

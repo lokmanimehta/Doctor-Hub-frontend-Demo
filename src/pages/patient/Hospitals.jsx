@@ -82,44 +82,44 @@ const Hospitals = () => {
     setCurrentImageIndex(0);
   };
 
- const handleConfirm = (e) => {
-  e.preventDefault();
+  const handleConfirm = (e) => {
+    e.preventDefault();
 
-  // ✅ SAFETY CHECK (VERY IMPORTANT)
-  if (!selectedHospital) {
-    alert("Something went wrong");
-    return;
-  }
+    // ✅ SAFETY CHECK (VERY IMPORTANT)
+    if (!selectedHospital) {
+      alert("Something went wrong");
+      return;
+    }
 
-  // ✅ Profile check
-  if (!selectedProfile) {
-    alert("Please select patient profile first");
-    navigate("/patient/profile");
-    return;
-  }
+    // ✅ Profile check
+    if (!selectedProfile) {
+      alert("Please select patient profile first");
+      navigate("/patient/profile");
+      return;
+    }
 
-  // ✅ Create booking object
-  const booking = {
-    type: "HOSPITAL",
-    hospitalId: selectedHospital.id,
-    hospitalName: selectedHospital.name,
-    patientId: selectedProfile.id,
-    patientName: selectedProfile.fullName,
-    relation: selectedProfile.relation,
-    bedsRequested: bedType, // ✅ GOOD: dynamic ho gaya
-    date: new Date().toISOString(),
+    // ✅ Create booking object
+    const booking = {
+      type: "HOSPITAL",
+      hospitalId: selectedHospital.id,
+      hospitalName: selectedHospital.name,
+      patientId: selectedProfile.id,
+      patientName: selectedProfile.fullName,
+      relation: selectedProfile.relation,
+      bedsRequested: bedType, // ✅ GOOD: dynamic ho gaya
+      date: new Date().toISOString(),
+    };
+
+    const existing = JSON.parse(localStorage.getItem("appointments")) || [];
+
+    localStorage.setItem(
+      "appointments",
+      JSON.stringify([...existing, booking])
+    );
+
+    setIsModalOpen(false);
+    setShowConfirmation(true);
   };
-
-  const existing = JSON.parse(localStorage.getItem("appointments")) || [];
-
-  localStorage.setItem(
-    "appointments",
-    JSON.stringify([...existing, booking])
-  );
-
-  setIsModalOpen(false);
-  setShowConfirmation(true);
-};
   const handleReset = () => {
     setSearchText("");
     setLocationFilter("");
@@ -288,11 +288,11 @@ const Hospitals = () => {
                 <form onSubmit={handleConfirm}>
                   <div className="form-group">
                     <label>Bed Selection</label>
-                    <select 
-  className="form-select"
-  value={bedType}
-  onChange={(e) => setBedType(e.target.value)}
->
+                    <select
+                      className="form-select"
+                      value={bedType}
+                      onChange={(e) => setBedType(e.target.value)}
+                    >
                       <option>General Ward</option>
                       <option>Private Room</option>
                       <option>Deluxe Room</option>
@@ -327,13 +327,7 @@ const Hospitals = () => {
                       <p style={{ color: "red" }}>No profile selected</p>
                     )}
 
-                    <button
-  type="button"
-  className="change-member-btn"
-  onClick={() => navigate("/patient/profile")}
->
-                      Change Member
-                    </button>
+
                   </div>
 
                   <button type="submit" className="book-bed-btn">Book Bed Now</button>

@@ -110,9 +110,10 @@ const { logoutUser } = useAuthActions(setCurrentUser);
     "/doctor/appointments": "My Appointments",
     "/doctor/patients": "Patient Records",
     "/doctor/profile": "My Profile",
-    "/doctor/Availability": "Availability",
+     "/doctor/add-patient": "Add Patient",
+    "/doctor/availability": "Availability",
     "/doctor/Labs": "Labs ",
-    "/doctor/Notifications": "Notifications",
+    "/doctor/notifications": "Notifications",
     
   };
 

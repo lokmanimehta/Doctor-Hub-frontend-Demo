@@ -124,242 +124,8 @@
 .experience-text { font-size: 13px; color: var(--text-light); }
 .book-mini-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; margin-top: auto; }
 
-/* --- FOOTER --- */
-/* --- FOOTER FULL STYLING --- */
-.main-footer { 
-  background: var(--primary-dark); 
-  color: white; 
-  padding: 50px 8% 30px; 
-  margin-top: 50px;
-  position: relative;
-  z-index: 1;
-}
-
-.footer-container { 
-  display: grid; 
-  grid-template-columns: 1.5fr 1fr 1fr 1.2fr; 
-  gap: 40px; 
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.footer-column h4 { 
-  font-size: 18px; 
-  margin-bottom: 25px; 
-  color: white; 
-  font-weight: 700;
-  position: relative;
-}
-
-/* Desktop pe headings ke niche line */
-.footer-column h4::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -8px;
-  width: 30px;
-  height: 2px;
-  background: rgba(255,255,255,0.3);
-}
-
-.footer-list { list-style: none; padding: 0; }
-.footer-list li { 
-  margin-bottom: 12px; 
-  color: #cbd5e1; 
-  cursor: pointer; 
-  font-size: 14px;
-  transition: 0.3s;
-}
-.footer-list li:hover { color: white; transform: translateX(5px); }
-
-/* Real Social Icons */
-.footer-socials { display: flex; gap: 12px; margin-top: 20px; }
-.social-icon {
-  width: 38px; height: 38px; 
-  background: rgba(255,255,255,0.1);
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 50%; color: white; font-size: 18px; 
-  transition: 0.3s; text-decoration: none;
-}
-.social-icon:hover { background: white; color: var(--primary-dark); transform: translateY(-3px); }
-
-.footer-logo { font-size: 26px; font-weight: 800; margin-bottom: 15px; color: white; }
-.footer-logo span { color: var(--text-dark); background: white; padding: 2px 8px; border-radius: 6px; margin-left: 5px; }
-
-.footer-desc { color: #cbd5e1; font-size: 14px; line-height: 1.6; max-width: 300px; }
-.footer-contact-info p { margin-bottom: 12px; color: #cbd5e1; font-size: 14px; display: flex; align-items: center; gap: 10px; }
-.example-1 {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 0;
-  margin: 15px 0 0 0;
-  list-style: none;
-  background-color: transparent;
-  height: auto;
-  width: auto;
-}
-
-.example-1 .icon-content {
-  margin-right: 15px;
-  position: relative;
-  display: inline-block; /* Ensure container is properly sized */
-}
-
-.example-1 .icon-content .tooltip {
-  position: absolute;
-  bottom: 125%; /* icon ke upar */
-  left: 50%;
-  transform: translateX(-50%);
-
-  background-color: #ffffff;
-  color: #000000;
-
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 600;
-
-  border-radius: 6px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-
-  width: max-content;   /* IMPORTANT */
-  max-width: 200px;     /* safety for long text */
-
-  white-space: nowrap;
-
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.25s ease;
-
-  z-index: 9999;
-}
-.example-1 .icon-content .tooltip::before {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-
-  width: 8px;
-  height: 8px;
-
-  background: #ffffff;
-
-  transform: translateX(-50%) rotate(45deg);
-}
-/* Hover position */
-.example-1 .icon-content:hover .tooltip {
-  opacity: 1;
-  visibility: visible;
-  bottom: 150%;
-}
-
-.example-1 .icon-content:hover .tooltip {
-  opacity: 1;
-  visibility: visible;
-  top: -55px; /* Hover par perfect distance */
-}
-
-.example-1 .icon-content .link {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  color: #fff;
-  background-color: rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-  text-decoration: none !important;
-}
-
-.example-1 .icon-content .link svg {
-  width: 22px;
-  height: 22px;
-  fill: #fff;
-  transition: all 0.3s ease;
-}
 
 
-/* Hover Effects */
-.example-1 .icon-content .link[data-social="facebook"]:hover { background-color: #1877F2; }
-.example-1 .icon-content .link[data-social="instagram"]:hover { background-color:  #e1306c; }
-.example-1 .icon-content .link[data-social="linkedin"]:hover { background-color: #0077B5; }
-.example-1 .icon-content .link[data-social="whatsapp"]:hover { background-color: #25D366; }
-/* --- MOBILE 3-COLUMN HORIZONTAL FIX --- */
-@media (max-width: 768px) {
-  .footer-container { 
-    display: flex !important;
-    flex-direction: row !important; /* Force horizontal row */
-    flex-wrap: wrap !important; 
-    gap: 10px !important;
-    text-align: left;
-    padding: 0 10px;
-  }
-
-  .footer-column.brand-col {
-    flex: 0 0 100% !important; /* Brand full width on top */
-    margin-bottom: 15px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    padding-bottom: 20px;
-  }
-
-  /* Services, Support, Contact info teeno ek line mein */
-  .footer-column:not(.brand-col) {
-    flex: 1 !important; 
-    min-width: 0 !important; /* Allow shrinking to fit 3 in a row */
-    margin-bottom: 0;
-  }
-
-  .footer-column h4 {
-    font-size: 11px !important; /* Chota font taaki 3 column fit ho jayein */
-    margin-bottom: 10px;
-    white-space: nowrap;
-  }
-
-  .footer-column h4::after { display: none; }
-
-  .footer-list li, .footer-contact-info p {
-    font-size: 10px !important; /* Very small font for mobile row */
-    margin-bottom: 6px;
-    white-space: nowrap; 
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .footer-contact-info p { 
-    white-space: normal; /* Address ko wrap hone do */
-  }
-
-  .social-icon { width: 30px; height: 30px; font-size: 14px; }
-}
-
-.footer-bottom { 
-  border-top: 1px solid rgba(255,255,255,0.1); 
-  margin-top: 40px; 
-  padding: 20px 0;
-  text-align: center; 
-}
-.footer-bottom-content p { font-size: 12px; color: #94a3b8; }
-/* --- MOBILE 2-CARDS PER LINE --- */
-@media (max-width: 1024px) {
-  .desktop-only { display: none !important; }
-  .hamburger-menu { display: block; }
-}
-
-@media (max-width: 600px) {
-  .blogs-grid-container { 
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 12px; 
-    padding: 20px 12px 60px;
-  }
-  .card-img-wrapper { height: 110px; }
-  .card-details { padding: 12px; gap: 5px; }
-  .card-details h3 { font-size: 14px; line-height: 1.2; }
-  .specialty-tag { font-size: 9px; }
-  .experience-text { font-size: 10px; }
-  .book-mini-btn { padding: 8px; font-size: 12px; }
-  .bg-blob { width: 300px; height: 300px; }
-}
 /* --- ULTIMATE PROFESSIONAL FOOTER --- */
 .main-footer {
   background: var(--primary); /* Book Now wala exact green */
@@ -452,8 +218,8 @@
   height: 38px;
   background: rgba(255, 255, 255, 0.15);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: center !important;
+  justify-content: center !important;
   border-radius: 50%; /* Circle icons are more professional */
   font-size: 14px;
   transition: 0.3s;
@@ -484,27 +250,7 @@
   color: #ffffff !important; /* Pure white */
   opacity: 0.8;
 }
-/* --- MOBILE RESPONSIVE --- */
-@media (max-width: 900px) {
-  .footer-container {
-    flex-wrap: wrap; /* Columns ko niche shift karega */
-    gap: 40px;
-  }
-  .footer-column {
-    min-width: 40%;
-  }
-}
 
-@media (max-width: 600px) {
-  .footer-container {
-    flex-direction: column; /* Mobile par single line stack */
-    text-align: left;
-    padding: 0 30px;
-  }
-  .footer-column {
-    width: 100%;
-  }
-}
 /* --- PREMIUM BLOG MODAL ENHANCEMENTS --- */
 .blog-modal-overlay {
     position: fixed;
@@ -679,24 +425,99 @@
     margin: 0;
 }
 
-/* Modal Responsiveness */
-@media (max-width: 768px) {
-    .modal-body-text { padding: 30px 20px; }
-    .modal-header-info h2 { font-size: 24px; }
-    .content-paragraph { font-size: 16px; }
-    .modal-image-header { height: 250px; }
-}
-/* Update your existing media query */
-@media (max-width: 768px) {
-  .blogs-hero { 
-    padding: 40px 15px 20px; /* Mobile par padding aur kam */
+/* --- MOBILE RESPONSIVE --- */
+@media (max-width: 900px) {
+  .footer-container {
+    flex-wrap: wrap; /* Columns ko niche shift karega */
+    gap: 40px;
   }
-  
-  .section-header h2 { 
-    font-size: 28px;        /* Mobile par heading ka size stable rahega */
+  .footer-column {
+    min-width: 40%;
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-container {
+    flex-direction: column; /* Mobile par single line stack */
+    text-align: left;
+    padding: 0 30px;
+  }
+  .footer-column {
+    width: 100%;
+  }
+}
+/* --- MOBILE 3-COLUMN HORIZONTAL FIX --- */
+@media (max-width: 768px) {
+  .footer-container { 
+    display: flex !important;
+    flex-direction: row !important; /* Force horizontal row */
+    flex-wrap: wrap !important; 
+    gap: 10px !important;
+    text-align: left;
+    padding: 0 10px;
   }
 
-  .section-header p {
-    font-size: 14px;        /* Choti screen ke liye thoda chota font */
+  .footer-column.brand-col {
+    flex: 0 0 100% !important; /* Brand full width on top */
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 20px;
   }
+
+  /* Services, Support, Contact info teeno ek line mein */
+  .footer-column:not(.brand-col) {
+    flex: 1 !important; 
+    min-width: 0 !important; /* Allow shrinking to fit 3 in a row */
+    margin-bottom: 0;
+  }
+
+  .footer-column h4 {
+    font-size: 11px !important; /* Chota font taaki 3 column fit ho jayein */
+    margin-bottom: 10px;
+    white-space: nowrap;
+  }
+
+  .footer-column h4::after { display: none; }
+
+  .footer-list li, .footer-contact-info p {
+    font-size: 10px !important; /* Very small font for mobile row */
+    margin-bottom: 6px;
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .footer-contact-info p { 
+    white-space: normal; /* Address ko wrap hone do */
+  }
+
+  .social-icon { width: 30px; height: 30px; font-size: 14px;align-items: center !important; }
+}
+
+.footer-bottom { 
+  border-top: 1px solid rgba(255,255,255,0.1); 
+  margin-top: 40px; 
+  padding: 20px 0;
+  text-align: center; 
+}
+.footer-bottom-content p { font-size: 12px; color: #94a3b8; }
+/* --- MOBILE 2-CARDS PER LINE --- */
+@media (max-width: 1024px) {
+  .desktop-only { display: none !important; }
+  .hamburger-menu { display: block; }
+}
+
+@media (max-width: 600px) {
+  .blogs-grid-container { 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 12px; 
+    padding: 20px 12px 60px;
+  }
+  .card-img-wrapper { height: 110px; }
+  .card-details { padding: 12px; gap: 5px; }
+  .card-details h3 { font-size: 14px; line-height: 1.2; }
+  .specialty-tag { font-size: 9px; }
+  .experience-text { font-size: 10px; }
+  .book-mini-btn { padding: 8px; font-size: 12px; }
+  .bg-blob { width: 300px; height: 300px; }
 }

@@ -137,7 +137,7 @@ const PatientAppointments = () => {
                             {app.status !== "Cancelled" && app.status !== "Completed" && (
                                 <>
                                     <button className="btn-reschedule-sub" onClick={() => setRescheduleTarget(app)}>Reschedule</button>
-                                    <button className="btn-delete-icon" onClick={() => setShowDeleteConfirm(app.id)}><FiTrash2 /></button>
+                                    <button className="btn-delete-icon" onClick={() => setShowDeleteConfirm(app.id)}>Cancel </button>
                                 </>
                             )}
                             <button className="btn-reminder-icon" onClick={triggerReminder}><FiBell /></button>

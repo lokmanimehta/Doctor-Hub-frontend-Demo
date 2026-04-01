@@ -6,11 +6,11 @@ import Logo from "../../assets/images/logo.png";
 const StandardToggle = ({ id, checked, onChange }) => {
   return (
     <label className="switch-container" htmlFor={id}>
-      <input 
-        type="checkbox" 
-        id={id} 
+      <input
+        type="checkbox"
+        id={id}
         checked={checked || false}
-        onChange={onChange || (() => {})}
+        onChange={onChange || (() => { })}
       />
       <span className="slider-round"></span>
     </label>
@@ -19,37 +19,37 @@ const StandardToggle = ({ id, checked, onChange }) => {
 
 const AllServicesPage = () => {
   const navigate = useNavigate();
- const [search, setSearch] = useState("");
-const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-// SaaS states
-const [saasDropdown, setSaasDropdown] = useState(false);
-const [doctorSub, setDoctorSub] = useState(false);
-const [patientSub, setPatientSub] = useState(false);
-const saasRef = useRef(null);
+  // SaaS states
+  const [saasDropdown, setSaasDropdown] = useState(false);
+  const [doctorSub, setDoctorSub] = useState(false);
+  const [patientSub, setPatientSub] = useState(false);
+  const saasRef = useRef(null);
 
-// Booking Modal States
-const [selected, setSelected] = useState(null);
-const [showBooking, setShowBooking] = useState(false);
-const [selectedHospital, setSelectedHospital] = useState(null);
-const [selectedDate, setSelectedDate] = useState(0);
-const [selectedTime, setSelectedTime] = useState("");
-const [currentImageIndex, setCurrentImageIndex] = useState(0);
-const [preview, setPreview] = useState(null);
+  // Booking Modal States
+  const [selected, setSelected] = useState(null);
+  const [showBooking, setShowBooking] = useState(false);
+  const [selectedHospital, setSelectedHospital] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(0);
+  const [selectedTime, setSelectedTime] = useState("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [preview, setPreview] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-const [showModal, setShowModal] = useState(false); // keep only one
+  const [showModal, setShowModal] = useState(false); // keep only one
 
   const selectedProfile = JSON.parse(localStorage.getItem("selectedProfile"));
 
-const [activeTab, setActiveTab] = useState("Available Tests");
-const [selectedTests, setSelectedTests] = useState([1,2]);
-const [modalSearch, setModalSearch] = useState("");
-const [selectedPackages, setSelectedPackages] = useState([]);
-const [selectedLab, setSelectedLab] = useState({});
-const [homePickup, setHomePickup] = useState(false); // For dynamic lab info
-// Refs for scroll
-const doctorScrollRef = useRef(null);
+  const [activeTab, setActiveTab] = useState("Available Tests");
+  const [selectedTests, setSelectedTests] = useState([1, 2]);
+  const [modalSearch, setModalSearch] = useState("");
+  const [selectedPackages, setSelectedPackages] = useState([]);
+  const [selectedLab, setSelectedLab] = useState({});
+  const [homePickup, setHomePickup] = useState(false); // For dynamic lab info
+  // Refs for scroll
+  const doctorScrollRef = useRef(null);
   const hospitalScrollRef = useRef(null);
   const labScrollRef = useRef(null);// keep only one // Fixes 'selectedLab' & 'setSelectedLab' is not defined
 
@@ -67,40 +67,40 @@ const doctorScrollRef = useRef(null);
   ];
 
   // --- Calculation Logic (For Billing Summary) ---// Toggle selected test
-const toggleTest = (id) => {
-  if (selectedTests.includes(id)) {
-    setSelectedTests(selectedTests.filter(tid => tid !== id));
-  } else {
-    setSelectedTests([...selectedTests, id]);
-  }
-};
-const filteredTests = allAvailableTests.filter(t =>
-  t.name.toLowerCase().includes(modalSearch.toLowerCase())
-);
-useEffect(() => {
-  if (showModal) {
-    document.body.style.overflow = 'hidden';
-  } else {
-    document.body.style.overflow = 'unset';
-  }
-}, [showModal]);
+  const toggleTest = (id) => {
+    if (selectedTests.includes(id)) {
+      setSelectedTests(selectedTests.filter(tid => tid !== id));
+    } else {
+      setSelectedTests([...selectedTests, id]);
+    }
+  };
+  const filteredTests = allAvailableTests.filter(t =>
+    t.name.toLowerCase().includes(modalSearch.toLowerCase())
+  );
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [showModal]);
 
 
-// Calculate subtotal, gst, service charge
-const subtotal = 
-  allAvailableTests
-    .filter(t => selectedTests.includes(t.id))
-    .reduce((acc, curr) => acc + curr.price, 0)
-  +
-  packagesData
-    .filter(p => selectedPackages.includes(p.id))
-    .reduce((acc, curr) => acc + curr.price, 0);
+  // Calculate subtotal, gst, service charge
+  const subtotal =
+    allAvailableTests
+      .filter(t => selectedTests.includes(t.id))
+      .reduce((acc, curr) => acc + curr.price, 0)
+    +
+    packagesData
+      .filter(p => selectedPackages.includes(p.id))
+      .reduce((acc, curr) => acc + curr.price, 0);
 
-const gst = Math.round(subtotal * 0.05);
-const serviceCharge = 50;
-const pickupFee = 120;
+  const gst = Math.round(subtotal * 0.05);
+  const serviceCharge = 50;
+  const pickupFee = 120;
 
-const grandTotal = subtotal + gst + serviceCharge + (homePickup ? pickupFee : 0);
+  const grandTotal = subtotal + gst + serviceCharge + (homePickup ? pickupFee : 0);
 
   useEffect(() => {
     const initDragScroll = (ref) => {
@@ -132,7 +132,7 @@ const grandTotal = subtotal + gst + serviceCharge + (homePickup ? pickupFee : 0)
         if (!isDown) return;
         e.preventDefault();
         const x = e.pageX - slider.offsetLeft;
-        const walk = (x - startX) * 2; 
+        const walk = (x - startX) * 2;
         slider.scrollLeft = scrollLeft - walk;
       };
 
@@ -153,73 +153,73 @@ const grandTotal = subtotal + gst + serviceCharge + (homePickup ? pickupFee : 0)
     initDragScroll(hospitalScrollRef);
     initDragScroll(labScrollRef);
   }, []);
- 
-const handleConfirmBooking = () => {
 
-  // ✅ STEP 1: Profile check
-  if (!selectedProfile) {
-    alert("Please select patient profile first");
-    navigate("/patient/profile");
-    return;
-  }
+  const handleConfirmBooking = () => {
 
-  // ✅ STEP 2: Time check
-  if (!selectedTime) {
-    alert("Please select time slot");
-    return;
-  }
+    // ✅ STEP 1: Profile check
+    if (!selectedProfile) {
+      alert("Please select patient profile first");
+      navigate("/patient/profile");
+      return;
+    }
 
-  // ✅ STEP 3: Proper date
-  const dateObj = new Date();
-  dateObj.setDate(dateObj.getDate() + selectedDate);
+    // ✅ STEP 2: Time check
+    if (!selectedTime) {
+      alert("Please select time slot");
+      return;
+    }
 
-  // ✅ STEP 4: Create booking
-  const booking = {
-    doctorId: selected.id,
-    doctorName: selected.name,
-    patientId: selectedProfile.id,
-    patientName: selectedProfile.fullName,
-    relation: selectedProfile.relation,
-    time: selectedTime,
-    date: dateObj.toISOString(),
+    // ✅ STEP 3: Proper date
+    const dateObj = new Date();
+    dateObj.setDate(dateObj.getDate() + selectedDate);
+
+    // ✅ STEP 4: Create booking
+    const booking = {
+      doctorId: selected.id,
+      doctorName: selected.name,
+      patientId: selectedProfile.id,
+      patientName: selectedProfile.fullName,
+      relation: selectedProfile.relation,
+      time: selectedTime,
+      date: dateObj.toISOString(),
+    };
+
+    // ✅ STEP 5: Get existing bookings
+    const existing = JSON.parse(localStorage.getItem("appointments")) || [];
+
+    // ✅ STEP 6: Duplicate check
+    const alreadyBooked = existing.some(
+      (a) =>
+        a.doctorId === booking.doctorId &&
+        a.time === booking.time &&
+        a.date === booking.date
+    );
+
+    if (alreadyBooked) {
+      alert("Slot already booked ❌");
+      return;
+    }
+
+    // ✅ STEP 7: Save
+    localStorage.setItem("appointments", JSON.stringify([...existing, booking]));
+
+    alert("Appointment Booked ✅");
+
+    // ✅ STEP 8: Reset
+    setSelectedTime("");
+    setSelectedDate(0);
+
+    closeModals();
   };
-
-  // ✅ STEP 5: Get existing bookings
-  const existing = JSON.parse(localStorage.getItem("appointments")) || [];
-
-  // ✅ STEP 6: Duplicate check
-  const alreadyBooked = existing.some(
-    (a) =>
-      a.doctorId === booking.doctorId &&
-      a.time === booking.time &&
-      a.date === booking.date
-  );
-
-  if (alreadyBooked) {
-    alert("Slot already booked ❌");
-    return;
-  }
-
-  // ✅ STEP 7: Save
-  localStorage.setItem("appointments", JSON.stringify([...existing, booking]));
-
-  alert("Appointment Booked ✅");
-
-  // ✅ STEP 8: Reset
-  setSelectedTime("");
-  setSelectedDate(0);
-
-  closeModals();
-};
-const closeModals = () => {
-  setShowBooking(false);
-  setShowConfirmation(false);
-  setShowModal(false);
-  setSelected(null);
-  setSelectedHospital(null);
-  setSelectedDate(0);
-  setSelectedTime("");
-};
+  const closeModals = () => {
+    setShowBooking(false);
+    setShowConfirmation(false);
+    setShowModal(false);
+    setSelected(null);
+    setSelectedHospital(null);
+    setSelectedDate(0);
+    setSelectedTime("");
+  };
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (saasRef.current && !saasRef.current.contains(e.target)) setSaasDropdown(false);
@@ -236,152 +236,152 @@ const closeModals = () => {
     { id: 5, name: "Dr. Karan Shah", specialty: "Pediatrician", location: "Borivali, Mumbai", rating: 4.5, experience: "9 yrs", img: "https://images.pexels.com/photos/6303602/pexels-photo-6303602.jpeg" },
   ];
 
- const hospitals = [
-  {
-    id: 1,
-    name: "Apollo Hospital",
-    location: "Chennai, Tamil Nadu",
-    rating: "4.8",
-    img: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?q=80&w=800",
-    images: [
-      "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c?q=80&w=800",
-      "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f?q=80&w=800",
-      "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800"
-    ],
-    depts: ["Cardiology", "Orthopedics", "Neurology", "Pediatrics"],
-    bedsAvailable: 23,
-    totalBeds: 50
-  },
+  const hospitals = [
+    {
+      id: 1,
+      name: "Apollo Hospital",
+      location: "Chennai, Tamil Nadu",
+      rating: "4.8",
+      img: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?q=80&w=800",
+      images: [
+        "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c?q=80&w=800",
+        "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f?q=80&w=800",
+        "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800"
+      ],
+      depts: ["Cardiology", "Orthopedics", "Neurology", "Pediatrics"],
+      bedsAvailable: 23,
+      totalBeds: 50
+    },
 
-  {
-    id: 2,
-    name: "Manipal Hospital",
-    location: "Bengaluru, Karnataka",
-    rating: "4.6",
-    img: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800",
-    images: [
-      "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800",
-      "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f?q=80&w=800"
-    ],
-    depts: ["Oncology", "Orthopedics", "General"],
-    bedsAvailable: 12,
-    totalBeds: 40
-  },
+    {
+      id: 2,
+      name: "Manipal Hospital",
+      location: "Bengaluru, Karnataka",
+      rating: "4.6",
+      img: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800",
+      images: [
+        "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800",
+        "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f?q=80&w=800"
+      ],
+      depts: ["Oncology", "Orthopedics", "General"],
+      bedsAvailable: 12,
+      totalBeds: 40
+    },
 
-  {
-    id: 3,
-    name: "Fortis Healthcare",
-    location: "Mumbai, Maharashtra",
-    rating: "4.7",
-    img: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=800",
-    images: [
-      "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=800",
-      "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c?q=80&w=800"
-    ],
-    depts: ["Pediatrics", "Surgery", "Cardiology"],
-    bedsAvailable: 18,
-    totalBeds: 45
-  },
+    {
+      id: 3,
+      name: "Fortis Healthcare",
+      location: "Mumbai, Maharashtra",
+      rating: "4.7",
+      img: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=800",
+      images: [
+        "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=800",
+        "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c?q=80&w=800"
+      ],
+      depts: ["Pediatrics", "Surgery", "Cardiology"],
+      bedsAvailable: 18,
+      totalBeds: 45
+    },
 
-  {
-    id: 4,
-    name: "Max Super Speciality",
-    location: "Delhi",
-    rating: "4.5",
-    img: "https://images.unsplash.com/photo-1538108149393-fbbd81895907?q=80&w=800",
-    images: [
-      "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c?q=80&w=800",
-      "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f?q=80&w=800",
-      "https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=800"
-    ],
-    depts: ["Gastro", "Cardiology"],
-    bedsAvailable: 9,
-    totalBeds: 30
-  },
+    {
+      id: 4,
+      name: "Max Super Speciality",
+      location: "Delhi",
+      rating: "4.5",
+      img: "https://images.unsplash.com/photo-1538108149393-fbbd81895907?q=80&w=800",
+      images: [
+        "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c?q=80&w=800",
+        "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f?q=80&w=800",
+        "https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=800"
+      ],
+      depts: ["Gastro", "Cardiology"],
+      bedsAvailable: 9,
+      totalBeds: 30
+    },
 
-  {
-    id: 5,
-    name: "Medanta Hospital",
-    location: "Gurgaon, Haryana",
-    rating: "4.9",
-    img: "https://images.unsplash.com/photo-1504439468489-c8920d796a29?q=80&w=800",
-    images: [
-      "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c?q=80&w=800",
-      "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f?q=80&w=800",
-      "https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=800"
-    ],
-    depts: ["Neurology", "Urology", "Cardiology"],
-    bedsAvailable: 31,
-    totalBeds: 60
-  }
-];
+    {
+      id: 5,
+      name: "Medanta Hospital",
+      location: "Gurgaon, Haryana",
+      rating: "4.9",
+      img: "https://images.unsplash.com/photo-1504439468489-c8920d796a29?q=80&w=800",
+      images: [
+        "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c?q=80&w=800",
+        "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f?q=80&w=800",
+        "https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=800"
+      ],
+      depts: ["Neurology", "Urology", "Cardiology"],
+      bedsAvailable: 31,
+      totalBeds: 60
+    }
+  ];
 
   const labs = [
-  {
-    id: 1,
-    name: "Thyrocare Lab",
-    location: "Mumbai",
-    rating: 4.6,
-    img: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b",
-    about: "Thyrocare is one of India's leading diagnostic labs known for affordable and accurate testing with fast report delivery.",
-    reviews: [
-  { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
-  { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
-]
-  },
-  {
-    id: 2,
-    name: "Dr Lal PathLabs",
-    location: "Delhi",
-    rating: 4.7,
-    img: "https://images.unsplash.com/photo-1581594693702-fbdc51b2763b",
-    about: "Dr Lal PathLabs offers a wide range of diagnostic services with NABL accreditation and trusted by millions.",
-    reviews: [
-  { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
-  { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
-]
-  },
-  {
-    id: 3,
-    name: "Metropolis Lab",
-    location: "Chennai",
-    rating: 4.5,
-    img: "https://images.unsplash.com/photo-1579154204601-01588f351e67",
-    about: "Metropolis Healthcare provides advanced pathology services with a strong focus on quality and innovation.",
-    reviews: [
-  { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
-  { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
-]
-  },
-  {
-    id: 4,
-    name: "SRL Diagnostics",
-    location: "Bangalore",
-    rating: 4.4,
-    img: "https://images.unsplash.com/photo-1582719508461-905c673771fd",
-    about: "SRL Diagnostics is a trusted name offering a wide network of labs with high-quality diagnostic services.",
-    reviews: [
-  { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
-  { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
-]
-  },
-  {
-    id: 5,
-    name: "Healthians",
-    location: "Hyderabad",
-    rating: 4.6,
-    img: "https://images.unsplash.com/photo-1580281657527-47b8d3d8b5a3",
-    about: "Healthians specializes in home sample collection with a strong focus on convenience and affordability.",
-    reviews: [
-  { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
-  { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
-]
-  }
-];
+    {
+      id: 1,
+      name: "Thyrocare Lab",
+      location: "Mumbai",
+      rating: 4.6,
+      img: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b",
+      about: "Thyrocare is one of India's leading diagnostic labs known for affordable and accurate testing with fast report delivery.",
+      reviews: [
+        { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
+        { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
+      ]
+    },
+    {
+      id: 2,
+      name: "Dr Lal PathLabs",
+      location: "Delhi",
+      rating: 4.7,
+      img: "https://images.unsplash.com/photo-1581594693702-fbdc51b2763b",
+      about: "Dr Lal PathLabs offers a wide range of diagnostic services with NABL accreditation and trusted by millions.",
+      reviews: [
+        { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
+        { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
+      ]
+    },
+    {
+      id: 3,
+      name: "Metropolis Lab",
+      location: "Chennai",
+      rating: 4.5,
+      img: "https://images.unsplash.com/photo-1579154204601-01588f351e67",
+      about: "Metropolis Healthcare provides advanced pathology services with a strong focus on quality and innovation.",
+      reviews: [
+        { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
+        { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
+      ]
+    },
+    {
+      id: 4,
+      name: "SRL Diagnostics",
+      location: "Bangalore",
+      rating: 4.4,
+      img: "https://images.unsplash.com/photo-1582719508461-905c673771fd",
+      about: "SRL Diagnostics is a trusted name offering a wide network of labs with high-quality diagnostic services.",
+      reviews: [
+        { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
+        { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
+      ]
+    },
+    {
+      id: 5,
+      name: "Healthians",
+      location: "Hyderabad",
+      rating: 4.6,
+      img: "https://images.unsplash.com/photo-1580281657527-47b8d3d8b5a3",
+      about: "Healthians specializes in home sample collection with a strong focus on convenience and affordability.",
+      reviews: [
+        { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
+        { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
+      ]
+    }
+  ];
   const TIME_SLOTS = [
-  "10:00 AM", "10:30 AM", "11:00 AM",
-  "05:00 PM", "05:30 PM", "06:00 PM"
-];
+    "10:00 AM", "10:30 AM", "11:00 AM",
+    "05:00 PM", "05:30 PM", "06:00 PM"
+  ];
   const filterData = (data) => {
     return data.filter(item =>
       (item.name && item.name.toLowerCase().includes(search.toLowerCase())) ||
@@ -390,7 +390,7 @@ const closeModals = () => {
       item.rating?.toString().includes(search)
     );
   };
-  
+
 
   return (
     <div className="home-wrapper">
@@ -467,54 +467,54 @@ const closeModals = () => {
             )}
           </div>
         </div>
-       {/* 🔥 PREMIUM SERVICES SECTION */}
-<div className="premium-services">
+        {/* 🔥 PREMIUM SERVICES SECTION */}
+        <div className="premium-services">
 
-  {/* PERSONAL CARE COORDINATOR */}
-  <div 
-    className="premium-service-card"
-    onClick={() => navigate("/care-coordinator")}
-  >
-    <div className="service-text">
-      <h3>Personal Care Coordinator</h3>
-      <p>
-        Planning treatment from another city or country? We help you find the right hospital, arrange your stay, and guide you throughout your medical journey.
-      </p>
-    </div>
+          {/* PERSONAL CARE COORDINATOR */}
+          <div
+            className="premium-service-card"
+            onClick={() => navigate("/care-coordinator")}
+          >
+            <div className="service-text">
+              <h3>Personal Care Coordinator</h3>
+              <p>
+                Planning treatment from another city or country? We help you find the right hospital, arrange your stay, and guide you throughout your medical journey.
+              </p>
+            </div>
 
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        navigate("/care-coordinator");
-      }}
-    >
-      Get Assistance →
-    </button>
-  </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate("/care-coordinator");
+              }}
+            >
+              Get Assistance →
+            </button>
+          </div>
 
-  {/* HEALTH INSURANCE */}
-  <div 
-    className="premium-service-card"
-    onClick={() => navigate("/insurance")}
-  >
-    <div className="service-text">
-      <h3>Secure Your Health</h3>
-      <p>
-        Avoid unexpected medical expenses. Compare trusted insurance plans with cashless hospital benefits.
-      </p>
-    </div>
+          {/* HEALTH INSURANCE */}
+          <div
+            className="premium-service-card"
+            onClick={() => navigate("/insurance")}
+          >
+            <div className="service-text">
+              <h3>Secure Your Health</h3>
+              <p>
+                Avoid unexpected medical expenses. Compare trusted insurance plans with cashless hospital benefits.
+              </p>
+            </div>
 
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        navigate("/insurance");
-      }}
-    >
-      View Plans →
-    </button>
-  </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate("/insurance");
+              }}
+            >
+              View Plans →
+            </button>
+          </div>
 
-</div>
+        </div>
 
         {/* DOCTORS SECTION */}
         <section className="service-section">
@@ -530,37 +530,37 @@ const closeModals = () => {
 
           <div className="horizontal-card-row" ref={doctorScrollRef} style={{ cursor: 'grab' }}>
             {filterData(doctors).map((item) => (
-              <div 
-  key={item.id} 
-  className="premium-v3-card"
-  onClick={() => {
-    setSelected(item);
-    setShowBooking(false);
-  }}
->
-  <div className="v3-card-top">
-    <img src={item.img} alt={item.name} />
-    <div className="v3-rating">⭐ {item.rating}</div>
-  </div>
+              <div
+                key={item.id}
+                className="premium-v3-card"
+                onClick={() => {
+                  setSelected(item);
+                  setShowBooking(false);
+                }}
+              >
+                <div className="v3-card-top">
+                  <img src={item.img} alt={item.name} />
+                  <div className="v3-rating">⭐ {item.rating}</div>
+                </div>
 
-  <div className="v3-card-body">
-    <h3>{item.name}</h3>
-    <p className="v3-spec">{item.specialty}</p>
-    <p className="v3-loc">📍 {item.location}</p>
-    <p className="v3-exp">💼 {item.experience} experience</p>
+                <div className="v3-card-body">
+                  <h3>{item.name}</h3>
+                  <p className="v3-spec">{item.specialty}</p>
+                  <p className="v3-loc">📍 {item.location}</p>
+                  <p className="v3-exp">💼 {item.experience} experience</p>
 
-   <button 
-  className="v3-btn secondary"
-  onClick={(e) => {
-    e.stopPropagation();
-    setSelected(item);
-    setShowBooking(true); // 🔥 directly booking open
-  }}
->
-  Book Appointment
-</button>
-  </div>
-</div>
+                  <button
+                    className="v3-btn secondary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelected(item);
+                      setShowBooking(true); // 🔥 directly booking open
+                    }}
+                  >
+                    Book Appointment
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </section>
@@ -579,33 +579,33 @@ const closeModals = () => {
 
           <div className="horizontal-card-row" ref={hospitalScrollRef} style={{ cursor: 'grab' }}>
             {filterData(hospitals).map((item) => (
-             <div 
-  key={item.id} 
-  className="premium-v3-card"
-  
->
-  <div className="v3-card-top">
-    <img src={item.img}
-  alt={item.name} 
-/>
-    <div className="v3-rating">⭐ {item.rating}</div>
-  </div>
+              <div
+                key={item.id}
+                className="premium-v3-card"
 
-  <div className="v3-card-body">
-    <h3>{item.name}</h3>
-    <p className="v3-loc">📍 {item.location}</p>
+              >
+                <div className="v3-card-top">
+                  <img src={item.img}
+                    alt={item.name}
+                  />
+                  <div className="v3-rating">⭐ {item.rating}</div>
+                </div>
 
-    <button 
-  className="v3-btn secondary"
-  onClick={(e) => {
-    e.stopPropagation();      // 🔥 IMPORTANT (card click double trigger avoid)
-    setSelectedHospital(item); // 🔥 SAME modal open
-  }}
->
-  View Details
-</button>
-  </div>
-</div>
+                <div className="v3-card-body">
+                  <h3>{item.name}</h3>
+                  <p className="v3-loc">📍 {item.location}</p>
+
+                  <button
+                    className="v3-btn secondary"
+                    onClick={(e) => {
+                      e.stopPropagation();      // 🔥 IMPORTANT (card click double trigger avoid)
+                      setSelectedHospital(item); // 🔥 SAME modal open
+                    }}
+                  >
+                    View Details
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </section>
@@ -624,326 +624,321 @@ const closeModals = () => {
 
           <div className="horizontal-card-row" ref={labScrollRef} style={{ cursor: 'grab' }}>
             {filterData(labs).map((item) => (
-             <div 
-  key={item.id} 
-  className="premium-v3-card"
- 
->
-  <div className="v3-card-top">
-    <img src={item.img} alt={item.name} />
-    <div className="v3-rating">⭐ {item.rating}</div>
-  </div>
+              <div
+                key={item.id}
+                className="premium-v3-card"
 
-  <div className="v3-card-body">
-    <h3>{item.name}</h3>
-    <p className="v3-loc">📍 {item.location}</p>
+              >
+                <div className="v3-card-top">
+                  <img src={item.img} alt={item.name} />
+                  <div className="v3-rating">⭐ {item.rating}</div>
+                </div>
 
-  <button className="v3-btn secondary" onClick={() => {
-  setSelectedLab(item); // lab is clicked lab data
-  setShowModal(true);
-}}>Book Test</button>
-  </div>
-</div>
+                <div className="v3-card-body">
+                  <h3>{item.name}</h3>
+                  <p className="v3-loc">📍 {item.location}</p>
+
+                  <button className="v3-btn secondary" onClick={() => {
+                    setSelectedLab(item); // lab is clicked lab data
+                    setShowModal(true);
+                  }}>Book Test</button>
+                </div>
+              </div>
             ))}
           </div>
         </section>
-        
+
 
       </div>
-     {selected && !showBooking && (
-  <div className="modal-overlay" onClick={() => setSelected(null)}>
-    <div className="profile-modal-card" onClick={(e) => e.stopPropagation()}>
+      {selected && !showBooking && (
+        <div className="modal-overlay" onClick={() => setSelected(null)}>
+          <div className="profile-modal-card" onClick={(e) => e.stopPropagation()}>
 
-      <button className="modal-close-x" onClick={() => setSelected(null)}>×</button>
+            <button className="modal-close-x" onClick={() => setSelected(null)}>×</button>
 
-      <div className="modal-header-top">
-        <img src={selected.img} className="modal-avatar" />
+            <div className="modal-header-top">
+              <img src={selected.img} className="modal-avatar" />
 
-        <div className="modal-title-info">
-          <h2>{selected.name}</h2>
-          <span className="modal-spec-badge">{selected.specialty}</span>
-          <p>⭐ {selected.rating} ({selected.experience})</p>
-        </div>
-      </div>
+              <div className="modal-title-info">
+                <h2>{selected.name}</h2>
+                <span className="modal-spec-badge">{selected.specialty}</span>
+                <p>⭐ {selected.rating} ({selected.experience})</p>
+              </div>
+            </div>
 
-      <div className="modal-body-content">
-        <div className="info-row"><strong>📍 Location:</strong> {selected.location}</div>
-        <div className="info-row"><strong>🏥 Clinic:</strong> City Care Hospital</div>
-        <div className="info-row"><strong>🎓 Education:</strong> MBBS, MD</div>
-        <div className="info-row"><strong>💼 Experience:</strong> {selected.experience}</div>
-        <div className="info-row"><strong>💰 Fee:</strong> ₹500</div>
+            <div className="modal-body-content">
+              <div className="info-row"><strong>📍 Location:</strong> {selected.location}</div>
+              <div className="info-row"><strong>🏥 Clinic:</strong> City Care Hospital</div>
+              <div className="info-row"><strong>🎓 Education:</strong> MBBS, MD</div>
+              <div className="info-row"><strong>💼 Experience:</strong> {selected.experience}</div>
+              <div className="info-row"><strong>💰 Fee:</strong> ₹500</div>
 
-        <div className="modal-bio-box">
-          <strong>About Doctor:</strong>
-          <p>Experienced {selected.specialty} specialist providing quality care.</p>
-        </div>
-      </div>
+              <div className="modal-bio-box">
+                <strong>About Doctor:</strong>
+                <p>Experienced {selected.specialty} specialist providing quality care.</p>
+              </div>
+            </div>
 
-      <div className="modal-actions">
-        <button 
-          className="primary-modal-btn"
-          onClick={() => setShowBooking(true)}
-        >
-          Book Appointment
-        </button>
-      </div>
-
-    </div>
-  </div>
-)}
-{selected && showBooking && (
-  <div className="booking-modal-overlay" onClick={() => setShowBooking(false)}>
-    <div className="booking-modal-card" onClick={(e) => e.stopPropagation()}>
-
-      <button className="modal-close" onClick={() => setShowBooking(false)}>✕</button>
-
-      <div className="booking-scroll">
-
-        <h2>Book Appointment</h2>
-
-        {/* Doctor mini info */}
-        <div className="booking-doctor">
-          <img src={selected.img} />
-          <div>
-            <h3>{selected.name}</h3>
-            <p>{selected.specialty}</p>
-          </div>
-        </div>
-
-        {/* Date */}
-        <div className="booking-section">
-          <p>Select Date</p>
-          <div className="date-list">
-            {[0,1,2,3,4].map((d) => {
-              const date = new Date();
-              date.setDate(date.getDate() + d);
-              return (
-                <button
-                  key={d}
-                  className={`date-chip ${selectedDate === d ? "active" : ""}`}
-                  onClick={() => setSelectedDate(d)}
-                >
-                  {date.toDateString().slice(0, 10)}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Time */}
-        <div className="booking-section">
-          <p>Select Time</p>
-          <div className="slot-list">
-            {TIME_SLOTS.map((t) => (
+            <div className="modal-actions">
               <button
-                key={t}
-                className={`slot ${selectedTime === t ? "active" : ""}`}
-                onClick={() => setSelectedTime(t)}
+                className="primary-modal-btn"
+                onClick={() => setShowBooking(true)}
               >
-                {t}
+                Book Appointment
               </button>
-            ))}
+            </div>
+
           </div>
         </div>
+      )}
+      {selected && showBooking && (
+        <div className="booking-modal-overlay" onClick={() => setShowBooking(false)}>
+          <div className="booking-modal-card" onClick={(e) => e.stopPropagation()}>
 
-        {/* Form */}
-        <div className="booking-section">
-  <p>Patient Info</p>
+            <button className="modal-close" onClick={() => setShowBooking(false)}>✕</button>
 
- {selectedProfile ? (
-  <>
-    <h4>{selectedProfile.fullName}</h4>
-    <p>
-      {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
-    </p>
-  </>
-) : (
-  <p style={{color:"red"}}>No profile selected</p>
-)}
+            <div className="booking-scroll">
 
-  <button
-    className="change-member-btn"
-    onClick={() => navigate("/patient/profile")}
-  >
-    Change Member
-  </button>
-</div>
+              <h2>Book Appointment</h2>
 
-        <button className="primary-btn confirm-btn" onClick={handleConfirmBooking}>
-          Confirm Appointment
-        </button>
-
-        <button 
-          className="secondary-btn confirm-btn"
-          onClick={() => setShowBooking(false)}
-        >
-          Go Back
-        </button>
-
-      </div>
-    </div>
-  </div>
-)}
-{selectedHospital && (
-  <div className="modal-overlay" onClick={() => setSelectedHospital(null)}>
-    <div className="booking-modal" onClick={(e) => e.stopPropagation()}>
-      <button className="modal-close" onClick={() => setSelectedHospital(null)}>
-        &times;
-      </button>
-
-      <div className="modal-flex">
-
-        {/* LEFT SIDE */}
-        <div className="modal-info-side">
-
-          {/* ✅ IMAGE SECTION FIXED */}
-          {selectedHospital.images?.length > 0 && (
-            <>
-              <img
-                src={selectedHospital.images[currentImageIndex]}
-                className="modal-hero-img"
-                alt=""
-                onClick={() =>
-                  setPreview(selectedHospital.images[currentImageIndex])
-                }
-              />
-
-              {selectedHospital.images.length > 1 && (
-                <>
-                  <button
-                    className="arrow left"
-                    onClick={() =>
-                      setCurrentImageIndex((prev) =>
-                        prev === 0
-                          ? selectedHospital.images.length - 1
-                          : prev - 1
-                      )
-                    }
-                  >
-                    ◀
-                  </button>
-
-                  <button
-                    className="arrow right"
-                    onClick={() =>
-                      setCurrentImageIndex((prev) =>
-                        prev === selectedHospital.images.length - 1
-                          ? 0
-                          : prev + 1
-                      )
-                    }
-                  >
-                    ▶
-                  </button>
-                </>
-              )}
-
-              <div className="modal-gallery">
-                {selectedHospital.images.map((img, i) => (
-                  <img
-                    key={i}
-                    src={img}
-                    alt=""
-                    onClick={() => setCurrentImageIndex(i)}
-                    style={{
-                      border:
-                        i === currentImageIndex
-                          ? "2px solid #10b981"
-                          : "1px solid #eee",
-                    }}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* HEADER */}
-          <div className="modal-header-info">
-            <div className="hosp-logo-mini">
-              <img src={selectedHospital.images?.[0]} alt="" />
-            </div>
-
-            <div className="hosp-title-wrap">
-              <h2>{selectedHospital.name}</h2>
-              <p>
-                📍 {selectedHospital.location}
-                <span className="star-span">
-                  ⭐ {selectedHospital.rating}
-                </span>
-              </p>
-            </div>
-          </div>
-
-          {/* ABOUT */}
-          <div className="about-section">
-            <h4>About Hospital</h4>
-            <p>
-              Multi-specialty hospital with advanced ICU, emergency,
-              diagnostics and surgical care.
-            </p>
-          </div>
-
-          {/* DEPARTMENTS */}
-          <div className="depts-section">
-            <h4>Departments</h4>
-            <div className="icon-grid">
-              {selectedHospital.depts?.map((d, i) => (
-                <div key={i} className="dept-icon-item">
-                  <span>⚕️</span>
-                  <small>{d}</small>
+              {/* Doctor mini info */}
+              <div className="booking-doctor">
+                <img src={selected.img} />
+                <div>
+                  <h3>{selected.name}</h3>
+                  <p>{selected.specialty}</p>
                 </div>
-              ))}
+              </div>
+
+              {/* Date */}
+              <div className="booking-section">
+                <p>Select Date</p>
+                <div className="date-list">
+                  {[0, 1, 2, 3, 4].map((d) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() + d);
+                    return (
+                      <button
+                        key={d}
+                        className={`date-chip ${selectedDate === d ? "active" : ""}`}
+                        onClick={() => setSelectedDate(d)}
+                      >
+                        {date.toDateString().slice(0, 10)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Time */}
+              <div className="booking-section">
+                <p>Select Time</p>
+                <div className="slot-list">
+                  {TIME_SLOTS.map((t) => (
+                    <button
+                      key={t}
+                      className={`slot ${selectedTime === t ? "active" : ""}`}
+                      onClick={() => setSelectedTime(t)}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Form */}
+              <div className="booking-section">
+                <p>Patient Info</p>
+
+                {selectedProfile ? (
+                  <>
+                    <h4>{selectedProfile.fullName}</h4>
+                    <p>
+                      {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
+                    </p>
+                  </>
+                ) : (
+                  <p style={{ color: "red" }}>No profile selected</p>
+                )}
+
+
+              </div>
+
+              <button className="primary-btn confirm-btn" onClick={handleConfirmBooking}>
+                Confirm Appointment
+              </button>
+
+              <button
+                className="secondary-btn confirm-btn"
+                onClick={() => setShowBooking(false)}
+              >
+                Go Back
+              </button>
+
             </div>
           </div>
-
-          {/* FACILITIES */}
-          <div className="facilities-section">
-            <h4>Facilities</h4>
-            <div className="icon-grid">
-              <div className="dept-icon-item">
-                <span>🏥</span>
-                <small>ICU</small>
-              </div>
-              <div className="dept-icon-item">
-                <span>🚑</span>
-                <small>Ambulance</small>
-              </div>
-              <div className="dept-icon-item">
-                <span>💊</span>
-                <small>Pharmacy</small>
-              </div>
-            </div>
-          </div>
-
         </div>
+      )}
+      {selectedHospital && (
+        <div className="modal-overlay" onClick={() => setSelectedHospital(null)}>
+          <div className="booking-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedHospital(null)}>
+              &times;
+            </button>
 
-        {/* RIGHT SIDE */}
-        <div className="modal-form-side">
+            <div className="modal-flex">
 
-          <h3>Booking & Admission Request</h3>
+              {/* LEFT SIDE */}
+              <div className="modal-info-side">
 
-          <div className="form-group">
-            <label>Bed Selection</label>
-            <select className="form-select">
-              <option>General Ward</option>
-              <option>Private Room</option>
-              <option>Deluxe Room</option>
-              <option>ICU</option>
-              <option>Ventilator ICU</option>
-              <option>Emergency Bed</option>
-              <option>Isolation Ward</option>
-              <option>Maternity Ward</option>
-              <option>Pediatric Ward</option>
-            </select>
-          </div>
+                {/* ✅ IMAGE SECTION FIXED */}
+                {selectedHospital.images?.length > 0 && (
+                  <>
+                    <img
+                      src={selectedHospital.images[currentImageIndex]}
+                      className="modal-hero-img"
+                      alt=""
+                      onClick={() =>
+                        setPreview(selectedHospital.images[currentImageIndex])
+                      }
+                    />
 
-          <div className="bed-availability-ui">
-            <p>Bed Availability</p>
-            <small className="green-text">
-              Beds Available: {selectedHospital.bedsAvailable} /{" "}
-              {selectedHospital.totalBeds}
-            </small>
- <div className="booking-section">
+                    {selectedHospital.images.length > 1 && (
+                      <>
+                        <button
+                          className="arrow left"
+                          onClick={() =>
+                            setCurrentImageIndex((prev) =>
+                              prev === 0
+                                ? selectedHospital.images.length - 1
+                                : prev - 1
+                            )
+                          }
+                        >
+                          ◀
+                        </button>
+
+                        <button
+                          className="arrow right"
+                          onClick={() =>
+                            setCurrentImageIndex((prev) =>
+                              prev === selectedHospital.images.length - 1
+                                ? 0
+                                : prev + 1
+                            )
+                          }
+                        >
+                          ▶
+                        </button>
+                      </>
+                    )}
+
+                    <div className="modal-gallery">
+                      {selectedHospital.images.map((img, i) => (
+                        <img
+                          key={i}
+                          src={img}
+                          alt=""
+                          onClick={() => setCurrentImageIndex(i)}
+                          style={{
+                            border:
+                              i === currentImageIndex
+                                ? "2px solid #10b981"
+                                : "1px solid #eee",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {/* HEADER */}
+                <div className="modal-header-info">
+                  <div className="hosp-logo-mini">
+                    <img src={selectedHospital.images?.[0]} alt="" />
+                  </div>
+
+                  <div className="hosp-title-wrap">
+                    <h2>{selectedHospital.name}</h2>
+                    <p>
+                      📍 {selectedHospital.location}
+                      <span className="star-span">
+                        ⭐ {selectedHospital.rating}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* ABOUT */}
+                <div className="about-section">
+                  <h4>About Hospital</h4>
+                  <p>
+                    Multi-specialty hospital with advanced ICU, emergency,
+                    diagnostics and surgical care.
+                  </p>
+                </div>
+
+                {/* DEPARTMENTS */}
+                <div className="depts-section">
+                  <h4>Departments</h4>
+                  <div className="icon-grid">
+                    {selectedHospital.depts?.map((d, i) => (
+                      <div key={i} className="dept-icon-item">
+                        <span>⚕️</span>
+                        <small>{d}</small>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* FACILITIES */}
+                <div className="facilities-section">
+                  <h4>Facilities</h4>
+                  <div className="icon-grid">
+                    <div className="dept-icon-item">
+                      <span>🏥</span>
+                      <small>ICU</small>
+                    </div>
+                    <div className="dept-icon-item">
+                      <span>🚑</span>
+                      <small>Ambulance</small>
+                    </div>
+                    <div className="dept-icon-item">
+                      <span>💊</span>
+                      <small>Pharmacy</small>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* RIGHT SIDE */}
+              <div className="modal-form-side">
+
+                <h3>Booking & Admission Request</h3>
+
+                <div className="form-group">
+                  <label>Bed Selection</label>
+                  <select className="form-select">
+                    <option>General Ward</option>
+                    <option>Private Room</option>
+                    <option>Deluxe Room</option>
+                    <option>ICU</option>
+                    <option>Ventilator ICU</option>
+                    <option>Emergency Bed</option>
+                    <option>Isolation Ward</option>
+                    <option>Maternity Ward</option>
+                    <option>Pediatric Ward</option>
+                  </select>
+                </div>
+
+                <div className="bed-availability-ui">
+                  <p>Bed Availability</p>
+                  <small className="green-text">
+                    Beds Available: {selectedHospital.bedsAvailable} /{" "}
+                    {selectedHospital.totalBeds}
+                  </small>
+                  <div className="booking-section">
                     <p>Patient Info</p>
 
                     {selectedProfile ? (
@@ -957,50 +952,43 @@ const closeModals = () => {
                       <p style={{ color: "red" }}>No profile selected</p>
                     )}
 
-                    <button
-  type="button"
-  className="change-member-btn"
-  onClick={() => navigate("/patient/profile")}
->
-                      Change Member
-                    </button>
+
                   </div>
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{
-                  width: `${
-                    (selectedHospital.bedsAvailable /
-                      selectedHospital.totalBeds) *
-                    100
-                  }%`,
-                }}
-              ></div>
+                  <div className="progress-bar">
+                    <div
+                      className="progress-fill"
+                      style={{
+                        width: `${(selectedHospital.bedsAvailable /
+                          selectedHospital.totalBeds) *
+                          100
+                          }%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <textarea placeholder="Reason for admission" rows="3"></textarea>
+                </div>
+
+                <div className="form-group">
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Emergency Contact Number"
+                  />
+                </div>
+
+                <button className="book-bed-btn">
+                  Book Bed Now
+                </button>
+
+              </div>
             </div>
           </div>
-
-          <div className="form-group">
-            <textarea placeholder="Reason for admission" rows="3"></textarea>
-          </div>
-
-          <div className="form-group">
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Emergency Contact Number"
-            />
-          </div>
-
-          <button className="book-bed-btn">
-            Book Bed Now
-          </button>
-
         </div>
-      </div>
-    </div>
-  </div>
-)}
-{showConfirmation && (
+      )}
+      {showConfirmation && (
         <div className="success-overlay">
           <div className="success-toast">
             <p style={{ fontWeight: 'bold', color: '#10B981' }}>Bed booked successfully ✅</p>
@@ -1016,7 +1004,7 @@ const closeModals = () => {
       {/* IMAGE FULL PREVIEW */}
       {preview && (
         <div className="full-preview-overlay active" onClick={() => setPreview(null)}>
-          <img src={preview} className="full-preview-img" alt="Preview" onClick={(e) => e.stopPropagation()}/>
+          <img src={preview} className="full-preview-img" alt="Preview" onClick={(e) => e.stopPropagation()} />
           <button className="preview-close-btn" onClick={() => setPreview(null)}>×</button>
 
           {selectedHospital?.images?.length > 1 && (
@@ -1038,216 +1026,209 @@ const closeModals = () => {
           )}
         </div>
       )}
-{/* POPUP MODAL */}
-{showModal && (
-  <div className="modal-root-overlay" onClick={() => setShowModal(false)}>
-    <div className="modal-container-main" onClick={(e) => e.stopPropagation()}>
-      {/* Header */}
-      <div className="modal-header-banner">
-        <div className="header-content-left">
-          <h2>{selectedLab?.name  || "Aarogya Diagnostic Center"}</h2>
-          <div className="sub-meta">
-            <span>⭐ {selectedLab.rating || "4.8"}</span> | <span>📍 {selectedLab.location || "Andheri East, Mumbai"}</span>
-          </div>
-        </div>
-        <div className="header-actions">
-          <button className="btn-call-lab">📞 Call Lab</button>
-          <button className="modal-close-icon" onClick={() => setShowModal(false)}>✕</button>
-        </div>
-      </div>
+      {/* POPUP MODAL */}
+      {showModal && (
+        <div className="modal-root-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-container-main" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="modal-header-banner">
+              <div className="header-content-left">
+                <h2>{selectedLab?.name || "Aarogya Diagnostic Center"}</h2>
+                <div className="sub-meta">
+                  <span>⭐ {selectedLab.rating || "4.8"}</span> | <span>📍 {selectedLab.location || "Andheri East, Mumbai"}</span>
+                </div>
+              </div>
+              <div className="header-actions">
+                <button className="btn-call-lab">📞 Call Lab</button>
+                <button className="modal-close-icon" onClick={() => setShowModal(false)}>✕</button>
+              </div>
+            </div>
 
-      {/* Tabs */}
-      <div className="modal-nav-tabs">
-        {['Available Tests', 'Packages', 'About Lab', 'Reviews'].map(tab => (
-          <button 
-            key={tab} 
-            className={`tab-item ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+            {/* Tabs */}
+            <div className="modal-nav-tabs">
+              {['Available Tests', 'Packages', 'About Lab', 'Reviews'].map(tab => (
+                <button
+                  key={tab}
+                  className={`tab-item ${activeTab === tab ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
 
-      {/* Modal Scrollable Content */}
-      <div className="modal-scroll-area">
-        <div className="modal-grid-body">
-          {/* Available Tests Tab */}
-          {activeTab === 'Available Tests' && (
-            <div className="booking-form-side">
-              <h3 className="form-heading">Select Tests & Schedule</h3>
-              <div className="form-field">
-                <label>Search & Select Tests</label>
-                <div className="test-selector-box">
-                  <div className="search-box-inner">
-                    <span className="search-tiny">🔍</span>
-                    <input 
-                      type="text" 
-                      placeholder="Type test name..." 
-                      className="test-search-input" 
-                      value={modalSearch}
-                      onChange={(e) => setModalSearch(e.target.value)}
-                    />
-                  </div>
-                  <div className="test-check-list">
-                    {filteredTests.map(test => (
-                      <div className="check-item" key={test.id} onClick={() => toggleTest(test.id)}>
-                        <div className="check-label-grp">
-                          <input type="checkbox" checked={selectedTests.includes(test.id)} readOnly />
-                          <span>{test.name}</span>
+            {/* Modal Scrollable Content */}
+            <div className="modal-scroll-area">
+              <div className="modal-grid-body">
+                {/* Available Tests Tab */}
+                {activeTab === 'Available Tests' && (
+                  <div className="booking-form-side">
+                    <h3 className="form-heading">Select Tests & Schedule</h3>
+                    <div className="form-field">
+                      <label>Search & Select Tests</label>
+                      <div className="test-selector-box">
+                        <div className="search-box-inner">
+                          <span className="search-tiny">🔍</span>
+                          <input
+                            type="text"
+                            placeholder="Type test name..."
+                            className="test-search-input"
+                            value={modalSearch}
+                            onChange={(e) => setModalSearch(e.target.value)}
+                          />
                         </div>
-                        <span className="item-price">₹{test.price}</span>
+                        <div className="test-check-list">
+                          {filteredTests.map(test => (
+                            <div className="check-item" key={test.id} onClick={() => toggleTest(test.id)}>
+                              <div className="check-label-grp">
+                                <input type="checkbox" checked={selectedTests.includes(test.id)} readOnly />
+                                <span>{test.name}</span>
+                              </div>
+                              <span className="item-price">₹{test.price}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="two-col-row">
+                      <div className="form-field">
+                        <label>Date</label>
+                        <input type="date" className="input-styled" defaultValue={new Date().toISOString().split('T')[0]} />
+                      </div>
+                      <div className="form-field">
+                        <label>Time Slot</label>
+                        <select className="input-styled">
+                          <option>08:00 AM - 09:00 AM</option>
+                          <option>10:00 AM - 11:00 AM</option>
+                          <option>02:00 PM - 03:00 PM</option>
+                          <option>05:00 PM - 06:00 PM</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="pickup-info-toggle">
+                      <div className="text-col">
+                        <strong>Home Sample Pickup</strong>
+                        <p>Technician will visit your address</p>
+                      </div>
+                      <StandardToggle
+                        id="homePickup"
+                        checked={homePickup}
+                        onChange={() => setHomePickup(!homePickup)}
+                      />
+                    </div>
+
+                    <div className="form-field">
+                      <label>Pickup Address</label>
+                      <textarea className="input-styled textarea" placeholder="Flat No, Building, Area Name..."></textarea>
+                    </div>
+                    <div className="booking-section">
+                      <p>Patient Info</p>
+
+                      {selectedProfile ? (
+                        <div className="selected-patient-card">
+                          <h4>{selectedProfile.fullName}</h4>
+                          <p>
+                            {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
+                          </p>
+                        </div>
+                      ) : (
+                        <p style={{ color: "red" }}>No profile selected</p>
+                      )}
+
+
+                    </div>
+                  </div>
+                )}
+
+                {/* Packages Tab */}
+                {activeTab === 'Packages' && (
+                  <div className="booking-form-side">
+                    <h3 className="form-heading">Health Packages</h3>
+                    {packagesData.map(pkg => (
+                      <div key={pkg.id} className="package-mini-card">
+                        <div className="pkg-info">
+                          <h4>{pkg.name}</h4>
+                          <p>Includes multiple parameters...</p>
+                          <span className="pkg-price">₹{pkg.price}</span>
+                        </div>
+                        <button
+                          className="btn-add-pkg"
+                          onClick={() => {
+                            if (selectedPackages.includes(pkg.id)) {
+                              setSelectedPackages(selectedPackages.filter(id => id !== pkg.id));
+                            } else {
+                              setSelectedPackages([...selectedPackages, pkg.id]);
+                            }
+                          }}
+                        >
+                          {selectedPackages.includes(pkg.id) ? "Remove" : "Add"}
+                        </button>
                       </div>
                     ))}
                   </div>
-                </div>
-              </div>
+                )}
 
-              <div className="two-col-row">
-                <div className="form-field">
-                  <label>Date</label>
-                  <input type="date" className="input-styled" defaultValue={new Date().toISOString().split('T')[0]} />
-                </div>
-                <div className="form-field">
-                  <label>Time Slot</label>
-                  <select className="input-styled">
-                    <option>08:00 AM - 09:00 AM</option>
-                    <option>10:00 AM - 11:00 AM</option>
-                    <option>02:00 PM - 03:00 PM</option>
-                    <option>05:00 PM - 06:00 PM</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="pickup-info-toggle">
-                 <div className="text-col">
-                   <strong>Home Sample Pickup</strong>
-                   <p>Technician will visit your address</p>
-                 </div>
-                 <StandardToggle 
-  id="homePickup" 
-  checked={homePickup} 
-  onChange={() => setHomePickup(!homePickup)} 
-/>
-              </div>
-
-              <div className="form-field">
-                <label>Pickup Address</label>
-                <textarea className="input-styled textarea" placeholder="Flat No, Building, Area Name..."></textarea>
-              </div>
-               <div className="booking-section">
-  <p>Patient Info</p>
-
-  {selectedProfile ? (
-    <div className="selected-patient-card">
-      <h4>{selectedProfile.fullName}</h4>
-      <p>
-        {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
-      </p>
-    </div>
-  ) : (
-    <p style={{ color: "red" }}>No profile selected</p>
-  )}
-
-  {/* ✅ ADD THIS BUTTON */}
-  <button
-    type="button"
-    className="change-member-btn"
-    onClick={() => navigate("/patient/profile")}
-  >
-    Change Member
-  </button>
-</div>
-            </div>
-          )}
-
-          {/* Packages Tab */}
-          {activeTab === 'Packages' && (
-            <div className="booking-form-side">
-              <h3 className="form-heading">Health Packages</h3>
-              {packagesData.map(pkg => (
-                <div key={pkg.id} className="package-mini-card">
-                  <div className="pkg-info">
-                    <h4>{pkg.name}</h4>
-                    <p>Includes multiple parameters...</p>
-                    <span className="pkg-price">₹{pkg.price}</span>
+                {activeTab === 'About Lab' && (
+                  <div className="booking-form-side">
+                    <h3 className="form-heading">About Aarogya Diagnostic</h3>
+                    <p className="about-text">
+                      Aarogya Diagnostic Center is a leading medical laboratory in Mumbai, established in 2010.
+                      We use state-of-the-art automated equipment to ensure the highest accuracy.
+                    </p>
+                    <ul className="certs-list">
+                      <li>✅ NABL Accredited</li>
+                      <li>✅ ISO Certified</li>
+                      <li>✅ 15+ Years Experience</li>
+                    </ul>
                   </div>
-                  <button 
-  className="btn-add-pkg"
-  onClick={() => {
-    if (selectedPackages.includes(pkg.id)) {
-      setSelectedPackages(selectedPackages.filter(id => id !== pkg.id));
-    } else {
-      setSelectedPackages([...selectedPackages, pkg.id]);
-    }
-  }}
->
-  {selectedPackages.includes(pkg.id) ? "Remove" : "Add"}
-</button>
+                )}
+
+                {/* Reviews Tab */}
+                {activeTab === 'Reviews' && (
+                  <div className="booking-form-side">
+                    <h3 className="form-heading">User Reviews</h3>
+
+                    {selectedLab.reviews?.length > 0 ? (
+                      selectedLab.reviews.map((rev, i) => (
+                        <div className="review-item" key={i}>
+                          <div className="rev-head">
+                            <strong>{rev.name}</strong>
+                            <span>{"⭐".repeat(Math.round(rev.ratingNumber))}</span>
+                          </div>
+                          <p>"{rev.comment}"</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No reviews available</p>
+                    )}
+                  </div>
+                )}
+
+
+                {/* Billing Summary */}
+                <div className="billing-summary-side">
+                  <div className="summary-card">
+                    <h4>Bill Details</h4>
+                    <div className="summary-row"><span>Test Subtotal</span><span>₹{subtotal}</span></div>
+                    <div className="summary-row"><span>Medical Tax (GST 5%)</span><span>₹{gst}</span></div>
+                    <div className="summary-row"><span>Service Charge</span><span>₹{serviceCharge}</span></div>
+                    {/* Conditional Rendering */}
+                    {homePickup && (
+                      <div className="summary-row"><span>Home Pickup Fee</span><span>₹{pickupFee}</span></div>
+                    )}
+                    <div className="grand-total-row"><span>Payable Amount</span><span>₹{grandTotal}</span></div>
+                    <button className="btn-confirm-booking">Confirm Booking</button>
+                    <p className="safe-text">🔒 100% Safe & Secure Payments</p>
+                  </div>
                 </div>
-              ))}
+
+              </div>
             </div>
-          )}
-
-         {activeTab === 'About Lab' && (
-  <div className="booking-form-side">
-    <h3 className="form-heading">About Aarogya Diagnostic</h3>
-    <p className="about-text">
-      Aarogya Diagnostic Center is a leading medical laboratory in Mumbai, established in 2010.
-      We use state-of-the-art automated equipment to ensure the highest accuracy.
-    </p>
-    <ul className="certs-list">
-      <li>✅ NABL Accredited</li>
-      <li>✅ ISO Certified</li>
-      <li>✅ 15+ Years Experience</li>
-    </ul>
-  </div>
-)}
-
-          {/* Reviews Tab */}
-          {activeTab === 'Reviews' && (
-  <div className="booking-form-side">
-    <h3 className="form-heading">User Reviews</h3>
-
-    {selectedLab.reviews?.length > 0 ? (
-      selectedLab.reviews.map((rev, i) => (
-        <div className="review-item" key={i}>
-          <div className="rev-head">
-            <strong>{rev.name}</strong>
-            <span>{"⭐".repeat(Math.round(rev.ratingNumber))}</span>
           </div>
-          <p>"{rev.comment}"</p>
         </div>
-      ))
-    ) : (
-      <p>No reviews available</p>
-    )}
-  </div>
-)}
-
-
-          {/* Billing Summary */}
-         <div className="billing-summary-side">
-  <div className="summary-card">
-    <h4>Bill Details</h4>
-    <div className="summary-row"><span>Test Subtotal</span><span>₹{subtotal}</span></div>
-    <div className="summary-row"><span>Medical Tax (GST 5%)</span><span>₹{gst}</span></div>
-    <div className="summary-row"><span>Service Charge</span><span>₹{serviceCharge}</span></div>
-    {/* Conditional Rendering */}
-    {homePickup && (
-      <div className="summary-row"><span>Home Pickup Fee</span><span>₹{pickupFee}</span></div>
-    )}
-    <div className="grand-total-row"><span>Payable Amount</span><span>₹{grandTotal}</span></div>
-    <button className="btn-confirm-booking">Confirm Booking</button>
-    <p className="safe-text">🔒 100% Safe & Secure Payments</p>
-  </div>
-</div>
-
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
       {/* --- FOOTER SECTION --- */}
       <footer className="main-footer">
         <div className="footer-container">
@@ -1298,7 +1279,7 @@ const closeModals = () => {
           <div className="footer-column">
             <h4>Services</h4>
             <ul className="footer-list">
-                <li onClick={() => navigate("/all-services")}>Find Doctors</li>
+              <li onClick={() => navigate("/all-services")}>Find Doctors</li>
               <li onClick={() => navigate("/all-services")}>Find Hospitals</li>
               <li onClick={() => navigate("/all-services")}>Find Labs</li>
             </ul>

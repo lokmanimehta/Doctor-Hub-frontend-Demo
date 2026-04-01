@@ -24,10 +24,7 @@ const PendingVerifications = () => {
   };
 
   // ✅ Ignore doctor (instant card remove)
-  const handleIgnore = (id) => {
-    console.log("Ignored doctor ID:", id);
-    setPendingDoctors(prev => prev.filter(doc => doc.id !== id));
-  };
+ 
 
   return (
     <div className="pending-verifications-page">
@@ -58,9 +55,7 @@ const PendingVerifications = () => {
                 </button>
 
                 {/* Ignore instantly removes card */}
-                <button className="btn-ignore" onClick={() => handleIgnore(doc.id)}>
-                  ❌
-                </button>
+               
               </div>
             </div>
           ))}

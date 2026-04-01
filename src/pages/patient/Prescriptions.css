@@ -1,476 +1,742 @@
+/* Prescriptions.css - Enterprise Level Design */
+
 :root {
-  --primary: #0f766e;
-  --primary-glow: rgba(15, 118, 110, 0.15);
-  --accent: #2dd4bf;
-  --bg-main: #f8fafc;
-  --card-bg: #ffffff;
-  --text-main: #06349f;
-  --text-sub: #475569;
-  --border-color: #cbd5e1;
-  --radius-lg: 24px;
-  --radius-md: 16px;
-  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* Universal Reset */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
-}
-
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg-main);
-  color: var(--text-main);
-  line-height: 1.5;
-  overflow-x: hidden;
-  /* Modal open hone par overflow-y: hidden; JS se lagana hoga */
-}
-
-/* Scrollbar Styling for smoothness */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --primary: #2563eb;
+    --primary-light: #eff6ff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05);
+    --radius: 12px;
 }
 
 .pres-container {
-  padding: 16px;
-  background: var(--bg-main);
-  min-height: 100vh;
-  width: 100%;
-  position: relative;
-  overflow-x: hidden;
-  transition: all 0.3s ease;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-main);
+    min-height: 100vh;
 }
 
-/* Header Upgrades */
+/* Header & Search */
 .pres-header-premium {
-  margin-bottom: 24px;
-  height: auto;
-  display: block;
+    margin-bottom: 30px;
+    height: 130px;
 }
 
 .header-titles h1 {
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--text-main);
-  letter-spacing: -0.5px;
-  line-height: 1.2;
+    font-size: 1.75rem;
+    color: var(--text-main);
+    font-weight: 700;
+    margin-bottom: 4px;
 }
 
 .header-titles p {
-  color: var(--text-sub);
-  font-size: 14px;
-  margin-top: 4px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
 }
 
-/* Search & Controls */
 .search-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 24px;
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .premium-search {
-  order: 1;
-  position: relative;
-  width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 350px;
+}
+
+.s-icon {
+    position: absolute;
+    left: 16px;
+    color: var(--text-muted);
 }
 
 .premium-search input {
-  width: 100%;
-  padding: 14px 16px 14px 48px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--card-bg);
-  font-size: 15px;
-  box-shadow: var(--shadow-sm);
-  outline: none;
-  transition: 0.3s;
+    width: 100%;
+    padding: 14px 14px 14px 48px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    background: var(--card-bg);
+    transition: border-color 0.2s;
 }
 
 .premium-search input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px var(--primary-glow);
-}
-
-.premium-search .s-icon {
-  position: absolute;
-  left: 18px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-sub);
-  font-size: 20px;
-  pointer-events: none;
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .filter-pills {
-  order: 2;
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 4px 0 12px 0;
-  white-space: nowrap;
-  -ms-overflow-style: none;
-}
-
-.filter-pills::-webkit-scrollbar {
-  display: none !important;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
 }
 
 .pill {
-  padding: 10px 20px;
-  border-radius: 50px;
-  border: 1px solid var(--border-color);
-  background: var(--card-bg);
-  color: var(--text-sub);
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  transition: 0.3s;
-  white-space: nowrap;
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-muted);
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
 }
 
 .pill.active {
-  background: var(--primary);
-  color: white;
-  border-color: var(--primary);
-  box-shadow: 0 10px 15px -3px rgba(15, 118, 110, 0.25);
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
 }
 
-/* Ongoing Med Highlight Card */
+/* AI Banner */
+.ai-insight-banner {
+    background: rgb(197, 246, 241);
+    color: #fff;
+    padding: 16px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.ai-icon-box {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+}
+.shield-icon{
+  color: black;
+}
+
+.ai-banner-text h4 { margin: 0; font-size: 0.95rem; }
+.ai-banner-text p { margin: 2px 0 0; font-size: 0.85rem; opacity: 0.8; color: black; }
+
+/* Ongoing Highlight Section */
 .ongoing-highlight {
-  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  margin-bottom: 30px;
-  color: white;
-  box-shadow: 0 25px 30px -10px rgba(13, 148, 136, 0.2);
+    background: var(--primary-light);
+    border: 1px solid rgba(37, 99, 235, 0.1);
+    padding: 20px;
+    border-radius: var(--radius);
+    margin-bottom: 30px;
 }
 
 .highlight-text h3 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 18px;
-}
-
-.pulse-icon {
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary);
+    font-size: 1.1rem;
+    margin-bottom: 4px;
 }
 
 .medication-grid-mini {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
 }
 
 .mini-med-card {
-  background: rgba(255, 255, 255, 0.15);
-   -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
- 
-  padding: 14px;
-  border-radius: var(--radius-md);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    background: var(--card-bg);
+    padding: 12px 16px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-sm);
 }
 
-.med-name { font-weight: 700; display: block; font-size: 14px; }
-.med-dosage { font-size: 12px; opacity: 0.9; }
+.med-name { display: block; font-weight: 600; color: var(--text-main); }
+.med-dosage { font-size: 0.85rem; color: var(--text-muted); }
 
 .alert-btn {
-  background: white;
-  color: var(--primary);
-  border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-weight: 800;
-  font-size: 11px;
-  cursor: pointer;
+    background: var(--primary-light);
+    color: var(--primary);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 /* Records Grid & Cards */
 .records-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
 }
 
 .premium-record-card {
-  background: var(--card-bg);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
-  transition: 0.3s ease;
-  display: flex;
-  flex-direction: column;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.premium-record-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
 }
 
 .card-status-indicator {
-  position: absolute;
-  top: 0; left: 0; width: 5px; height: 100%;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
 }
-.card-status-indicator[data-status="Active"] { background: var(--accent); }
-.card-status-indicator[data-status="Past"] { background: #cbd5e1; }
+
+.card-status-indicator[data-status="Active"] { background: var(--success); }
+.card-status-indicator[data-status="Past"] { background: var(--text-muted); }
 
 .doctor-profile {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 .doctor-profile img {
-  width: 45px; height: 45px; border-radius: 10px; object-fit: cover;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
-.doc-details h4 { font-size: 15px; color: var(--text-main); margin: 0; }
-.doc-details span { font-size: 12px; color: var(--text-sub); }
+.doc-details h4 { margin: 0; font-size: 1rem; color: var(--text-main); }
+.doc-details span { font-size: 0.85rem; color: var(--text-muted); }
 
-.diagnosis-info .label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-sub); font-weight: 700; }
-.diagnosis-info p { font-size: 16px; font-weight: 700; color: var(--primary); margin-top: 2px; }
+.diagnosis-info .label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+.diagnosis-info p { font-weight: 600; margin: 4px 0 12px; color: var(--text-main); }
+
+.voice-summary-preview {
+    background: #f1f5f9;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    display: flex;
+    gap: 8px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    font-style: italic;
+}
 
 .meta-footer {
-  margin-top: 15px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  font-size: 11px;
-  color: var(--text-sub);
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
 }
 
 .card-actions {
-  margin-top: 18px;
-  padding-top: 15px;
-  border-top: 1px dashed var(--border-color);
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
 }
 
 .btn-icon {
-  background: none;
-  border: none;
-  font-size: 22px;
-  color: var(--text-sub);
-  cursor: pointer;
-  transition: 0.2s;
-  padding: 5px;
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    color: var(--text-main);
+    transition: 0.2s;
 }
 
-.btn-icon:hover { color: var(--primary); transform: scale(1.1); }
+.btn-icon:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
 
-.premium-toast {
-  position: fixed;
-  top: 24px; /* Neeche ki jagah upar kar diya taaki dikhe */
-  left: 50%;
-  transform: translateX(-50%);
-background: #0f172a; /* Dark background */
-  color: #ffffff !important; /* YAHAN CHANGE KIYA: var(--bg-main) ki jagah direct white use karein */
-  padding: 14px 28px;;
-  border-radius: 50px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  z-index: 999999; /* Sabse upar */
-  font-size: 14px;
-  font-weight: 600;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  border: 1px solid rgba(255,255,255,0.1);
-  animation: toastSlideIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-  
-}
-.premium-toast span, 
-.premium-toast p {
-  color: #ffffff !important;
-  display: inline-block;
-}
-
-@keyframes toastSlideIn {
-  from { transform: translate(-50%, -100%); opacity: 0; }
-  to { transform: translate(-50%, 0); opacity: 1; }
-}
-/* --- MODAL SYSTEM (CRITICAL FIXES) --- */
+/* Modal Styles */
 .modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.8);
-    -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-
-  z-index: 100000;
-  display: flex;
-  align-items: center; 
-  justify-content: center;
-  padding: 16px;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
 }
 
+/* Modal Container Improvements */
 .premium-modal {
-  background: white;
-  width: 100%;
-  max-width: 500px;
-  border-radius: var(--radius-lg);
-  max-height: 85vh; 
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  overflow: hidden; /* Strict limit */
-  animation: modalPop 0.3s ease-out;
-}
-
-@keyframes modalPop {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+    background: #ffffff;
+    width: 95%;
+    max-width: 650px; /* Optimal width for reading */
+    max-height: 85vh;
+    border-radius: 20px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-head {
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border-color);
-  flex-shrink: 0;
+    padding: 20px 24px;
+    border-bottom: 1px solid #f1f5f9;
 }
+
+.title-grp h2 { margin: 0; font-size: 1.3rem; color: #0f172a; }
+.title-grp p { margin: 4px 0 0; font-size: 0.85rem; color: #64748b; }
 
 .modal-scroll-area {
-  padding: 16px;
-  overflow-y: auto;
-  overflow-x: hidden; /* YAHAN SE FIX HUA HAI */
-  flex: 1;
+    padding: 24px;
+    overflow-y: auto;
 }
 
-/* Table Responsive Fix for Mobile */
-.meds-table-container {
-  width: 100%;
-  margin: 10px 0;
+/* Card Based Medicines (Scroll-free) */
+.meds-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 12px;
 }
 
-.meds-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-/* Mobile par table ko stack kar rahe hain */
-@media (max-width: 600px) {
-  .meds-table thead {
-    display: none; /* Header chhupa do mobile par */
-  }
-  .meds-table tr {
-    display: block;
-    background: var(--bg-main);
+.med-detail-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
-    margin-bottom: 12px;
-    padding: 12px;
-    border: 1px solid var(--border-color);
-  }
-  .meds-table td {
+    padding: 16px;
+    transition: transform 0.2s;
+}
+
+.med-detail-card:hover {
+    border-color: #2563eb;
+    background: #f8fafc;
+}
+
+.med-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px dashed var(--border-color);
-    width: 100%;
-    font-size: 14px;
-  }
-  .meds-table td:last-child { border-bottom: none; }
-  /* Content add karne ke liye labels */
-  .meds-table td::before {
-    content: attr(data-label);
-    font-weight: 700;
-    color: var(--text-sub);
-    font-size: 12px;
-  }
+    margin-bottom: 12px;
 }
 
-/* Desktop Table View */
-@media (min-width: 601px) {
-  .meds-table th { text-align: left; padding: 12px; font-size: 12px; color: var(--text-sub); border-bottom: 2px solid var(--bg-main); }
-  .meds-table td { padding: 12px; border-bottom: 1px solid var(--bg-main); }
+.med-card-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #1e293b;
 }
 
 .dose-badge {
-  background: var(--primary);
-  color: white;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 12px;
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
 }
 
-.doc-notes {
-  background: #fffbeb;
-  padding: 16px;
-  border-radius: 12px;
-  border-left: 4px solid #f59e0b;
-  margin-top: 15px;
-  width: 100%;
+.med-meta-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: #475569;
 }
 
-.doc-notes p { font-size: 13px; color: #b45309; word-wrap: break-word; }
+/* AI Voice Transcription Section Fix */
+.ai-voice-card {
+    background: #fff5f7; /* Soft pink background like your image */
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.ai-voice-card h4 {
+    color: #be185d; /* Darker pink for text */
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Line 388 ke aas-paas ise update karo */
+.ai-voice-card p {
+    -webkit-user-select: none;  /* Safari aur iOS ke liye */
+    -moz-user-select: none;     /* Firefox ke liye */
+    -ms-user-select: none;      /* Internet Explorer/Edge ke liye */
+    user-select: none;          /* Standard syntax */
+}
+
+/* Diagnosis Section */
+/* Clinical Notes Card Container */
+.doc-notes-card {
+    margin-top: 24px;
+    background: #f8fafc; /* Light grayish-blue background */
+    border-radius: 16px;
+    border-left: 5px solid #2563eb; /* Primary blue accent */
+    padding: 20px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.notes-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.notes-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pulse-icon {
+    color: #2563eb;
+    font-size: 1.2rem;
+    animation: pulse-soft 2s infinite;
+}
+
+/* Text Content Fix */
+.notes-content p {
+    margin: 0;
+    line-height: 1.6;
+    color: #475569;
+    font-size: 0.95rem;
+    font-style: italic; /* Medical notes often look good in italic */
+    
+    /* Highlight fix */
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Modern Lifestyle Tags (Optional) */
+.lifestyle-tags {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.tag {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+/* Subtle Animation for the Icon */
+@keyframes pulse-soft {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Fix for the X Button in Modal Head */
+.modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.close-btn {
+    background: #f1f5f9;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.close-btn:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
 
 /* Modal Footer */
 .modal-footer-btns {
-  padding: 16px 20px;
-  display: flex;
-  gap: 10px;
-  border-top: 1px solid var(--border-color);
-  flex-shrink: 0;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1.5fr; /* Primary action is wider */
+    gap: 12px;
+    border-top: 1px solid #f1f5f9;
 }
 
 .btn-order {
-  flex: 1;
-  padding: 14px;
-  background: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 14px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
 }
 
-/* Sidebar & Desktop Adjustments */
-@media (min-width: 1024px) {
-  .pres-container { padding: 40px; max-width: 1400px; margin: 0 auto; }
-  .search-controls { 
-    flex-direction: row; 
-    justify-content: flex-start; /* Left se start hoga */
+.btn-reports {
+    background: #fff;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: flex;
     align-items: center;
-    gap: 20px; /* Search bar aur tabs ke beech ka fixed gap */
-  }
- .premium-search { 
-    flex: 0 0 400px; /* Search bar fixed 400px ka rahega */
-    order: 1;
-  }
-  .filter-pills { 
-    order: 2;
-    margin: 0;
-    padding: 0;
-    overflow: visible; /* Scroll hide karne ki zaroorat nahi desktop pe */
-  }
-  .records-grid { grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); }
-  .premium-modal { max-width: 600px; }
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
 }
+.modal-head {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex; /* Ensure horizontal layout */
+    justify-content: space-between; /* Title left, X right */
+    align-items: flex-start;
+}
+
+.close-btn {
+    background: #f1f5f9;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s;
+    flex-shrink: 0; /* Button dabbe na */
+}
+
+.close-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+/* Follow-up Section Styling */
+.follow-up-section {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(0, 0, 0, 0.08); /* Light separator */
+}
+
+.follow-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.follow-label svg {
+    color: #2563eb;
+    font-size: 1rem;
+}
+
+.follow-up-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.follow-pill {
+    background: #f1f5f9;
+    color: #334155;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.follow-pill:hover {
+    background: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+.follow-pill strong {
+    color: #0f172a;
+    font-weight: 700;
+}
+.btn-order { background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+.btn-reports { background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+
+/* Toast */
+/* Toast Notification Styling */
+.premium-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b; /* Dark background taaki white text chamke */
+    color: #ffffff !important; /* Forcefully white text */
+    padding: 12px 24px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 2000;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    font-weight: 500;
+}
+
+.toast-icon {
+    color: #10b981; /* Icon ko green rakha hai success feel ke liye */
+    font-size: 1.2rem;
+}
+
+.premium-toast span {
+    color: #ffffff !important; /* Span ke liye extra safety */
+}
+
+/* Responsive Adjustments */
+/* --- MOBILE RESPONSIVE OPTIMIZATIONS --- */
 
 @media (max-width: 768px) {
-  .patient-main.expanded-margin { margin-left: 0 !important; }
+    /* Container padding kam karein */
+    .pres-container {
+        padding: 12px;
+    }
+
+    /* Header height auto karein taaki content wrap ho sake */
+    .pres-header-premium {
+        height: auto;
+        margin-bottom: 20px;
+    }
+
+    .header-titles h1 {
+        font-size: 1.4rem;
+    }
+
+    /* Search bar ko full width karein */
+    .premium-search {
+        width: 100% !important;
+    }
+
+    .search-controls {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* AI Banner ko thoda compact karein */
+    .ai-insight-banner {
+        padding: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    /* Medication Grid Mobile: 1 column */
+    .medication-grid-mini {
+        grid-template-columns: 1fr;
+    }
+
+    /* Records Grid Mobile: 1 column */
+    .records-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    /* Modal Adjustments */
+    .premium-modal {
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 0; /* Full screen mobile feel */
+    }
+
+    .modal-scroll-area {
+        padding: 16px;
+    }
+
+    .med-meta-row {
+        grid-template-columns: 1fr; /* Details ek ke niche ek */
+        gap: 5px;
+    }
+
+    /* Buttons row ko stack karein mobile par */
+    .modal-footer-btns {
+        grid-template-columns: 1fr;
+        padding: 15px;
+    }
+
+    .btn-order {
+        order: -1; /* Order button ko upar dikhane ke liye */
+    }
+
+    /* Voice summary text thoda chota */
+    .voice-summary-preview {
+        font-size: 0.8rem;
+        padding: 8px;
+    }
+}
+
+/* Extra Small Devices (Phones) */
+@media (max-width: 480px) {
+    .header-titles h1 {
+        font-size: 1.2rem;
+    }
+
+    .pill {
+        padding: 6px 14px;
+        font-size: 0.85rem;
+    }
+
+    .premium-record-card {
+        padding: 15px;
+    }
+
+    .doc-details h4 {
+        font-size: 0.95rem;
+    }
+    
+    .toast-icon {
+        font-size: 1rem;
+    }
+    
+    .premium-toast {
+        width: 90%;
+        font-size: 0.85rem;
+        padding: 10px 15px;
+    }
 }

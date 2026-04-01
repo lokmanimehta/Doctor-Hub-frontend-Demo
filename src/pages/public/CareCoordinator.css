@@ -120,7 +120,98 @@
   gap: 5px;
 }
 
+/* --- MOBILE & TABLET RESPONSIVENESS --- */
+
+@media (max-width: 1024px) {
+  .care-content-grid {
+    gap: 30px; /* Tablet par thoda kam gap */
+  }
+}
+
 @media (max-width: 900px) {
-  .care-content-grid { grid-template-columns: 1fr; }
-  .care-form-container { position: static; }
+  .care-content-grid {
+    grid-template-columns: 1fr; /* Form ko content ke niche shift karega */
+  }
+
+  .care-form-container {
+    position: static; /* Sticky behavior hatane ke liye */
+    margin-top: 40px;
+    padding: 30px 20px;
+  }
+
+  .care-hero h1 {
+    font-size: 32px; /* Choti screen ke liye heading size adjust */
+  }
+}
+
+@media (max-width: 600px) {
+  .care-container {
+    padding: 0 15px;
+    margin: 20px auto;
+  }
+
+  .care-hero {
+    margin-bottom: 30px;
+  }
+
+  .care-hero h1 {
+    font-size: 28px;
+    line-height: 1.2;
+  }
+
+  .care-hero p {
+    font-size: 15px;
+  }
+
+  /* Form adjustments */
+  .form-row {
+    grid-template-columns: 1fr; /* Mobile par inputs ek ke niche ek */
+    gap: 0;
+  }
+
+  .info-card {
+    padding: 20px;
+  }
+
+  /* Execution Steps */
+  .step {
+    gap: 15px;
+  }
+
+  .step-num {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  /* Benefits Grid - 2 columns on mobile instead of 3 */
+  .benefits-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .benefit-box {
+    padding: 15px 10px;
+  }
+
+  .benefit-box h4 {
+    font-size: 13px;
+  }
+
+  /* Submit Button */
+  .btn-submit {
+    padding: 14px;
+    font-size: 16px;
+  }
+}
+
+/* Extra small screens (iPhone SE etc.) */
+@media (max-width: 380px) {
+  .benefits-grid {
+    grid-template-columns: 1fr; /* Sab kuch single column */
+  }
+  
+  .care-hero h1 {
+    font-size: 24px;
+  }
 }

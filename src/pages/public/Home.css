@@ -76,7 +76,7 @@ a, a:hover, a:visited, a:active {
     background: white;
     width: 280px; /* Professional width */
     min-width: 280px; 
-    min-height:260px ;
+    min-height:280px ;
     height:auto ;
     border-radius: 20px;
     box-shadow: var(--shadow-premium);

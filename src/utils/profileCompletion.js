@@ -1,25 +1,45 @@
-export const calculateProfileCompletion = (user) => {
+export const calculateProfileCompletion = (form = {}, files = {}) => {
   let score = 0;
 
-  if (user.fullName) score += 10;
-  if (user.email) score += 10;
-  if (user.phone) score += 10;
-  if (user.specialization) score += 10;
-  if (user.experience) score += 10;
-  if (user.gender) score += 10;
-  if (user.about) score += 10;
+  // BASIC
+  if (form.phone) score += 5;
+  if (form.gender) score += 5;
+  if (form.about) score += 5;
+  if (form.profilePic) score += 5;
 
-  // ✅ IMPORTANT FIX
-if (user.clinics && user.clinics.length > 0) {
-  const validClinic = user.clinics.some(
-    c => c.clinicName && c.clinicAddress && c.consultationFee
-  );
-  if (validClinic) score += 10;
-}
+  // PROFESSIONAL
+  if (form.specialization) score += 10;
+  if (form.experience) score += 10;
 
-  if (user.councilName) score += 10;
-  if (user.registrationNumber) score += 10;
-  if (user.registrationYear) score += 10;
+  // CLINIC
+  if (form.clinics?.length > 0) {
+    score += 15;
 
-  return score;
+    const hasValidAvailability = form.clinics.some(clinic =>
+      clinic.availability?.some(
+        slot => slot.day && slot.startTime && slot.endTime
+      )
+    );
+
+    if (hasValidAvailability) score += 10;
+  }
+
+  // VISITING
+  if (form.visitingPositions?.length > 0) score += 5;
+
+  // VERIFICATION
+  if (form.councilName) score += 10;
+  if (form.registrationNumber && form.registrationYear) score += 10;
+
+  // DOCUMENTS (FIXED)
+  if (files?.signature) score += 5;
+
+  const hasGovtId = files?.govtIds?.some(id => id.file);
+  if (hasGovtId) score += 5;
+
+  const hasCertificate = files?.certificates?.some(c => c.file);
+  if (hasCertificate) score += 5;
+
+  // 🔥 FINAL FIX
+  return Math.min(score, 100);
 };

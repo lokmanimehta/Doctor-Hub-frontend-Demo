@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Contact.css";
 import Logo from "../../assets/images/logo.png"
-
+import { Mail, MapPin, Phone, Send } from "lucide-react";
 const ContactUs = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -11,7 +11,12 @@ const ContactUs = () => {
   const [patientSub, setPatientSub] = useState(false);
   
   const saasRef = useRef(null);
-
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "General Inquiry",
+    message: ""
+  });
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (saasRef.current && !saasRef.current.contains(e.target)) setSaasDropdown(false);
@@ -19,7 +24,10 @@ const ContactUs = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
+const handleSubmit = (e) => {
+    e.preventDefault();
+    alert("Message Sent! We will get back to you soon.");
+  };
   return (
     <div className="home-wrapper">
       {/* --- SIDEBAR OVERLAY --- */}
@@ -98,53 +106,93 @@ const ContactUs = () => {
       </header>
 
       {/* --- CONTACT CONTENT --- */}
-      <main className="main-content">
-        <section className="contact-hero">
-          <h1>Get In <span>Touch</span></h1>
-          <p>We're here to help you 24/7. Reach out to us anytime.</p>
-        </section>
+      <main className="contact-content">
+        <div className="content-container">
+          {/* --- LEFT: INFO SECTION --- */}
+          <div className="info-section">
+            <div className="section-tag">Contact Us</div>
+            <h1>Let’s talk about <span>your health</span> journey.</h1>
+            <p className="subtext">
+              Have questions about our services or need technical support? 
+              Our team is ready to assist you.
+            </p>
 
-        <section className="contact-main-section">
-          <div className="contact-card">
-            <div className="contact-info-panel">
-              <div>
-                <h2>Contact <span>Info</span></h2>
-                <p style={{marginTop:'10px', opacity:'0.8'}}>Say something to start a live chat!</p>
-              </div>
-              
-              <div className="info-items">
-                <div className="info-item"><span>📍</span> <p>123 Health Tower, Mumbai</p></div>
-                <div className="info-item"><span>📞</span> <p>+91 (800) 123-4567</p></div>
-                <div className="info-item"><span>✉️</span> <p>support@dochub.com</p></div>
+            <div className="contact-methods">
+              <div className="method-card">
+                <div className="icon-box"><Mail size={20} /></div>
+                <div>
+                  <h4>Email us</h4>
+                  <p>support@dochub.com</p>
+                </div>
               </div>
 
-              {/* Panel Socials */}
-             
+              <div className="method-card">
+                <div className="icon-box"><Phone size={20} /></div>
+                <div>
+                  <h4>Call us</h4>
+                  <p>+91 (22) 4567-8900</p>
+                </div>
+              </div>
+
+              <div className="method-card">
+                <div className="icon-box"><MapPin size={20} /></div>
+                <div>
+                  <h4>Visit us</h4>
+                  <p>Andheri West, Mumbai, MH</p>
+                </div>
+              </div>
             </div>
+          </div>
 
-            <form className="contact-form-panel">
-              <div className="form-grid">
-                <div className="input-group">
-                  <label>First Name</label>
-                  <input type="text" placeholder="First Name" required />
-                </div>
-                <div className="input-group">
-                  <label>Last Name</label>
-                  <input type="text" placeholder="Surname" required />
-                </div>
+          {/* --- RIGHT: FORM SECTION --- */}
+          <div className="form-section">
+            <form onSubmit={handleSubmit} className="minimal-form">
+              <div className="input-group">
+                <label>Full Name</label>
+                <input 
+                  type="text" 
+                  placeholder="John Doe" 
+                  required 
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                />
               </div>
+
               <div className="input-group">
                 <label>Email Address</label>
-                <input type="email" placeholder="YourEmail@gmail.com" required />
+                <input 
+                  type="email" 
+                  placeholder="john@example.com" 
+                  required 
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                />
               </div>
+
+              <div className="input-group">
+                <label>Subject</label>
+                <select onChange={(e) => setFormData({...formData, subject: e.target.value})}>
+                  <option>General Inquiry</option>
+                  <option>Technical Support</option>
+                  <option>Doctor Partnership</option>
+                  <option>Patient Portal Issue</option>
+                </select>
+              </div>
+
               <div className="input-group">
                 <label>Message</label>
-                <textarea rows="4" placeholder="How can we help?" required></textarea>
+                <textarea 
+                  rows="5" 
+                  placeholder="How can we help you today?" 
+                  required
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                ></textarea>
               </div>
-              <button type="submit" className="submit-btn">Send Message</button>
+
+              <button type="submit" className="submit-button">
+                Send Message <Send size={16} />
+              </button>
             </form>
           </div>
-        </section>
+        </div>
       </main>
 
       <footer className="main-footer">

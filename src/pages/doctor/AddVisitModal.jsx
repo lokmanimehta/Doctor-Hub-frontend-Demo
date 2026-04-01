@@ -2,15 +2,23 @@ import React, { useState } from "react";
 import "./AddVisitModal.css";
 import { useEffect } from "react";
 
-const AddVisitModal = ({ onClose }) => {
+const AddVisitModal = ({ onClose, onSave }) => {
   const [complaint, setComplaint] = useState("");
   const [notes, setNotes] = useState("");
 
   const handleSave = () => {
-    // UI ONLY for now
-    console.log({ complaint, notes });
-    onClose();
+  if (!complaint || !notes) return;
+
+  const newVisit = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString(),
+    complaint,
+    notes
   };
+
+  onSave(newVisit);   // 🔥 IMPORTANT
+  onClose();
+};
 useEffect(() => {
   document.body.style.overflow = "hidden";
   return () => {

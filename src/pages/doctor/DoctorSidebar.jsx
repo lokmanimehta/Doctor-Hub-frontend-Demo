@@ -1,45 +1,4 @@
-// import React from "react";
-// import { NavLink } from "react-router-dom";
-// import "./DoctorSidebar.css";
-// import { useNotifications } from "../../hooks/useNotifications";
 
-// const DoctorSidebar = () => {
-//   const { unreadCount } = useNotifications();
-
-//   const menu = [
-//     { name: "Dashboard", path: "/doctor/dashboard" },
-//     { name: "Appointments", path: "/doctor/appointments" },
-//     { name: "Patients", path: "/doctor/patients" },
-//     { name: "Availability", path: "/doctor/availability" },
-//     { name: "Notifications", path: "/doctor/notifications" },
-//   ];
-
-//   return (
-//     <aside className="doctor-sidebar">
-//       <h2 className="doctor-logo">Doctor’s Hub</h2>
-
-//       <ul className="doctor-menu">
-//         {menu.map((item) => (
-//           <li key={item.name}>
-//             <NavLink
-//               to={item.path}
-//               className={({ isActive }) =>
-//                 isActive ? "doctor-link active" : "doctor-link"
-//               }
-//             >
-//               <span>{item.name}</span>
-//               {item.name === "Notifications" && unreadCount > 0 && (
-//                 <span className="notification-badge">{unreadCount}</span>
-//               )}
-//             </NavLink>
-//           </li>
-//         ))}
-//       </ul>
-//     </aside>
-//   );
-// };
-
-// export default DoctorSidebar;
 
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";

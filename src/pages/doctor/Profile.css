@@ -461,70 +461,128 @@
 
 /* --- VIEW MODE STYLING --- */
 .profile-view-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+    max-width: 1000px;
+    margin: 40px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    font-family: 'Plus Jakarta Sans', sans-serif; /* Premium Font */
 }
 
+/* Main Top Card */
 .view-card {
-  background: #fff;
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f1f5f9;
 }
 
 .doctor-header-top {
-  display: flex;
-  gap: 25px;
-  align-items: center;
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-.view-title-group h3 { font-size: 24px; margin: 0; display: flex; align-items: center; gap: 8px; }
-.verified-check { color: #10b981; font-size: 18px; }
-.view-spec { color: #047857; font-weight: 600; margin: 5px 0; }
+.view-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 15px; /* Square with rounded corners */
+    overflow: hidden;
+    border: 4px solid #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
 
-.view-tags { display: flex; gap: 10px; margin-top: 10px; }
+.avatar-img { width: 100%; height: 100%; object-fit: cover; }
+
+.view-title-group h3 {
+    font-size: 26px;
+    color: #111827;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.verified-check {
+    color: #10b981;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.view-spec {
+    color: #059669;
+    font-weight: 600;
+    font-size: 16px;
+    margin: 8px 0 15px 0;
+}
+
+.view-tags { display: flex; gap: 12px; }
 .view-tags span {
-  background: #f3f4f6;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  color: #4b5563;
-  font-weight: 500;
+    background: #f8fafc;
+    padding: 6px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
 }
 
-.view-about { margin-top: 20px; padding-top: 15px; border-top: 1px solid #f3f4f6; font-size: 14px; line-height: 1.6; }
+.view-about { margin-top: 20px; }
+.view-about h4 { font-size: 16px; color: #111827; margin-bottom: 8px; }
+.view-about p { color: #4b5563; line-height: 1.6; font-size: 14px; }
 
+/* Grid Layout for Bottom Section */
 .view-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr 1fr; /* Exact like Image 1 */
+    gap: 20px;
 }
 
-.view-card h4 {
-  margin-top: 0;
-  margin-bottom: 15px;
-  color: #111827;
-  font-size: 16px;
-  border-bottom: 2px solid #ecfdf5;
-  padding-bottom: 8px;
+.info-sub-card { padding: 20px; }
+.info-sub-card h4 {
+    font-size: 15px;
+    margin-bottom: 15px;
+    color: #111827;
+    font-weight: 700;
 }
 
-.view-details p { margin: 10px 0; font-size: 14px; color: #374151; }
-.view-divider { border: none; border-top: 1px dashed #e5e7eb; margin: 15px 0; }
-
-.view-entry-item {
-  background: #f9fafb;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 10px;
+.detail-row {
+    margin-bottom: 12px;
+    font-size: 13.5px;
+    color: #374151;
 }
 
-.view-entry-title { font-weight: 700; font-size: 14px; margin: 0; }
-.view-entry-sub { font-size: 13px; color: #6b7280; margin: 4px 0; }
-.view-fee { color: #059669; font-weight: 700; font-size: 13px; margin: 0; }
+.clinic-item {
+    background: #fdfdfd;
+    border: 1px solid #f1f5f9;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+.fee-tag {
+    color: #10b981;
+    font-weight: 700;
+    float: right;
+}
+
+/* Bottom Status Bar */
+.status-bar {
+    background: #ffffff;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+    color: #059669;
+    font-weight: 600;
+    font-size: 14px;
+    border: 1px solid #dcfce7;
+}
+
+
 
 /* --- FORM & BUTTONS --- */
 .profile-form { background: #fff; padding: 24px; border-radius: 16px; max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
@@ -783,5 +841,131 @@
 
   .view-entry-sub {
     font-size: 12px;
+  }
+}
+
+/* --- MOBILE & TABLET RESPONSIVE --- */
+
+@media (max-width: 768px) {
+    .profile-view-container {
+        margin: 20px 15px; /* Side margins thode kam kar diye */
+        gap: 15px;
+    }
+
+    .view-card {
+        padding: 20px; /* Padding kam ki mobile ke liye */
+    }
+
+    .doctor-header-top {
+        flex-direction: column; /* Avatar aur text stack ho jayenge */
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .view-avatar {
+        width: 100px;
+        height: 100px; /* Thoda chota size */
+    }
+
+    .view-title-group h3 {
+        font-size: 22px;
+        justify-content: center;
+    }
+
+    .view-tags {
+        flex-wrap: wrap; /* Tags niche shift ho jayenge agar jagah nahi hogi */
+        justify-content: center;
+    }
+
+    .view-tags span {
+        padding: 4px 12px;
+        font-size: 12px;
+    }
+
+    /* Grid layout ko 1 column kar diya */
+    .view-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    /* Status bar ko sticky ya simple padding adjustment */
+    .status-bar {
+        font-size: 13px;
+        padding: 15px;
+    }
+}
+
+/* Chote phones ke liye extra fix */
+@media (max-width: 480px) {
+    .view-title-group h3 {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .fee-tag {
+        float: none; /* Mobile par fee name ke niche aa jaye toh better hai */
+        display: block;
+        margin-bottom: 5px;
+    }
+}
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.popup-content {
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 10px;
+  width: 300px;
+  text-align: center;
+  animation: popupFade 0.3s ease;
+}
+
+.popup-content p {
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.popup-content button {
+  padding: 8px 15px;
+  border: none;
+  background: #10b981;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* TYPES */
+.popup.success .popup-content {
+  border-top: 5px solid #10b981;
+}
+
+.popup.error .popup-content {
+  border-top: 5px solid #ef4444;
+}
+
+.popup.warning .popup-content {
+  border-top: 5px solid #f59e0b;
+}
+
+/* animation */
+@keyframes popupFade {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }

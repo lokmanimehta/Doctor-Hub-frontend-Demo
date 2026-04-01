@@ -1,22 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { 
-  FiUser, FiPhone, FiMail, FiActivity, FiAlertCircle, 
-  FiClipboard, FiEye, FiEyeOff, FiEdit2, FiCamera, FiPlus 
+import {
+  FiUser, FiPhone, FiMail, FiActivity, FiAlertCircle,
+  FiClipboard, FiEye, FiEyeOff, FiEdit2, FiCamera, FiPlus
 } from "react-icons/fi";
 import "./PatientProfile.css";
 
 const UpdateProfile = () => {
-  const doctorData = JSON.parse(localStorage.getItem("doctorAddedPatient")) || {};
+  // --- Data Fetching ---
   const patientLoginData = JSON.parse(localStorage.getItem("currentUser")) || {};
-//   const doctor = JSON.parse(localStorage.getItem("selectedDoctor")) || {};
-// const user = JSON.parse(localStorage.getItem("currentUser"));
-  // View or Edit mode toggle
+
+  // --- States ---
   const [isEditing, setIsEditing] = useState(false);
+  const [familyMembers, setFamilyMembers] = useState(() => {
+    return JSON.parse(localStorage.getItem(`familyMembers_${patientLoginData.email}`)) || [];
+  });
 
   const [formData, setFormData] = useState({
-    fullName: doctorData.fullName || patientLoginData.fullName || "",
-    email: doctorData.email || patientLoginData.email || "",
-    phone: doctorData.phone || patientLoginData.phone || "",
+    fullName: patientLoginData.fullName || "",
+    email: patientLoginData.email || "",
+    phone: patientLoginData.phone || "",
     age: patientLoginData.age || "",
     gender: patientLoginData.gender || "",
     bloodGroup: patientLoginData.bloodGroup || "",
@@ -28,7 +30,7 @@ const UpdateProfile = () => {
     medications: patientLoginData.medications || "",
     emergencyName: patientLoginData.emergencyName || "",
     emergencyPhone: patientLoginData.emergencyPhone || "",
-    profileImage: patientLoginData.profileImage || "https://i.pravatar.cc/150", 
+    profileImage: patientLoginData.profileImage || "https://i.pravatar.cc/150",
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
@@ -40,11 +42,7 @@ const UpdateProfile = () => {
     new: false,
     confirm: false,
   });
-  
-  // Family Members State
-  const [familyMembers, setFamilyMembers] = useState(
-    JSON.parse(localStorage.getItem("familyMembers")) || []
-  );
+
   const [showAddMember, setShowAddMember] = useState(false);
   const [newMember, setNewMember] = useState({
     fullName: "",
@@ -54,24 +52,27 @@ const UpdateProfile = () => {
     bloodGroup: "",
     phone: "",
   });
+
+  // --- Profile Selection Logic ---
   const selfProfile = {
-  id: patientLoginData.id || 1,
-  fullName: patientLoginData.fullName,
-  age: patientLoginData.age,
-  gender: patientLoginData.gender,
-  relation: "Self",
-  type: "SELF"
-};
+    id: "self",
+    fullName: patientLoginData.fullName || "Self",
+    age: patientLoginData.age,
+    gender: patientLoginData.gender,
+    relation: "Primary Member",
+    type: "SELF"
+  };
 
-const allProfiles = [selfProfile, ...familyMembers];
-const [selectedProfile, setSelectedProfile] = useState(() => {
-  const saved = JSON.parse(localStorage.getItem("selectedProfile"));
+  const allProfiles = [selfProfile, ...familyMembers];
 
-  if (saved) return saved;
+  const [selectedProfile, setSelectedProfile] = useState(() => {
+    const saved = JSON.parse(localStorage.getItem("selectedProfile"));
+    if (saved) return saved;
+    localStorage.setItem("selectedProfile", JSON.stringify(selfProfile));
+    return selfProfile;
+  });
 
-  localStorage.setItem("selectedProfile", JSON.stringify(selfProfile));
-  return selfProfile;
-});
+  // --- Handlers & Validation ---
   const validate = (field, value) => {
     switch (field) {
       case "phone":
@@ -133,12 +134,12 @@ const [selectedProfile, setSelectedProfile] = useState(() => {
     }
     const updatedMembers = [...familyMembers, { ...newMember, id: Date.now() }];
     setFamilyMembers(updatedMembers);
-    localStorage.setItem("familyMembers", JSON.stringify(updatedMembers));
+    localStorage.setItem(`familyMembers_${patientLoginData.email}`, JSON.stringify(updatedMembers));
     setNewMember({ fullName: "", age: "", gender: "", relation: "", bloodGroup: "", phone: "" });
     setShowAddMember(false);
   };
 
-  // Prevent background scroll when modal is open
+  // --- Effects ---
   useEffect(() => {
     document.body.style.overflow = showAddMember ? "hidden" : "auto";
   }, [showAddMember]);
@@ -195,63 +196,64 @@ const [selectedProfile, setSelectedProfile] = useState(() => {
             </div>
           </div>
 
+          {/* --- FIX: SELECTED MEMBER BANNER --- */}
           <div className="selected-member-banner">
-  <span>Booking for:</span>
-  <strong>{selectedProfile?.fullName}</strong>
-  <p>
-    {selectedProfile?.relation} • {selectedProfile?.age || "N/A"} yrs • {selectedProfile?.gender}
-  </p>
-</div>
-          {/* Family List in View Mode */}
+            <span>Booking For:</span>
+            <strong>{selectedProfile?.fullName}</strong>
+            <p>
+              {selectedProfile?.relation}
+              {selectedProfile?.age && ` • ${selectedProfile.age} Yrs`}
+              {selectedProfile?.gender && ` • ${selectedProfile.gender}`}
+            </p>
+          </div>
+
+          {/* --- FAMILY MEMBERS VIEW SECTION --- */}
           <div className="family-view-section">
             <div className="family-header">
               <h3>👨‍👩‍👧 Family Members</h3>
-              <button onClick={() => setShowAddMember(true)} className="add-member-btn">
+              <button className="add-member-btn" onClick={() => setShowAddMember(true)}>
                 <FiPlus /> Add Member
               </button>
             </div>
+
             <div className="family-grid">
-              {familyMembers.length === 0 ? (
-                <p className="no-data">No family members added yet.</p>
-              ) : (
-                allProfiles.map((m) => (
- <div key={m.id} className="family-mini-card">
- <div className="member-icon">
-  {m?.fullName?.charAt(0)?.toUpperCase() || "?"}
-</div>
-
-  <div className="member-info">
-    <h5>{m.fullName}</h5>
-    <span>{m.relation} • {m.age || "N/A"} Yrs</span>
-
-    <button
-  className={`select-btn ${selectedProfile?.id === m.id ? "active" : ""}`}
-  onClick={() => {
-    setSelectedProfile(m);
-    localStorage.setItem("selectedProfile", JSON.stringify(m));
-  }}
->
-  {selectedProfile?.id === m.id ? "Selected ✅" : "Select"}
-</button>
-  </div>
-</div>
-))
-              )}
+              {allProfiles.map((m) => (
+                <div key={m.id} className={`family-mini-card ${selectedProfile?.id === m.id ? "selected-border" : ""}`}>
+                  <div className="member-main-info">
+                    <div className={`member-icon ${selectedProfile?.id === m.id ? "active-icon" : ""}`}>
+                      {m?.fullName?.charAt(0)?.toUpperCase() || "?"}
+                    </div>
+                    <div className="member-info">
+                      <h5>{m.fullName}</h5>
+                      <span>{m.relation} • {m.age || "N/A"} Yrs</span>
+                    </div>
+                  </div>
+                  <button
+                    className={`select-member-action-btn ${selectedProfile?.id === m.id ? "active-btn" : ""}`}
+                    onClick={() => {
+                      setSelectedProfile(m);
+                      localStorage.setItem("selectedProfile", JSON.stringify(m));
+                    }}
+                  >
+                    {selectedProfile?.id === m.id ? "Selected ✅" : "Select"}
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       ) : (
         /* --- EDIT MODE --- */
         <form className="update-profile-form" onSubmit={handleSubmit}>
-          
           <div className="form-card profile-image-edit">
             <div className="avatar-edit-container">
-               <img src={formData.profileImage} alt="Preview" className="edit-avatar-preview" />
-               <label htmlFor="imageUpload" className="camera-icon-label">
-                  <FiCamera />
-                  <input type="file" id="imageUpload" hidden onChange={handleImageUpload} accept="image/*" />
-               </label>
-            </div>
+   <img src={formData.profileImage} alt="Preview" className="edit-avatar-preview" />
+   <div className="avatar-name">{formData.fullName}</div> {/* <-- ADD THIS */}
+   <label htmlFor="imageUpload" className="camera-icon-label">
+      <FiCamera />
+      <input type="file" id="imageUpload" hidden onChange={handleImageUpload} accept="image/*" />
+   </label>
+</div>
             <p>Click camera icon to change photo</p>
           </div>
 
@@ -466,7 +468,7 @@ const [selectedProfile, setSelectedProfile] = useState(() => {
                   onChange={(e) => handleMemberChange("phone", e.target.value)}
                 />
               </div>
-              
+
               <div className="info-box">
                 <FiAlertCircle />
                 <p>This member will be available for quick booking.</p>

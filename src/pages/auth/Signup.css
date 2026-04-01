@@ -363,10 +363,7 @@ font-weight:bold;
 }
 
 /* Responsive Media Query */
-@media (max-width: 1024px) {
-  .auth-wrapper { grid-template-columns: 1fr; max-width: 500px; }
-  .auth-visual { display: none; }
-}
+
 .otp-section{
 margin-top:20px;
 text-align:center;
@@ -383,32 +380,7 @@ margin-bottom:10px;
 color:#64748b;
 margin-bottom:20px;
 }
-@media (max-width:768px){
 
-.auth-form-section{
-padding:30px 20px;
-}
-
-.input-group{
-grid-template-columns:1fr;
-gap:12px;
-}
-
-.full-width{
-grid-column:span 1;
-}
-
-.signup-btn,
-.resend-btn{
-padding:14px;
-font-size:14px;
-}
-
-.auth-wrapper{
-border-radius:20px;
-}
-
-}
 
 /* --- Professional Animated Checkbox (Signup) --- */
 .terms-checkbox {
@@ -548,12 +520,7 @@ border-radius:20px;
   100% { transform: scale(1, 1); }
 }
 
-/* Mobile Adjustment */
-@media (max-width: 480px) {
-  .terms-checkbox label {
-    font-size: 13px;
-  }
-}
+
 /* Browser ka default eye icon hatane ke liye */
 input::-ms-reveal,
 input::-ms-clear {
@@ -566,4 +533,265 @@ input::-webkit-credentials-auto-fill-button {
   visibility: hidden;
   display: none !important;
   pointer-events: none;
+}
+/* 🔷 FAMILY SECTION WRAPPER */
+.family-section {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f9fbff;
+  border: 1px solid #e0e7ff;
+}
+
+/* 🔷 HEADER */
+.family-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.family-header h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* 🔷 ADD BUTTON */
+.add-family-btn {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.add-family-btn:hover {
+  background: #2563eb;
+}
+
+/* 🔷 FORM BOX */
+.family-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* 🔷 INPUTS */
+.family-form input,
+.family-form select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 13px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.family-form input:focus,
+.family-form select:focus {
+  border-color: #3b82f6;
+}
+
+/* 🔷 SAVE BUTTON */
+.family-form button {
+  grid-column: span 2;
+  padding: 8px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.family-form button:hover {
+  background: #059669;
+}
+
+/* 🔷 FAMILY LIST */
+.family-list {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 🔷 CHIP UI */
+.family-chip {
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.family-chip span {
+  margin-left: 6px;
+  cursor: pointer;
+}
+/* 🔙 BACK BUTTON WRAPPER */
+.back-btn-premium {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f1f5f9;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* 🔳 ICON BOX */
+.back-btn-icon-box {
+  background: #e2e8f0;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+/* 📝 TEXT */
+.back-btn-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+  transition: all 0.25s ease;
+}
+
+/* 🔥 HOVER EFFECT */
+.back-btn-premium:hover {
+  background: #e2e8f0;
+}
+
+.back-btn-premium:hover .back-btn-icon-box {
+  background: #cbd5f5;
+  transform: translateX(-3px);
+}
+
+.back-btn-premium:hover .back-btn-text {
+  color: #2563eb;
+}
+
+/* ⚡ ACTIVE CLICK EFFECT */
+.back-btn-premium:active {
+  transform: scale(0.96);
+}
+.back-btn-premium {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.back-btn-premium:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+/* --- COMPLETE MOBILE RESPONSIVE FIXES --- */
+@media (max-width: 768px) {
+  /* 1. Layout Adjustments */
+  .auth-container {
+    padding: 10px; /* Thoda space side mein */
+    align-items: flex-start; /* Lambe forms ke liye scroll easy hoga */
+  }
+
+  .auth-wrapper {
+  grid-template-columns: 1fr;
+  min-height: initial;      /* 'auto' ki jagah 'initial' ya 'unset' use karo */
+  height: auto;             /* Isse content ke hisaab se height badh jayegi */
+  border-radius: 20px;
+  margin-top: 20px;
+}
+
+  .auth-visual {
+    display: none; /* Mobile par illustration ki jarurat nahi */
+  }
+
+  /* 2. Form Padding & Spacing */
+  .auth-form-section {
+    padding: 30px 20px; /* Padding kam kar di mobile ke liye */
+  }
+
+  .form-header h1 {
+    font-size: 1.7rem; /* Heading choti ki */
+    text-align: center;
+  }
+
+  /* 3. Grid to Single Column */
+  .input-group {
+    grid-template-columns: 1fr; /* Saare inputs full width */
+    gap: 12px;
+  }
+
+  .full-width {
+    grid-column: span 1;
+  }
+
+  /* 4. Input & Button Sizing */
+  .auth-input {
+    font-size: 16px; /* Mobile keyboard zoom issue fix karne ke liye */
+    padding: 12px 40px 12px 44px !important;
+  }
+
+  .signup-btn, .resend-btn {
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  /* 5. Family Section Fix */
+  .family-form {
+    grid-template-columns: 1fr; /* Family inputs bhi stack honge */
+  }
+
+  .family-form button {
+    grid-column: span 1;
+  }
+
+  .family-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  /* 6. Terms & Checkbox Fix */
+  .terms-checkbox {
+    align-items: flex-start; /* Multi-line text ke liye */
+  }
+
+  .terms-checkbox label {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  /* 7. Toast & Popups */
+  .popup-toast {
+    width: calc(100% - 40px);
+    left: 20px;
+    right: 20px;
+    top: 10px;
+    justify-content: center;
+  }
+
+  /* 8. Profile Selector Modal (Login Page wala logic) */
+  .profile-selector-popup {
+    width: 90%;
+    max-height: 80vh;
+    padding: 20px;
+  }
+}
+
+/* Extra Small Devices */
+@media (max-width: 480px) {
+  .form-header h1 {
+    font-size: 1.4rem;
+  }
+  
+  .role-badge-container {
+    justify-content: center; /* Center role toggle on very small screens */
+  }
 }
