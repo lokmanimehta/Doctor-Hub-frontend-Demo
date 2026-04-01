@@ -184,6 +184,7 @@ import AdsManagement from "./pages/admin/AdsManagement";
 import Hospitals from "./pages/patient/Hospitals";
 import LabsPage from "./pages/patient/LabsPage";
 import MyDoctors from "./pages/patient/Mydoctors";
+import Mydoctors from "./pages/patient/Mydoctors";
 
 
 function App() {
@@ -245,7 +246,7 @@ function App() {
   {/* Baaki saare routes jo sidebar mein hain unka path yahan define karna zaroori hai */}
     <Route path="finddoctors" element={<FindDoctors/>} />
 
-  <Route path="mydoctors" element={<MyDoctors/>} />
+  <Route path="mydoctors" element={<Mydoctors/>} />
    <Route path="hospitals" element={<Hospitals/>} />
 <Route path="doctorsprofile/:id" element={<Doctorprofile />} />
 <Route path="labs" element={<LabsPage />} />
