@@ -183,7 +183,7 @@ import FeedbackPage from "./pages/admin/FeedbackPage";
 import AdsManagement from "./pages/admin/AdsManagement";
 import Hospitals from "./pages/patient/Hospitals";
 import LabsPage from "./pages/patient/LabsPage";
-import MyDoctorss from "./pages/patient/Mydoctors";
+import MyDoctorss from "./pages/patient/MyDoctorsss";
 
 function App() {
   return (
