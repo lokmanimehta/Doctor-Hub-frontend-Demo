@@ -174,6 +174,7 @@ import Feedback from "./pages/patient/Feedback";
 import Help from "./pages/patient/Help";
 import MedicalRecords from "./pages/patient/MedicalRecords";
 import FindDoctors from "./pages/patient/FindDoctors";
+import MyDoctors from "./pages/patient/MyDoctors";
 import Doctorprofile from "./pages/patient/Doctorprofile";
 import PendingDoctorModal from "./pages/admin/PendingDoctorModal";
 import UserManagement from "./pages/admin/UserManagement";
@@ -183,7 +184,7 @@ import FeedbackPage from "./pages/admin/FeedbackPage";
 import AdsManagement from "./pages/admin/AdsManagement";
 import Hospitals from "./pages/patient/Hospitals";
 import LabsPage from "./pages/patient/LabsPage";
-import MyDoctorss from "./pages/patient/MyDoctorsss";
+
 
 function App() {
   return (
@@ -244,7 +245,7 @@ function App() {
   {/* Baaki saare routes jo sidebar mein hain unka path yahan define karna zaroori hai */}
     <Route path="finddoctors" element={<FindDoctors/>} />
 
-  <Route path="mydoctors" element={<MyDoctorss/>} />
+  <Route path="mydoctors" element={<MyDoctors/>} />
    <Route path="hospitals" element={<Hospitals/>} />
 <Route path="doctorsprofile/:id" element={<Doctorprofile />} />
 <Route path="labs" element={<LabsPage />} />
