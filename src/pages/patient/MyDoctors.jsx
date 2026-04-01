@@ -16,7 +16,7 @@ const RECENT_VISITS = DOCTORS.slice(0, 10).map((doc, i) => ({
   complaint: ["Headache", "Fever", "Back Pain", "Chest Pain"][i % 4],
 }));
 
-export default function Mydoctors() {
+export default function MyDoctorss() {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
