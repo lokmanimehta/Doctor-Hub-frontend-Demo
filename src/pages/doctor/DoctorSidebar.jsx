@@ -246,6 +246,13 @@ const DoctorSidebar = ({
               </div>
 
               <button
+                onClick={() => {
+                  navigate("/");
+                }}
+              >
+                🏠 Home
+              </button>  
+              <button
                 type="button"
                 onClick={() => {
                   navigate("/doctor/profile");
