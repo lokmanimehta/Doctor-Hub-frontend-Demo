@@ -24,8 +24,19 @@ const DoctorHeader = ({ setIsMobileOpen }) => {
 
   const displayName = doctorProfile?.fullName || currentUser?.fullName || "Doctor";
   const displayRole = currentUser?.role || "DOCTOR";
-  const profileImageUrl =
-    doctorProfile?.profilePictureUrl?.trim() || defaultDoctorAvatar;
+  const getSafeDoctorImage = (url) => {
+    if (!url || typeof url !== "string") return defaultDoctorAvatar;
+
+    if (url.includes("localhost:8080")) {
+      return defaultDoctorAvatar;
+    }
+
+    return url;
+  };
+
+  const profileImageUrl = getSafeDoctorImage(
+    doctorProfile?.profilePictureUrl?.trim()
+  );
 
   const [avatarSrc, setAvatarSrc] = useState(profileImageUrl);
 
@@ -67,7 +78,7 @@ const DoctorHeader = ({ setIsMobileOpen }) => {
 
   const resolvedTitle =
     currentPath.startsWith("/doctor/patients/") &&
-    currentPath !== "/doctor/patients"
+      currentPath !== "/doctor/patients"
       ? "Patient Details"
       : routeTitles[currentPath] || "Doctor Workspace";
 
@@ -121,7 +132,10 @@ const DoctorHeader = ({ setIsMobileOpen }) => {
               src={avatarSrc}
               alt={displayName}
               className="header-avatar"
-              onError={() => setAvatarSrc(defaultDoctorAvatar)}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                setAvatarSrc(defaultDoctorAvatar);
+              }}
             />
           </button>
 
