@@ -76,15 +76,17 @@ export const useAuthActions = (setCurrentUser) => {
       }
     } catch (err) {
       console.error("Logout API failed", err);
-    } finally {
-      clearAuthStorage();
+    }finally {
+  sessionStorage.setItem("manualLogout", "true");
 
-      if (setCurrentUser) {
-        setCurrentUser(null);
-      }
+  clearAuthStorage();
 
-      navigate("/", { replace: true });
-    }
+  if (setCurrentUser) {
+    setCurrentUser(null);
+  }
+
+  navigate("/", { replace: true });
+}
   };
 
   return { logoutUser };

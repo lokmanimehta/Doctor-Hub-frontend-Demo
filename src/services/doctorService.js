@@ -119,9 +119,7 @@ export const getPatientById = async (id) => {
    VISIT API
 ===================================== */
 
-/* =====================================
-   VISIT API
-===================================== */
+
 
 export const createPatientVisit = async (patientId, payload) => {
   const response = await api.post(`/doctor/patients/${patientId}/visits`, payload);
