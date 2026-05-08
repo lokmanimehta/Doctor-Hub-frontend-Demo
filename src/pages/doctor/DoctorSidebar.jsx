@@ -1,18 +1,69 @@
-
-
-import React, { useState, useEffect } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { 
-  FiGrid, FiCalendar, FiUsers, FiClock, FiBell, 
-  FiUserPlus, FiLogOut, FiActivity 
-} from "react-icons/fi"; // Icons import kar liye
+import {
+  FiActivity,
+  FiBell,
+  FiCalendar,
+  FiClock,
+  FiGrid,
+  FiUserPlus,
+  FiUsers
+} from "react-icons/fi";
 import "./DoctorSidebar.css";
-import Logo from "../../assets/images/logo.png"
+import Logo from "../../assets/images/logo.png";
+import defaultDoctorAvatar from "../../assets/images/avtar.png";
 
-const DoctorSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen }) => {
+import { AuthContext } from "../../context/AuthContext";
+import { DoctorProfileContext } from "../../context/DoctorProfileContext";
+import { useNotifications } from "../../context/useNotifications";
+import { useAuthActions } from "../../services/authService";
+
+const DoctorSidebar = ({
+  isCollapsed,
+  setIsCollapsed,
+  isMobileOpen,
+  setIsMobileOpen
+}) => {
   const [showFooterMenu, setShowFooterMenu] = useState(false);
+  const [avatarSrc, setAvatarSrc] = useState(defaultDoctorAvatar);
+
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+  const footerMenuRef = useRef(null);
+
+  const { currentUser, setCurrentUser } = useContext(AuthContext);
+  const { doctorProfile, doctorProfileLoading } = useContext(DoctorProfileContext);
+  const { unreadCount } = useNotifications();
+  const { logoutUser } = useAuthActions(setCurrentUser);
+
+  const menu = useMemo(
+    () => [
+      { name: "Dashboard", path: "/doctor/dashboard", icon: <FiGrid /> },
+      { name: "Appointments", path: "/doctor/appointments", icon: <FiCalendar /> },
+      { name: "Patients", path: "/doctor/patients", icon: <FiUsers /> },
+      { name: "Add Patient", path: "/doctor/add-patient", icon: <FiUserPlus /> },
+      { name: "Availability", path: "/doctor/availability", icon: <FiClock /> },
+      { name: "Labs", path: "/doctor/labs", icon: <FiActivity /> },
+      {
+        name: "Notifications",
+        path: "/doctor/notifications",
+        icon: <FiBell />,
+        badge: unreadCount
+      }
+    ],
+    [unreadCount]
+  );
+
+  const displayName = doctorProfile?.fullName || currentUser?.fullName || "Doctor";
+
+  const displayRole =
+    doctorProfile?.specializations?.[0] || currentUser?.role || "DOCTOR";
+
+  const profileImageUrl =
+    doctorProfile?.profilePictureUrl?.trim() || defaultDoctorAvatar;
+
+  useEffect(() => {
+    setAvatarSrc(profileImageUrl);
+  }, [profileImageUrl]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -20,79 +71,112 @@ const DoctorSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileO
         setIsCollapsed(true);
       } else {
         setIsMobileOpen(false);
-        if(window.innerWidth > 1024) setIsCollapsed(false);
+        setIsCollapsed(false);
       }
     };
+
     window.addEventListener("resize", handleResize);
     handleResize();
+
     return () => window.removeEventListener("resize", handleResize);
   }, [setIsCollapsed, setIsMobileOpen]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (footerMenuRef.current && !footerMenuRef.current.contains(event.target)) {
+        setShowFooterMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const handleUserCardClick = () => {
     if (window.innerWidth <= 1024) {
-      setShowFooterMenu(!showFooterMenu);
-    } else {
-      if (isCollapsed) {
-        setIsCollapsed(false);
-        setShowFooterMenu(false);
-      } else {
-        setShowFooterMenu(!showFooterMenu);
-      }
+      setShowFooterMenu((prev) => !prev);
+      return;
     }
+
+    if (isCollapsed) {
+      setIsCollapsed(false);
+      setShowFooterMenu(false);
+      return;
+    }
+
+    setShowFooterMenu((prev) => !prev);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    navigate("/");
+  const handleLogout = async () => {
+    setShowFooterMenu(false);
+    setIsMobileOpen(false);
+    await logoutUser();
   };
-
-  // ✅ Updated Menu Array with "Add Patient"
-  const menu = [
-    { name: "Dashboard", path: "/doctor/dashboard", icon: <FiGrid /> },
-    { name: "Appointments", path: "/doctor/appointments", icon: <FiCalendar /> },
-    { name: "Patients", path: "/doctor/patients", icon: <FiUsers /> },
-    { name: "Add Patient", path: "/doctor/add-patient", icon: <FiUserPlus /> }, // Naya Tab
-    { name: "Availability", path: "/doctor/availability", icon: <FiClock /> },
-    { name: "Labs", path: "/doctor/Labs", icon: <FiActivity /> },
-    { name: "Notifications", path: "/doctor/notifications", icon: <FiBell /> },
-    
-  ];
 
   return (
     <>
       {isMobileOpen && (
-        <div className="sidebar-mobile-overlay" onClick={() => {
-          setIsMobileOpen(false);
-          setShowFooterMenu(false);
-        }}></div>
+        <div
+          className="sidebar-mobile-overlay"
+          onClick={() => {
+            setIsMobileOpen(false);
+            setShowFooterMenu(false);
+          }}
+        />
       )}
 
-      <aside className={`doctor-sidebar ${isCollapsed ? "collapsed" : "expanded"} ${isMobileOpen ? "mobile-active" : ""}`}>
+      <aside
+        className={`doctor-sidebar ${isCollapsed ? "collapsed" : "expanded"} ${
+          isMobileOpen ? "mobile-active" : ""
+        }`}
+      >
         <div className="sidebar-header">
-          <div className="logo-area" onClick={() => navigate("/")} style={{ cursor: 'pointer' }}>
-      {/* Jab sidebar collapsed ho aur mobile open na ho, tab sirf chota icon dikhega */}
-      {isCollapsed && !isMobileOpen ? (
-        <img src={Logo} alt="DH" className="sidebar-logo-icon" />
-      ) : (
-        <div className="full-logo-wrapper">
-          <img src={Logo} alt="Doctor's Hub" className="sidebar-logo-img" />
-          <h2 className="doctor-logo">
-            Doctor's <span>Hub</span>
-          </h2>
-        </div>
-      )}
-    </div>
-          
+          <div
+            className="logo-area"
+            onClick={() => navigate("/")}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") navigate("/");
+            }}
+          >
+            {isCollapsed && !isMobileOpen ? (
+              <img src={Logo} alt="DH" className="sidebar-logo-icon" />
+            ) : (
+              <div className="full-logo-wrapper">
+                <img src={Logo} alt="Doctor's Hub" className="sidebar-logo-img" />
+                <h2 className="doctor-logo">
+                  Doctor's <span>Hub</span>
+                </h2>
+              </div>
+            )}
+          </div>
+
           {isMobileOpen ? (
-            <button className="mobile-close-btn" onClick={() => {
-              setIsMobileOpen(false);
-              setShowFooterMenu(false);
-            }}>✕</button>
+            <button
+              type="button"
+              className="mobile-close-btn"
+              onClick={() => {
+                setIsMobileOpen(false);
+                setShowFooterMenu(false);
+              }}
+              aria-label="Close sidebar"
+            >
+              ✕
+            </button>
           ) : (
-            <button className="desktop-toggle-arrow" onClick={() => {
-              setIsCollapsed(!isCollapsed);
-              setShowFooterMenu(false);
-            }}>
+            <button
+              type="button"
+              className="desktop-toggle-arrow"
+              onClick={() => {
+                setIsCollapsed((prev) => !prev);
+                setShowFooterMenu(false);
+              }}
+              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
               {isCollapsed ? "❯" : "❮"}
             </button>
           )}
@@ -102,51 +186,101 @@ const DoctorSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileO
           <ul className="sidebar-ul">
             {menu.map((item) => (
               <li key={item.name} className="sidebar-li">
-                <NavLink 
-                  to={item.path} 
+                <NavLink
+                  to={item.path}
                   onClick={() => {
                     setIsMobileOpen(false);
                     setShowFooterMenu(false);
-                  }} 
-                  className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+                  }}
+                  className={({ isActive }) =>
+                    isActive ? "nav-link active" : "nav-link"
+                  }
                 >
-                  <span className="nav-icon">{item.icon}</span>
-                  {(!isCollapsed || isMobileOpen) && <span className="nav-text">{item.name}</span>}
+                  <span className="nav-icon nav-icon-wrap">
+                    {item.icon}
+                    {item.badge > 0 && (
+                      <span className="sidebar-notification-badge sidebar-notification-badge-icon">
+                        {item.badge > 99 ? "99+" : item.badge}
+                      </span>
+                    )}
+                  </span>
+
+                  {(!isCollapsed || isMobileOpen) && (
+                    <span className="nav-text">{item.name}</span>
+                  )}
                 </NavLink>
               </li>
             ))}
           </ul>
         </nav>
 
-        <div className="sidebar-footer">
+        <div className="sidebar-footer" ref={footerMenuRef}>
           {showFooterMenu && (!isCollapsed || isMobileOpen) && (
             <div className="sidebar-footer-dropdown">
-               <button
+              <div className="sidebar-dropdown-user-info">
+                <img
+                  src={avatarSrc}
+                  alt={displayName}
+                  className="sidebar-dropdown-avatar"
+                  onError={() => setAvatarSrc(defaultDoctorAvatar)}
+                />
+                <div className="sidebar-dropdown-user-text">
+                  <span className="sidebar-dropdown-name">
+                    {doctorProfileLoading ? "Loading..." : `Dr. ${displayName}`}
+                  </span>
+                  <span className="sidebar-dropdown-role">{displayRole}</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
                 onClick={() => {
-                  navigate("/");
+                  navigate("/doctor/profile");
                   setShowFooterMenu(false);
+                  setIsMobileOpen(false);
                 }}
               >
-                🏠 Home
+                <span>👤</span> View Profile
               </button>
-              <button onClick={() => { navigate("/doctor/profile"); setShowFooterMenu(false); setIsMobileOpen(false); }}>
-                👤 My Profile
+
+              <button
+                type="button"
+                onClick={() => {
+                  navigate("/doctor/notifications");
+                  setShowFooterMenu(false);
+                  setIsMobileOpen(false);
+                }}
+              >
+                <span>🔔</span> Notifications
               </button>
-              <button className="logout-item" onClick={handleLogout}>
-                🚪 Logout
+
+              <button type="button" className="logout-btn" onClick={handleLogout}>
+                <span>🚪</span> Logout
               </button>
             </div>
           )}
 
-          <div className={`sidebar-user-card ${(isCollapsed && !isMobileOpen) ? "centered" : ""}`} onClick={handleUserCardClick}>
-            <img src="https://i.pravatar.cc/150?img=12" alt="Profile" className="user-avatar" />
+          <button
+            type="button"
+            className={`sidebar-user-card ${isCollapsed && !isMobileOpen ? "centered" : ""}`}
+            onClick={handleUserCardClick}
+          >
+            <img
+              src={avatarSrc}
+              alt={displayName}
+              className="user-avatar"
+              onError={() => setAvatarSrc(defaultDoctorAvatar)}
+            />
+
             {(!isCollapsed || isMobileOpen) && (
               <div className="user-info">
-                <p className="user-name">Dr. {user?.fullName || "Sameer"}</p>
-                <p className="user-role">{user?.role || "Surgeon"}</p>
+                <p className="user-name">
+                  {doctorProfileLoading ? "Loading..." : `Dr. ${displayName}`}
+                </p>
+                <p className="user-role">{displayRole}</p>
               </div>
             )}
-          </div>
+          </button>
         </div>
       </aside>
     </>

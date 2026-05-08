@@ -247,14 +247,27 @@ const UpdateProfile = () => {
         <form className="update-profile-form" onSubmit={handleSubmit}>
           <div className="form-card profile-image-edit">
             <div className="avatar-edit-container">
-   <img src={formData.profileImage} alt="Preview" className="edit-avatar-preview" />
-   <div className="avatar-name">{formData.fullName}</div> {/* <-- ADD THIS */}
-   <label htmlFor="imageUpload" className="camera-icon-label">
-      <FiCamera />
-      <input type="file" id="imageUpload" hidden onChange={handleImageUpload} accept="image/*" />
-   </label>
-</div>
-            <p>Click camera icon to change photo</p>
+              <img
+                src={formData.profileImage}
+                alt="Preview"
+                className="edit-avatar-preview"
+              />
+              <label htmlFor="imageUpload" className="camera-icon-label">
+                <FiCamera />
+                <input
+                  type="file"
+                  id="imageUpload"
+                  hidden
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                />
+              </label>
+            </div>
+
+            <div className="avatar-info-text">
+              <h3>{formData.fullName || "Your Name"}</h3>
+              <p>Click the camera icon to update your profile photo.</p>
+            </div>
           </div>
 
           <div className="form-grid-layout">

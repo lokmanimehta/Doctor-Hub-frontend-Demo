@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Help.css";
 
 const helpTopics = [
@@ -35,6 +36,7 @@ const helpTopics = [
 ];
 
 const Help = () => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [openId, setOpenId] = useState(null);
 
@@ -50,8 +52,36 @@ const Help = () => {
     <div className="help-container">
       <h1>Help & Support</h1>
       <p className="subtitle">
-        Find answers to common questions
+        Find answers to common questions and get quick care guidance
       </p>
+
+      {/* AI HELP CARD */}
+      <div className="ai-help-card">
+        <div className="ai-help-text">
+          <p className="ai-help-label">AI CARE ASSIST</p>
+          <h3>Not sure what care you need?</h3>
+          <p>
+            Use AI guidance to understand whether you may need a doctor,
+            specialist, follow-up care, or urgent hospital support.
+          </p>
+        </div>
+
+        <div className="ai-help-actions">
+          <button
+            className="ai-primary-btn"
+            onClick={() => navigate("/patient/dashboard")}
+          >
+            Start AI Symptom Check
+          </button>
+
+          <button
+            className="ai-secondary-btn"
+            onClick={() => navigate("/patient/finddoctors")}
+          >
+            Find Doctors
+          </button>
+        </div>
+      </div>
 
       {/* Search */}
       <input
@@ -61,6 +91,33 @@ const Help = () => {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+
+      {/* QUICK ACTIONS */}
+      <div className="quick-help-actions">
+        <div
+          className="quick-help-card"
+          onClick={() => navigate("/patient/dashboard")}
+        >
+          <h4>AI Symptom Check</h4>
+          <p>Check symptoms and get guidance before booking care.</p>
+        </div>
+
+        <div
+          className="quick-help-card"
+          onClick={() => navigate("/patient/finddoctors")}
+        >
+          <h4>Find Doctors</h4>
+          <p>Browse doctors by specialty and book a consultation.</p>
+        </div>
+
+        <div
+          className="quick-help-card emergency"
+          onClick={() => navigate("/patient/hospitals")}
+        >
+          <h4>Emergency Hospitals</h4>
+          <p>See hospitals quickly if your case feels urgent.</p>
+        </div>
+      </div>
 
       {/* FAQ */}
       <div className="faq-list">
@@ -108,17 +165,31 @@ const Help = () => {
         <p>
           Contact our support team at
           <br />
-          <strong>
-            support@doctorshub.com
-          </strong>
+          <strong>support@doctorshub.com</strong>
         </p>
+
+        <button
+          className="support-btn"
+          onClick={() => navigate("/patient/feedback")}
+        >
+          Contact Support
+        </button>
       </div>
 
       {/* Emergency */}
-      <div className="emergency-note">
-        For medical emergencies, please
-        contact your local emergency
-        services immediately.
+      <div className="emergency-alert-box">
+        <h4>Emergency Notice</h4>
+        <p>
+          For chest pain, breathing difficulty, severe bleeding, unconsciousness,
+          stroke symptoms, or any serious medical emergency, please contact your
+          local emergency services or visit the nearest hospital immediately.
+        </p>
+        <button
+          className="emergency-btn"
+          onClick={() => navigate("/patient/hospitals")}
+        >
+          View Emergency Hospitals
+        </button>
       </div>
     </div>
   );

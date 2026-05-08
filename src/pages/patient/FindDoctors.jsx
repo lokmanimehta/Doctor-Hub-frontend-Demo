@@ -1,44 +1,75 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./FindDoctors.css";
 import { DOCTORS } from "../../utils/doctorsDummyprofileData";
 
 const SPECIALTIES = [
-  "All", "Physician", "Dermatologist", "Neurologist", "Cardiologist",
-  "Dentist", "ENT", "Gynecologist", "Psychiatrist", "Pediatrician"
+  "All",
+  "Physician",
+  "Dermatologist",
+  "Neurologist",
+  "Cardiologist",
+  "Dentist",
+  "ENT",
+  "Gynecologist",
+  "Psychiatrist",
+  "Pediatrician"
 ];
 
 const TIME_SLOTS = [
-  "10:00 AM", "10:30 AM", "11:00 AM", "05:00 PM", "05:30 PM", "06:00 PM"
+  "10:00 AM",
+  "10:30 AM",
+  "11:00 AM",
+  "05:00 PM",
+  "05:30 PM",
+  "06:00 PM"
 ];
 
 export default function FindDoctors() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const recommendedSpecialty = location.state?.recommendedSpecialty || "All";
+  const symptomQuery = location.state?.symptomQuery || "";
+  const triageTitle = location.state?.triageTitle || "";
+
   const [search, setSearch] = useState("");
-  const [activeSpec, setActiveSpec] = useState("All");
+  const [activeSpec, setActiveSpec] = useState(recommendedSpecialty);
   const [selected, setSelected] = useState(null);
   const [showBooking, setShowBooking] = useState(false);
 
-  // Booking States
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedTime, setSelectedTime] = useState("");
+
   const selectedProfile = JSON.parse(localStorage.getItem("selectedProfile"));
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  // Prevent background scroll when modal is open
+
   useEffect(() => {
     if (selected) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
     }
-    return () => { document.body.style.overflow = "auto"; };
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
   }, [selected]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
 
-  /* --- Filtering --- */
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const filteredDoctors = useMemo(() => {
     return DOCTORS.filter((d) => {
-      const searchText = `${d.name} ${d.specialty} ${d.location} ${d.city} ${d.clinicName}`.toLowerCase();
+      const searchText =
+        `${d.name} ${d.specialty} ${d.location} ${d.city} ${d.clinicName}`.toLowerCase();
+
       return (
         searchText.includes(search.toLowerCase()) &&
         (activeSpec === "All" || d.specialty === activeSpec)
@@ -52,25 +83,25 @@ export default function FindDoctors() {
   };
 
   const handleConfirmBooking = () => {
-
-    // ✅ STEP 1: Profile check
     if (!selectedProfile) {
       alert("Please select patient profile first");
       navigate("/patient/profile");
       return;
     }
 
-    // ✅ STEP 2: Time check
     if (!selectedTime) {
       alert("Please select time slot");
       return;
     }
 
-    // ✅ STEP 3: Proper date
+    if (!selected) {
+      alert("Please select a doctor first");
+      return;
+    }
+
     const dateObj = new Date();
     dateObj.setDate(dateObj.getDate() + selectedDate);
 
-    // ✅ STEP 4: Create booking
     const booking = {
       doctorId: selected.id,
       doctorName: selected.name,
@@ -78,13 +109,11 @@ export default function FindDoctors() {
       patientName: selectedProfile.fullName,
       relation: selectedProfile.relation,
       time: selectedTime,
-      date: dateObj.toISOString(),
+      date: dateObj.toISOString()
     };
 
-    // ✅ STEP 5: Get existing bookings
     const existing = JSON.parse(localStorage.getItem("appointments")) || [];
 
-    // ✅ STEP 6: Duplicate check
     const alreadyBooked = existing.some(
       (a) =>
         a.doctorId === booking.doctorId &&
@@ -97,15 +126,12 @@ export default function FindDoctors() {
       return;
     }
 
-    // ✅ STEP 7: Save
     localStorage.setItem("appointments", JSON.stringify([...existing, booking]));
 
     alert("Appointment Booked ✅");
 
-    // ✅ STEP 8: Reset
     setSelectedTime("");
     setSelectedDate(0);
-
     closeModals();
   };
 
@@ -119,19 +145,18 @@ export default function FindDoctors() {
 
   const doctorRows = chunkDoctors(filteredDoctors, isMobile ? 5 : 4);
 
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   return (
     <div className="find-doctor-container">
-      
+      {recommendedSpecialty !== "All" && (
+        <div className="ai-doctor-recommendation-banner">
+          <h3>{triageTitle || "Recommended Doctors"}</h3>
+          <p>
+            Based on your symptoms, we are showing{" "}
+            <strong>{recommendedSpecialty}</strong> doctors.
+          </p>
+          {symptomQuery && <span>Symptoms entered: {symptomQuery}</span>}
+        </div>
+      )}
 
       <div className="search-wrapper">
         <input
@@ -154,7 +179,6 @@ export default function FindDoctors() {
         ))}
       </div>
 
-      {/* Doctor Grid */}
       <div className="doctor-grid">
         {doctorRows.map((row, index) => (
           <div className="doctor-row" key={index}>
@@ -172,14 +196,16 @@ export default function FindDoctors() {
                 <div className="v3-card-body">
                   <h3>{doc.name}</h3>
                   <p className="v3-spec">{doc.specialty}</p>
-                  <p className="v3-loc">📍 {doc.location}, {doc.city}</p>
+                  <p className="v3-loc">
+                    📍 {doc.location}, {doc.city}
+                  </p>
                   <p className="v3-exp">💼 {doc.experience} yrs experience</p>
                   <p className="v3-fee">💰 ₹{doc.fee}</p>
 
                   <button
                     className="v3-btn secondary"
                     onClick={(e) => {
-                      e.stopPropagation(); // 🔥 important
+                      e.stopPropagation();
                       setSelected(doc);
                       setShowBooking(true);
                     }}
@@ -197,28 +223,42 @@ export default function FindDoctors() {
         ))}
       </div>
 
-      {/* --- UNIFIED MODAL SYSTEM --- */}
       {selected && !showBooking && (
         <div className="modal-overlay" onClick={closeModals}>
-          <div className="profile-modal-card" onClick={(e) => e.stopPropagation()}>
-
-            <button className="modal-close-x" onClick={closeModals}>×</button>
+          <div
+            className="profile-modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button className="modal-close-x" onClick={closeModals}>
+              ×
+            </button>
 
             <div className="modal-header-top">
-              <img src={selected.image} className="modal-avatar" />
+              <img src={selected.image} alt={selected.name} className="modal-avatar" />
 
               <div className="modal-title-info">
                 <h2>{selected.name}</h2>
                 <span className="modal-spec-badge">{selected.specialty}</span>
-                <p>⭐ {selected.rating} ({selected.experience} yrs)</p>
+                <p>
+                  ⭐ {selected.rating} ({selected.experience} yrs)
+                </p>
               </div>
             </div>
 
             <div className="modal-body-content">
-              <div className="info-row"><strong>🏥 Clinic:</strong> {selected.clinicName}</div>
-              <div className="info-row"><strong>📍 Address:</strong> {selected.clinicAddress}</div>
-              <div className="info-row"><strong>🗣 Languages:</strong> {selected.languages?.join(", ")}</div>
-              <div className="info-row"><strong>💰 Fee:</strong> ₹{selected.fee}</div>
+              <div className="info-row">
+                <strong>🏥 Clinic:</strong> {selected.clinicName}
+              </div>
+              <div className="info-row">
+                <strong>📍 Address:</strong> {selected.clinicAddress}
+              </div>
+              <div className="info-row">
+                <strong>🗣 Languages:</strong>{" "}
+                {selected.languages?.join(", ")}
+              </div>
+              <div className="info-row">
+                <strong>💰 Fee:</strong> ₹{selected.fee}
+              </div>
 
               <div className="modal-bio-box">
                 <strong>About Doctor:</strong>
@@ -243,38 +283,50 @@ export default function FindDoctors() {
                 Full Profile
               </button>
             </div>
-
           </div>
         </div>
-      )}{selected && showBooking && (
-        <div className="booking-modal-overlay" onClick={() => setShowBooking(false)}>
-          <div className="booking-modal-card" onClick={(e) => e.stopPropagation()}>
+      )}
 
-            <button className="modal-close" onClick={() => setShowBooking(false)}>✕</button>
+      {selected && showBooking && (
+        <div
+          className="booking-modal-overlay"
+          onClick={() => setShowBooking(false)}
+        >
+          <div
+            className="booking-modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="modal-close"
+              onClick={() => setShowBooking(false)}
+            >
+              ✕
+            </button>
 
             <div className="booking-scroll">
-
               <h2>Book Appointment</h2>
 
               <div className="booking-doctor">
-                <img src={selected.image} />
+                <img src={selected.image} alt={selected.name} />
                 <div>
                   <h3>{selected.name}</h3>
                   <p>{selected.clinicName}</p>
                 </div>
               </div>
 
-              {/* DATE */}
               <div className="booking-section">
                 <p>Select Date</p>
                 <div className="date-list">
                   {[0, 1, 2, 3, 4].map((d) => {
                     const date = new Date();
                     date.setDate(date.getDate() + d);
+
                     return (
                       <button
                         key={d}
-                        className={`date-chip ${selectedDate === d ? "active" : ""}`}
+                        className={`date-chip ${
+                          selectedDate === d ? "active" : ""
+                        }`}
                         onClick={() => setSelectedDate(d)}
                       >
                         {date.toDateString().slice(0, 10)}
@@ -284,7 +336,6 @@ export default function FindDoctors() {
                 </div>
               </div>
 
-              {/* TIME */}
               <div className="booking-section">
                 <p>Select Time Slot</p>
                 <div className="slot-list">
@@ -298,9 +349,8 @@ export default function FindDoctors() {
                     </button>
                   ))}
                 </div>
-              
+              </div>
 
-              {/* FORM */}
               <div className="booking-section">
                 <p className="section-label">Patient Info</p>
 
@@ -308,18 +358,28 @@ export default function FindDoctors() {
                   <div className="selected-patient-card">
                     <h4>{selectedProfile.fullName}</h4>
                     <p>
-                      {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
+                      {selectedProfile.relation} •{" "}
+                      {selectedProfile.age || "N/A"} yrs •{" "}
+                      {selectedProfile.gender}
                     </p>
                   </div>
                 ) : (
-                  <div className="selected-patient-card" style={{ borderColor: '#fee2e2' }}>
-                    <p style={{ color: "#ef4444", margin: 0 }}>No profile selected</p>
+                  <div
+                    className="selected-patient-card"
+                    style={{ borderColor: "#fee2e2" }}
+                  >
+                    <p style={{ color: "#ef4444", margin: 0 }}>
+                      No profile selected
+                    </p>
                   </div>
                 )}
               </div>
             </div>
 
-            <button className="primary-btn confirm-btn" onClick={handleConfirmBooking}>
+            <button
+              className="primary-btn confirm-btn"
+              onClick={handleConfirmBooking}
+            >
               Confirm Appointment
             </button>
 
@@ -329,13 +389,9 @@ export default function FindDoctors() {
             >
               Go Back
             </button>
-
           </div>
         </div>
-        </div>
-  )
-}
-
-    </div >
+      )}
+    </div>
   );
 }

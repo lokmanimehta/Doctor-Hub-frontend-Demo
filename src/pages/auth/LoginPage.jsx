@@ -3,15 +3,16 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import userlogin from "../../assets/images/userlogin.png";
-import { forgotPassword, resetPassword } from "../../services/authService";
-// import { loginUser } from "../../services/authService";
+import { forgotPassword, resetPassword, loginUser, getPatientProfiles } from "../../services/authService";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import { useProfile } from "../../context/useProfile";
+
 const LoginPage = () => {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const { setCurrentUser } = useContext(AuthContext);
   const [password, setPassword] = useState("");
   const [resendDisabled, setResendDisabled] = useState(false);
@@ -33,370 +34,133 @@ const LoginPage = () => {
   const [resendTimer, setResendTimer] = useState(30);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [profiles, setProfiles] = useState([]);
-
+  const { selectProfile } = useProfile();
   const showPopup = (message, type) => {
     setPopupMessage(message);
     setPopupType(type);
   };
 
 
-  // const handleLogin = async (e) => {
-
-  // e.preventDefault();
-  // setLoading(true);
-
-  // const trimmedEmail = email.trim();
-  // const trimmedPassword = password.trim();
-
-  //   try {
-
-  //     const user = await loginUser({
-  //       identifier: trimmedEmail,
-  //       password: trimmedPassword,
-  //       rememberMe
-  //     });
-  //     setCurrentUser(user);
-  //     console.log("LOGIN USER:", user)
-  //     if (!user) {
-  //       throw new Error("User data not returned from login");
-  //     }
-
-  //     showPopup("🎉 Login successful! Welcome back.", "success");
-
-  //     setTimeout(() => {
-
-  //       if (user?.role === "ADMIN") navigate("/admin/dashboard");
-  //       else if (user.role === "DOCTOR") navigate("/doctor/dashboard");
-  //       else if (user.role === "PATIENT") navigate("/");
-  //       else navigate("/");
-
-  //     }, 500);
-
-  //   } catch (error) {
-
-  //     showPopup(`❌ ${error.message || "Login failed"}`, "error");
-
-  //   }
-
-  //   setLoading(false);
-
-
-  // };
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const trimmedEmail = email.trim();
+    const trimmedIdentifier = identifier.trim();
     const trimmedPassword = password.trim();
 
     try {
-      if (!trimmedEmail || !trimmedPassword) {
-        throw new Error("Email and password required");
+      if (!trimmedIdentifier || !trimmedPassword) {
+        throw new Error("Email/Mobile and password are required");
       }
 
-      // ✅ Dummy users
-      const defaultUsers = [
-
-        // 🔴 DOCTOR - LOW PROFILE (~20%)
-        {
-          email: "doc1@test.com",
-          password: "123456",
-          role: "DOCTOR",
-          adminApproved: false,
-          profile: {
-            fullName: " Ravi Gupta",
-            email: "doc1@test.com",
-            phone: "",
-            specialization: "",
-            experience: "",
-            gender: "",
-            about: "",
-            profilePic: null,
-            clinics: [],
-            visitingPositions: [],
-            councilName: "",
-            registrationNumber: "",
-            registrationYear: "",
-            files: {
-              signature: null,
-              govtIds: [],
-              certificates: []
-            }
-          }
-        },
-
-        // 🟡 DOCTOR - MID PROFILE (~60%)
-        {
-          email: "doc2@test.com",
-          password: "123456",
-          role: "DOCTOR",
-          adminApproved: false,
-          profile: {
-            fullName: " Raj Sharma",
-            email: "doc2@test.com",
-            phone: "9876543210",
-            specialization: "Cardiologist",
-            experience: "5",
-            gender: "Male",
-            about: "Heart specialist",
-            profilePic: "dummy_pic",
-
-            clinics: [{
-              clinicName: "City Clinic",
-              clinicAddress: "Mumbai",
-              consultationFee: "500",
-              availability: [
-                { day: "Monday", startTime: "10:00", endTime: "13:00" }
-              ]
-            }],
-
-            visitingPositions: [],
-
-            councilName: "",
-            registrationNumber: "",
-            registrationYear: "",
-
-            files: {
-              signature: null,
-              govtIds: [],
-              certificates: []
-            }
-          }
-        },
-
-        // 🟢 DOCTOR - COMPLETE (~90%) BUT NOT VERIFIED
-        {
-          email: "doc3@test.com",
-          password: "123456",
-          role: "DOCTOR",
-          adminApproved: true, // 🔥 VERY IMPORTANT
-          profile: {
-            fullName: " Priya Mehta",
-            email: "doc3@test.com",
-            phone: "9999999999",
-            specialization: "Dermatologist",
-            experience: "10",
-            gender: "Female",
-            about: "Skin specialist with 10 years experience",
-            profilePic: "dummy_pic",
-
-            clinics: [{
-              clinicName: "Skin Care Clinic",
-              clinicAddress: "Delhi",
-              consultationFee: "800",
-              availability: [
-                { day: "Monday", startTime: "10:00", endTime: "14:00" },
-                { day: "Tuesday", startTime: "10:00", endTime: "14:00" }
-              ]
-            }],
-
-            visitingPositions: [{
-              location: "Apollo Hospital",
-              fees: "1000",
-              availability: [
-                { day: "Wednesday", startTime: "12:00", endTime: "16:00" }
-              ]
-            }],
-
-            councilName: "Medical Council of India",
-            registrationNumber: "MC12345",
-            registrationYear: "2015",
-
-            files: {
-              signature: "dummy_signature",
-              govtIds: [
-                { type: "AADHAAR", file: "aadhaar_file" }
-              ],
-              certificates: [
-                { title: "MBBS", file: "mbbs_file" },
-                { title: "MD", file: "md_file" }
-              ]
-            }
-          }
-        },
-
-        // 🧑‍💼 ADMIN
-        {
-          email: "admin@test.com",
-          password: "123456",
-          role: "ADMIN",
-          profile: {
-            fullName: "Admin User",
-            email: "admin@test.com",
-            phone: "9999999999"
-          }
-        },
-
-        // 🔴 PATIENT INCOMPLETE (~30%)
-        {
-          email: "pat1@test.com",
-          password: "123456",
-          role: "PATIENT",
-          profile: {
-            fullName: "Rahul",
-            email: "pat1@test.com",
-            phone: "",
-            age: "",
-            gender: ""
-          }
-        },
-
-        // 🟢 PATIENT COMPLETE (~100%)
-        {
-          email: "pat2@test.com",
-          password: "123456",
-          role: "PATIENT",
-          profile: {
-            fullName: "Anjali Verma",
-            email: "pat2@test.com",
-            phone: "8888888888",
-            age: "28",
-            gender: "Female"
-          }
-        }
-
-      ];
-
-      // ✅ get users from signup (localStorage)
-      const storedUsers = JSON.parse(localStorage.getItem("dummyUsers")) || [];
-
-      // ✅ merge both
-      const dummyUsers = [...defaultUsers, ...storedUsers];
-      // ✅ Match user
-      const user = dummyUsers.find(
-        (u) =>
-          u.email === trimmedEmail &&
-          u.password === trimmedPassword
-      );
-
-      if (!user) {
-        throw new Error("Invalid email or password");
-      }
-
-      // ✅ Simulated user object
-      const loggedInUser = {
-        email: user.email,
-        role: user.role,
-        ...user.profile
-
-      };
-
-
-      // ✅ MUST
-      // ✅ save user
-      localStorage.setItem("currentUser", JSON.stringify(loggedInUser));
-      setCurrentUser(loggedInUser);
-      window.dispatchEvent(new Event("storage"));
-
-      // ✅ PROFILE LOGIC START
-      const storedMembers =
-        JSON.parse(localStorage.getItem(`familyMembers_${loggedInUser.email}`)) || [];
-      const selfProfile = {
-        id: Date.now(),
-        fullName: loggedInUser.fullName,
-        age: loggedInUser.age,
-        gender: loggedInUser.gender,
-        relation: "Self",
-        type: "SELF"
-      };
-
-      const allProfiles = [selfProfile, ...storedMembers];
-      console.log("Stored Members:", storedMembers);
-      console.log("All Profiles:", allProfiles);
-      if (allProfiles.length > 1) {
-        // 🔥 STOP navigation
-        setProfiles(allProfiles);
-        setShowProfileSelector(true);
-
-        showPopup("👨‍👩‍👧 Select profile to continue", "success");
-      } else {
-        // ✅ auto select
-        localStorage.setItem("selectedProfile", JSON.stringify(selfProfile));
-
-        showPopup("🎉 Login successful! Welcome back.", "success");
-
-        setTimeout(() => {
-          if (loggedInUser.role === "ADMIN") navigate("/admin/dashboard");
-          else if (loggedInUser.role === "DOCTOR") navigate("/doctor/dashboard");
-          else navigate("/");
-        }, 500);
-      }
-
-
-
-
-
-    } catch (error) {
-      showPopup(`❌ ${error.message}`, "error");
-    }
-
-    setLoading(false);
-  };
-
-  const sendOtp = async () => {
-
-    if (resendDisabled) return;
-
-    if (!email) {
-      showPopup("⚠️ Please enter your email or phone first", "error");
-      return;
-    }
-
-    setResendDisabled(true);
-    setResendTimer(30);
-    let destination = "";
-
-    if (email.includes("@")) {
-      destination = email.replace(/(.{2}).+(@.+)/, "$1****$2");
-    } else {
-      destination = email.replace(/.(?=.{2})/g, "*");
-    }
-
-    setOtpDestination(destination);
-    setOtpSent(true);
-    setOtpIdentifier(email.trim());
-
-    // ⭐ popup instantly
-    showPopup(`📩 Sending OTP to ${destination}...`, "success");
-    const countdown = setInterval(() => {
-
-      setResendTimer(prev => {
-
-        if (prev === 1) {
-          clearInterval(countdown);
-          setResendDisabled(false);
-          return 0;
-        }
-
-        return prev - 1;
-
+      const user = await loginUser({
+        identifier: trimmedIdentifier,
+        password: trimmedPassword,
+        rememberMe
       });
 
-    }, 1000);
+      if (!user) {
+        throw new Error("User data not returned from login");
+      }
 
-    try {
+      setCurrentUser(user);
 
-      await forgotPassword(email.trim());
+      if (user.role === "PATIENT") {
+        const profileResponse = await getPatientProfiles();
+        const fetchedProfiles = profileResponse?.profiles || [];
 
-      showPopup(`🔐 OTP sent successfully to ${destination}`, "success");
+        if (fetchedProfiles.length > 1) {
+          setProfiles(fetchedProfiles);
+          setShowProfileSelector(true);
+          showPopup("👨‍👩‍👧 Select profile to continue", "success");
+          return;
+        }
 
-    } catch (err) {
+        if (fetchedProfiles.length === 1) {
+          handleProfileSelect(fetchedProfiles[0]);
+          return;
+        }
+      }
 
-      showPopup(`❌ ${err.message || "Failed to send OTP"}`, "error");
+      showPopup("🔓 Login successful! Welcome back.", "success");
 
+      setTimeout(() => {
+        if (user.role === "ADMIN") {
+          navigate("/admin/dashboard");
+        } else if (user.role === "DOCTOR") {
+          navigate("/doctor/dashboard");
+        } else {
+          navigate("/");
+        }
+      }, 500);
+
+    } catch (error) {
+      showPopup(`❌ ${error.message || "Login failed"}`, "error");
+    } finally {
+      setLoading(false);
     }
-
   };
-  const handleProfileSelect = (profile) => {
-    localStorage.setItem("selectedProfile", JSON.stringify(profile));
 
-    showPopup(`✅ Logged in as ${profile.fullName}`, "success");
+  const handleProfileSelect = (profile) => {
+    console.log("Selected profile:", profile);
+    console.log("Selected profile full:", JSON.stringify(profile, null, 2));
+
+    selectProfile(profile);
+
+    showPopup(`🔓 Logged in as ${profile.fullName}`, "success");
 
     setTimeout(() => {
       navigate("/");
     }, 500);
   };
+
+  const sendOtp = async () => {
+  if (resendDisabled) return;
+
+  const trimmedIdentifier = identifier.trim();
+
+  if (!trimmedIdentifier) {
+    showPopup("⚠️ Please enter your email or phone first", "error");
+    return;
+  }
+
+  let destination = "";
+
+  if (trimmedIdentifier.includes("@")) {
+    destination = trimmedIdentifier.replace(/(.{2}).+(@.+)/, "$1****$2");
+  } else {
+    destination = trimmedIdentifier.replace(/.(?=.{2})/g, "*");
+  }
+
+  try {
+    setResendDisabled(true);
+
+    await forgotPassword(trimmedIdentifier);
+
+    setOtpDestination(destination);
+    setOtpSent(true);
+    setOtpIdentifier(trimmedIdentifier);
+    setResendTimer(30);
+
+    showPopup(`🔐 OTP sent successfully to ${destination}`, "success");
+
+    const countdown = setInterval(() => {
+      setResendTimer((prev) => {
+        if (prev === 1) {
+          clearInterval(countdown);
+          setResendDisabled(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+  } catch (err) {
+    setResendDisabled(false);
+    showPopup(`❌ ${err.message || "Failed to send OTP"}`, "error");
+  }
+};
+
   const resetPasswordHandler = async () => {
     if (loadingReset) return;       // prevent multiple clicks
     setLoadingReset(true);
@@ -485,9 +249,10 @@ const LoginPage = () => {
                     <input
                       type="text"
                       placeholder="Email or Phone Number"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
                       required
+                      autoComplete="username"
                     />
                   </div>
                 </div>
@@ -502,6 +267,7 @@ const LoginPage = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      autoComplete="current-password"
                     />
                     <span
                       className="show-hide-icon"
@@ -565,8 +331,8 @@ const LoginPage = () => {
                     <input
                       type="text"
                       placeholder="Email or Phone"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
                       disabled={otpSent}
                     />
                   </div>
@@ -618,6 +384,7 @@ const LoginPage = () => {
                       placeholder="New Password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
+                      autoComplete="new-password"
                     />
                     <span
                       className="show-hide-icon"
@@ -639,6 +406,7 @@ const LoginPage = () => {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
+                      autoComplete="new-password"
                     />
 
                     <span
@@ -670,7 +438,6 @@ const LoginPage = () => {
               </div>
 
             )}
-
             {showProfileSelector && (
               <div className="profile-modal-overlay">
                 <div className="profile-selector-popup">
@@ -678,7 +445,7 @@ const LoginPage = () => {
 
                   {profiles.map((p) => (
                     <div
-                      key={p.id}
+                      key={`${p.type}-${p.id}`}
                       className="profile-card"
                       onClick={() => handleProfileSelect(p)}
                     >
@@ -697,6 +464,7 @@ const LoginPage = () => {
                 </div>
               </div>
             )}
+
           </div>
 
         </div>

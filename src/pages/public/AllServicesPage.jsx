@@ -1,8 +1,26 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
 import "./AllServices.css";
 import Logo from "../../assets/images/logo.png";
+import { AuthContext } from "../../context/AuthContext";
+import { useAuthActions } from "../../services/authService";
+import { useProfile } from "../../context/useProfile";
+import defaultDoctorAvatar from "../../assets/images/avtar.png";
+const DEFAULT_DOCTOR_IMAGE =
+  "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=800";
 
+const DEFAULT_LAB_IMAGE =
+  "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=800";
+const getSafeDoctorImage = (url) => {
+  if (!url || typeof url !== "string") return defaultDoctorAvatar;
+
+  if (url.includes("localhost:8080")) {
+    return defaultDoctorAvatar;
+  }
+
+  return url;
+};
 const StandardToggle = ({ id, checked, onChange }) => {
   return (
     <label className="switch-container" htmlFor={id}>
@@ -17,99 +35,235 @@ const StandardToggle = ({ id, checked, onChange }) => {
   );
 };
 
+const formatDateForApi = (offsetDays) => {
+  const date = new Date();
+  date.setDate(date.getDate() + offsetDays);
+  return date.toISOString().slice(0, 10);
+};
+
+const formatDateLabel = (offsetDays) => {
+  const date = new Date();
+  date.setDate(date.getDate() + offsetDays);
+
+  return date.toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+  });
+};
+
+const getDoctorLocation = (doctor) => {
+  return [doctor?.area, doctor?.city].filter(Boolean).join(", ") || "Location not updated";
+};
+
+const getLabLocation = (lab) => {
+  return [lab?.area, lab?.city, lab?.state].filter(Boolean).join(", ") || "Location not updated";
+};
+
+const getDoctorRating = (doctor) => {
+  if (doctor?.avgRating === null || doctor?.avgRating === undefined) return "New";
+  return Number(doctor.avgRating).toFixed(1);
+};
+
+const getLabRating = () => {
+  return "Verified";
+};
+
 const AllServicesPage = () => {
   const navigate = useNavigate();
+
+  const { currentUser, setCurrentUser } = useContext(AuthContext);
+  const { logoutUser } = useAuthActions(setCurrentUser);
+  const { clearProfile, selectedProfile } = useProfile();
+
   const [search, setSearch] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [sidebarProfileOpen, setSidebarProfileOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // SaaS states
-  const [saasDropdown, setSaasDropdown] = useState(false);
-  const [doctorSub, setDoctorSub] = useState(false);
-  const [patientSub, setPatientSub] = useState(false);
-  const saasRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const doctorScrollRef = useRef(null);
+  const hospitalScrollRef = useRef(null);
+  const labScrollRef = useRef(null);
 
-  // Booking Modal States
-  const [selected, setSelected] = useState(null);
-  const [showBooking, setShowBooking] = useState(false);
-  const [selectedHospital, setSelectedHospital] = useState(null);
+  const [doctors, setDoctors] = useState([]);
+  const [doctorLoading, setDoctorLoading] = useState(false);
+  const [doctorError, setDoctorError] = useState("");
+
+  const [labs, setLabs] = useState([]);
+  const [labTests, setLabTests] = useState([]);
+  const [labLoading, setLabLoading] = useState(false);
+  const [labError, setLabError] = useState("");
+
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedDoctorDetail, setSelectedDoctorDetail] = useState(null);
+  const [doctorDetailLoading, setDoctorDetailLoading] = useState(false);
+  const [selectedClinicId, setSelectedClinicId] = useState("");
+  const [showDoctorProfileModal, setShowDoctorProfileModal] = useState(false);
+  const [showDoctorBookingModal, setShowDoctorBookingModal] = useState(false);
+
   const [selectedDate, setSelectedDate] = useState(0);
-  const [selectedTime, setSelectedTime] = useState("");
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [slots, setSlots] = useState([]);
+  const [slotLoading, setSlotLoading] = useState(false);
+  const [slotError, setSlotError] = useState("");
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingMessage, setBookingMessage] = useState("");
+
+  const [selectedHospital, setSelectedHospital] = useState(null);
+  const [hospitals, setHospitals] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [preview, setPreview] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  const [showModal, setShowModal] = useState(false); // keep only one
-
-  const selectedProfile = JSON.parse(localStorage.getItem("selectedProfile"));
-
+  const [selectedLab, setSelectedLab] = useState(null);
+  const [showLabModal, setShowLabModal] = useState(false);
   const [activeTab, setActiveTab] = useState("Available Tests");
-  const [selectedTests, setSelectedTests] = useState([1, 2]);
+  const [selectedTests, setSelectedTests] = useState([]);
   const [modalSearch, setModalSearch] = useState("");
   const [selectedPackages, setSelectedPackages] = useState([]);
-  const [selectedLab, setSelectedLab] = useState({});
-  const [homePickup, setHomePickup] = useState(false); // For dynamic lab info
-  // Refs for scroll
-  const doctorScrollRef = useRef(null);
-  const hospitalScrollRef = useRef(null);
-  const labScrollRef = useRef(null);// keep only one // Fixes 'selectedLab' & 'setSelectedLab' is not defined
-
-  // --- Dummy Data (Fixes 'allAvailableTests' & 'packagesData' is not defined) ---
-  const allAvailableTests = [
-    { id: 1, name: "Full Body Checkup", price: 1500 },
-    { id: 2, name: "Blood Glucose (Fasting)", price: 200 },
-    { id: 3, name: "Lipid Profile", price: 600 },
-    { id: 4, name: "Thyroid Profile (T3 T4 TSH)", price: 800 },
-  ];
-
-  const packagesData = [
-    { id: 101, name: "Comprehensive Gold", price: 2999, parameters: 85 },
-    { id: 102, name: "Basic Health Screen", price: 999, parameters: 40 },
-  ];
-
-  // --- Calculation Logic (For Billing Summary) ---// Toggle selected test
-  const toggleTest = (id) => {
-    if (selectedTests.includes(id)) {
-      setSelectedTests(selectedTests.filter(tid => tid !== id));
-    } else {
-      setSelectedTests([...selectedTests, id]);
-    }
-  };
-  const filteredTests = allAvailableTests.filter(t =>
-    t.name.toLowerCase().includes(modalSearch.toLowerCase())
+  const [homePickup, setHomePickup] = useState(false);
+  const [hospitalsLoading, setHospitalsLoading] = useState(false);
+  const [hospitalsError, setHospitalsError] = useState("");
+  const [hospitalDepartments, setHospitalDepartments] = useState([]);
+  const [hospitalSlots, setHospitalSlots] = useState([]);
+  const [hospitalDeptLoading, setHospitalDeptLoading] = useState(false);
+  const [hospitalSlotLoading, setHospitalSlotLoading] = useState(false);
+  const [hospitalBookingLoading, setHospitalBookingLoading] = useState(false);
+  const [hospitalSelectedDepartment, setHospitalSelectedDepartment] = useState(null);
+  const [hospitalSelectedDate, setHospitalSelectedDate] = useState(1);
+  const [hospitalSelectedSlot, setHospitalSelectedSlot] = useState(null);
+  const [hospitalPatientNote, setHospitalPatientNote] = useState("");
+  const [hospitalBookingMessage, setHospitalBookingMessage] = useState("");
+  const [loginPromptOpen, setLoginPromptOpen] = useState(false);
+  const [loginRedirectPath, setLoginRedirectPath] = useState("");
+  const packagesData = useMemo(
+    () => [
+      { id: 101, name: "Comprehensive Health Package", price: 2999, parameters: 85 },
+      { id: 102, name: "Basic Health Screen", price: 999, parameters: 40 },
+    ],
+    []
   );
+
   useEffect(() => {
-    if (showModal) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
+    const fetchHospitals = async () => {
+      try {
+        setHospitalsLoading(true);
+        setHospitalsError("");
+
+        const response = await api.get("/public/hospitals");
+        setHospitals(Array.isArray(response.data) ? response.data : []);
+      } catch (error) {
+        console.error("Failed to fetch hospitals", error);
+        setHospitalsError("Unable to load hospitals right now.");
+      } finally {
+        setHospitalsLoading(false);
+      }
+    };
+
+    fetchHospitals();
+  }, []);
+
+  const handleLogout = async () => {
+    clearProfile();
+    setDropdownOpen(false);
+    setSidebarProfileOpen(false);
+    setIsSidebarOpen(false);
+    await logoutUser();
+  };
+
+  const handleProtectedViewAll = (path) => {
+    if (!currentUser) {
+      setLoginRedirectPath(path);
+      setLoginPromptOpen(true);
+      return;
     }
-  }, [showModal]);
 
+    navigate(path);
+  };
+  const navigateToRoleProfile = () => {
+    if (!currentUser) return;
 
-  // Calculate subtotal, gst, service charge
-  const subtotal =
-    allAvailableTests
-      .filter(t => selectedTests.includes(t.id))
-      .reduce((acc, curr) => acc + curr.price, 0)
-    +
-    packagesData
-      .filter(p => selectedPackages.includes(p.id))
-      .reduce((acc, curr) => acc + curr.price, 0);
+    if (currentUser.role === "DOCTOR") {
+      navigate("/doctor/profile");
+      return;
+    }
 
-  const gst = Math.round(subtotal * 0.05);
-  const serviceCharge = 50;
-  const pickupFee = 120;
+    if (currentUser.role === "ADMIN") {
+      navigate("/admin/profile");
+      return;
+    }
 
-  const grandTotal = subtotal + gst + serviceCharge + (homePickup ? pickupFee : 0);
+    navigate("/patient/profile");
+  };
+
+  const navigateToRoleDashboard = () => {
+    if (!currentUser) return;
+
+    if (currentUser.role === "DOCTOR") {
+      navigate("/doctor/dashboard");
+      return;
+    }
+
+    if (currentUser.role === "ADMIN") {
+      navigate("/admin/dashboard");
+      return;
+    }
+
+    navigate("/patient/dashboard");
+  };
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        setDoctorLoading(true);
+        setDoctorError("");
+
+        const response = await api.get("/public/doctors?page=0&size=8");
+        setDoctors(Array.isArray(response.data) ? response.data : []);
+      } catch (error) {
+        console.error("Failed to fetch doctors", error);
+        setDoctorError("Unable to load doctors right now.");
+      } finally {
+        setDoctorLoading(false);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
+
+  useEffect(() => {
+    const fetchLabsAndTests = async () => {
+      try {
+        setLabLoading(true);
+        setLabError("");
+
+        const [labsResponse, testsResponse] = await Promise.all([
+          api.get("/public/labs"),
+          api.get("/public/lab-tests"),
+        ]);
+
+        setLabs(Array.isArray(labsResponse.data) ? labsResponse.data : []);
+        setLabTests(Array.isArray(testsResponse.data) ? testsResponse.data : []);
+      } catch (error) {
+        console.error("Failed to fetch labs/tests", error);
+        setLabError("Unable to load labs right now.");
+      } finally {
+        setLabLoading(false);
+      }
+    };
+
+    fetchLabsAndTests();
+  }, []);
 
   useEffect(() => {
     const initDragScroll = (ref) => {
       const slider = ref.current;
-      if (!slider) return;
+      if (!slider) return undefined;
 
       let isDown = false;
-      let startX;
-      let scrollLeft;
+      let startX = 0;
+      let scrollLeft = 0;
 
       const onMouseDown = (e) => {
         isDown = true;
@@ -149,310 +303,778 @@ const AllServicesPage = () => {
       };
     };
 
-    initDragScroll(doctorScrollRef);
-    initDragScroll(hospitalScrollRef);
-    initDragScroll(labScrollRef);
+    const cleanupDoctor = initDragScroll(doctorScrollRef);
+    const cleanupHospital = initDragScroll(hospitalScrollRef);
+    const cleanupLab = initDragScroll(labScrollRef);
+
+    return () => {
+      cleanupDoctor?.();
+      cleanupHospital?.();
+      cleanupLab?.();
+    };
+  }, [doctors.length, hospitals.length, labs.length]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleConfirmBooking = () => {
+  useEffect(() => {
+    if (showDoctorProfileModal || showDoctorBookingModal || selectedHospital || showLabModal || preview) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
 
-    // ✅ STEP 1: Profile check
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [showDoctorProfileModal, showDoctorBookingModal, selectedHospital, showLabModal, preview]);
+
+  const filteredDoctors = useMemo(() => {
+    const q = search.trim().toLowerCase();
+
+    if (!q) return doctors;
+
+    return doctors.filter((doctor) => {
+      const searchable = [
+        doctor.fullName,
+        doctor.primarySpecialization,
+        doctor.clinicName,
+        doctor.city,
+        doctor.area,
+        doctor.consultationFee,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchable.includes(q);
+    });
+  }, [doctors, search]);
+
+  const filteredHospitals = useMemo(() => {
+    const q = search.trim().toLowerCase();
+
+    if (!q) return hospitals;
+
+    return hospitals.filter((hospital) => {
+      const searchable = [
+        hospital.hospitalName,
+        hospital.city,
+        hospital.area,
+        hospital.address,
+        hospital.rating,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchable.includes(q);
+    });
+  }, [hospitals, search]);
+
+  const getHospitalImages = (hospital) => {
+    if (Array.isArray(hospital?.imageUrls) && hospital.imageUrls.length > 0) {
+      return hospital.imageUrls;
+    }
+
+    if (hospital?.imageUrl) {
+      return [hospital.imageUrl];
+    }
+
+    return [];
+  };
+
+  const getCurrentHospitalImage = () => {
+    const images = getHospitalImages(selectedHospital);
+    return images[currentImageIndex] || selectedHospital?.imageUrl || "";
+  };
+
+  const goToNextHospitalImage = () => {
+    const images = getHospitalImages(selectedHospital);
+    if (images.length <= 1) return;
+
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const goToPreviousHospitalImage = () => {
+    const images = getHospitalImages(selectedHospital);
+    if (images.length <= 1) return;
+
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const filteredLabs = useMemo(() => {
+    const q = search.trim().toLowerCase();
+
+    if (!q) return labs;
+
+    return labs.filter((lab) => {
+      const searchable = [
+        lab.name,
+        lab.city,
+        lab.area,
+        lab.state,
+        lab.addressLine1,
+        lab.addressLine2,
+        ...(lab.services || []),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchable.includes(q);
+    });
+  }, [labs, search]);
+
+  const handleOpenHospitalModal = async (hospital) => {
+    setSelectedHospital(hospital);
+    setCurrentImageIndex(0);
+    setHospitalDepartments([]);
+    setHospitalSlots([]);
+    setHospitalSelectedDepartment(null);
+    setHospitalSelectedDate(1);
+    setHospitalSelectedSlot(null);
+    setHospitalPatientNote("");
+    setHospitalBookingMessage("");
+
+    try {
+      setHospitalDeptLoading(true);
+
+      const response = await api.get(`/public/hospitals/${hospital.id}/departments`);
+      const departments = Array.isArray(response.data) ? response.data : [];
+
+      setHospitalDepartments(departments);
+      setHospitalSelectedDepartment(departments[0] || null);
+    } catch (error) {
+      console.error("Failed to fetch hospital departments", error);
+      setHospitalBookingMessage("Unable to load hospital departments.");
+    } finally {
+      setHospitalDeptLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchHospitalSlots = async () => {
+      if (!selectedHospital?.id || !hospitalSelectedDepartment?.id) return;
+
+      try {
+        setHospitalSlotLoading(true);
+        setHospitalBookingMessage("");
+        setHospitalSelectedSlot(null);
+
+        const date = formatDateForApi(hospitalSelectedDate);
+
+        const response = await api.get(
+          `/public/hospitals/${selectedHospital.id}/departments/${hospitalSelectedDepartment.id}/slots?date=${date}`
+        );
+
+        setHospitalSlots(Array.isArray(response.data) ? response.data : []);
+      } catch (error) {
+        console.error("Failed to fetch hospital slots", error);
+        setHospitalSlots([]);
+        setHospitalBookingMessage("Unable to load slots for selected date.");
+      } finally {
+        setHospitalSlotLoading(false);
+      }
+    };
+
+    fetchHospitalSlots();
+  }, [selectedHospital?.id, hospitalSelectedDepartment?.id, hospitalSelectedDate]);
+
+  const handleHospitalBooking = async () => {
+    if (!currentUser) {
+      alert("Please login first to book hospital appointment");
+      navigate("/login");
+      return;
+    }
+
+    if (currentUser.role !== "PATIENT") {
+      setHospitalBookingMessage("Only patients can book hospital appointments.");
+      return;
+    }
+
     if (!selectedProfile) {
       alert("Please select patient profile first");
       navigate("/patient/profile");
       return;
     }
 
-    // ✅ STEP 2: Time check
-    if (!selectedTime) {
-      alert("Please select time slot");
+    if (!selectedHospital?.id) {
+      setHospitalBookingMessage("Please select hospital.");
       return;
     }
 
-    // ✅ STEP 3: Proper date
-    const dateObj = new Date();
-    dateObj.setDate(dateObj.getDate() + selectedDate);
-
-    // ✅ STEP 4: Create booking
-    const booking = {
-      doctorId: selected.id,
-      doctorName: selected.name,
-      patientId: selectedProfile.id,
-      patientName: selectedProfile.fullName,
-      relation: selectedProfile.relation,
-      time: selectedTime,
-      date: dateObj.toISOString(),
-    };
-
-    // ✅ STEP 5: Get existing bookings
-    const existing = JSON.parse(localStorage.getItem("appointments")) || [];
-
-    // ✅ STEP 6: Duplicate check
-    const alreadyBooked = existing.some(
-      (a) =>
-        a.doctorId === booking.doctorId &&
-        a.time === booking.time &&
-        a.date === booking.date
-    );
-
-    if (alreadyBooked) {
-      alert("Slot already booked ❌");
+    if (!hospitalSelectedDepartment?.id) {
+      setHospitalBookingMessage("Please select department.");
       return;
     }
 
-    // ✅ STEP 7: Save
-    localStorage.setItem("appointments", JSON.stringify([...existing, booking]));
+    if (!hospitalSelectedSlot?.startTime) {
+      setHospitalBookingMessage("Please select an available slot.");
+      return;
+    }
 
-    alert("Appointment Booked ✅");
+    try {
+      setHospitalBookingLoading(true);
+      setHospitalBookingMessage("");
 
-    // ✅ STEP 8: Reset
-    setSelectedTime("");
-    setSelectedDate(0);
+      const payload = {
+        hospitalId: selectedHospital.id,
+        departmentId: hospitalSelectedDepartment.id,
+        patientProfileId: selectedProfile.id,
+        appointmentDate: formatDateForApi(hospitalSelectedDate),
+        slotStartTime: hospitalSelectedSlot.startTime,
+        slotEndTime: hospitalSelectedSlot.endTime,
+        patientNote: hospitalPatientNote || "Booked from services page",
+      };
 
-    closeModals();
+      const response = await api.post("/patient/hospital-appointments", payload);
+
+      if (response.data?.success) {
+        setHospitalBookingMessage(response.data.message || "Hospital appointment booked successfully.");
+        setShowConfirmation(true);
+      } else {
+        setHospitalBookingMessage(response.data?.message || "Unable to book hospital appointment.");
+      }
+    } catch (error) {
+      console.error("Hospital appointment booking failed", error);
+      setHospitalBookingMessage(
+        error.response?.data?.message || "Unable to book hospital appointment."
+      );
+    } finally {
+      setHospitalBookingLoading(false);
+    }
   };
-  const closeModals = () => {
-    setShowBooking(false);
-    setShowConfirmation(false);
-    setShowModal(false);
-    setSelected(null);
-    setSelectedHospital(null);
-    setSelectedDate(0);
-    setSelectedTime("");
+
+  const filteredTests = useMemo(() => {
+    const q = modalSearch.trim().toLowerCase();
+
+    if (!q) return labTests;
+
+    return labTests.filter((test) => {
+      const searchable = [test.testName, test.testCode, test.category, test.serviceType]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchable.includes(q);
+    });
+  }, [labTests, modalSearch]);
+
+  const subtotal =
+    labTests
+      .filter((test) => selectedTests.includes(test.id))
+      .reduce((acc, curr) => acc + Number(curr.price || 0), 0) +
+    packagesData
+      .filter((pack) => selectedPackages.includes(pack.id))
+      .reduce((acc, curr) => acc + Number(curr.price || 0), 0);
+
+  const gst = Math.round(subtotal * 0.05);
+  const serviceCharge = subtotal > 0 ? 50 : 0;
+  const pickupFee = homePickup ? 120 : 0;
+  const grandTotal = subtotal + gst + serviceCharge + pickupFee;
+
+  const primaryClinic =
+    selectedDoctorDetail?.clinics?.find((clinic) => clinic.isPrimary || clinic.primary) ||
+    selectedDoctorDetail?.clinics?.[0] ||
+    selectedDoctorDetail?.doctorClinics?.[0] ||
+    null;
+
+  const profileDoctor = selectedDoctorDetail || selectedDoctor;
+
+  const detailClinics =
+    selectedDoctorDetail?.clinics ||
+    selectedDoctorDetail?.doctorClinics ||
+    [];
+  const clinicOptions =
+    selectedDoctorDetail?.clinics ||
+    selectedDoctorDetail?.doctorClinics ||
+    [];
+
+  const selectedBookingClinic =
+    clinicOptions.find((clinic) => String(clinic.id) === String(selectedClinicId)) ||
+    primaryClinic;
+  const openDoctorProfile = async (doctor) => {
+    setSelectedDoctor(doctor);
+    setShowDoctorProfileModal(true);
+    setShowDoctorBookingModal(false);
+    setSelectedDoctorDetail(null);
+    setDoctorDetailLoading(true);
+
+    try {
+      const response = await api.get(`/public/doctors/${doctor.doctorProfileId}`);
+
+      setSelectedDoctorDetail(response.data);
+
+      const clinics = response.data?.clinics || response.data?.doctorClinics || [];
+      const defaultClinic =
+        clinics.find((clinic) => clinic.isPrimary || clinic.primary) || clinics[0];
+
+      setSelectedClinicId(defaultClinic?.id ? String(defaultClinic.id) : "");
+    } catch (error) {
+      console.error("Failed to fetch doctor detail", error);
+      setSelectedDoctorDetail(null);
+    } finally {
+      setDoctorDetailLoading(false);
+    }
   };
+
+  const openDoctorBooking = async (doctor) => {
+    setSelectedDoctor(doctor);
+    setShowDoctorProfileModal(false);
+    setShowDoctorBookingModal(true);
+    setSelectedDoctorDetail(null);
+    setSelectedClinicId("");
+    setSelectedSlot(null);
+    setSlots([]);
+    setSlotError("");
+    setBookingMessage("");
+    setDoctorDetailLoading(true);
+
+    try {
+      const response = await api.get(`/public/doctors/${doctor.doctorProfileId}`);
+
+      setSelectedDoctorDetail(response.data);
+
+      const clinics = response.data?.clinics || response.data?.doctorClinics || [];
+      const defaultClinic =
+        clinics.find((clinic) => clinic.isPrimary || clinic.primary) || clinics[0];
+
+      setSelectedClinicId(defaultClinic?.id ? String(defaultClinic.id) : "");
+    } catch (error) {
+      console.error("Failed to fetch doctor detail", error);
+      setSlotError("Unable to load doctor clinic details.");
+    } finally {
+      setDoctorDetailLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (saasRef.current && !saasRef.current.contains(e.target)) setSaasDropdown(false);
+    const fetchAvailability = async () => {
+      if (!showDoctorBookingModal || !selectedDoctor?.doctorProfileId || !selectedBookingClinic?.id) return;
+      try {
+        setSlotLoading(true);
+        setSlotError("");
+        setSelectedSlot(null);
+
+        const date = formatDateForApi(selectedDate);
+        const response = await api.get(
+          `/public/doctors/${selectedDoctor.doctorProfileId}/clinics/${selectedBookingClinic.id}/availability?date=${date}`);
+
+        setSlots(Array.isArray(response.data?.slots) ? response.data.slots : []);
+      } catch (error) {
+        console.error("Failed to fetch availability", error);
+        setSlots([]);
+        setSlotError("Unable to load slots for selected date.");
+      } finally {
+        setSlotLoading(false);
+      }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
-  const doctors = [
-    { id: 1, name: "Dr. Anjali Mehta", specialty: "Cardiologist", location: "Andheri West, Mumbai", rating: 4.9, experience: "12 yrs", img: "https://images.pexels.com/photos/8376318/pexels-photo-8376318.jpeg" },
-    { id: 2, name: "Dr. Rajesh Sharma", specialty: "Orthopedic", location: "Bandra East, Mumbai", rating: 4.7, experience: "10 yrs", img: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=800" },
-    { id: 3, name: "Dr. Neha Verma", specialty: "Dermatologist", location: "Powai, Mumbai", rating: 4.8, experience: "8 yrs", img: "https://images.pexels.com/photos/3881247/pexels-photo-3881247.jpeg" },
-    { id: 4, name: "Dr. Amit Patel", specialty: "Neurologist", location: "Malad West, Mumbai", rating: 4.6, experience: "15 yrs", img: "https://images.pexels.com/photos/19438560/pexels-photo-19438560.jpeg" },
-    { id: 5, name: "Dr. Karan Shah", specialty: "Pediatrician", location: "Borivali, Mumbai", rating: 4.5, experience: "9 yrs", img: "https://images.pexels.com/photos/6303602/pexels-photo-6303602.jpeg" },
-  ];
+    fetchAvailability();
+  }, [showDoctorBookingModal, selectedDoctor?.doctorProfileId, selectedBookingClinic?.id, selectedDate]);
+  const closeAllModals = () => {
+    setShowDoctorProfileModal(false);
+    setShowDoctorBookingModal(false);
+    setSelectedDoctor(null);
+    setSelectedDoctorDetail(null);
+    setSelectedDate(0);
+    setSelectedSlot(null);
+    setSlots([]);
+    setSlotError("");
+    setBookingMessage("");
 
-  const hospitals = [
-    {
-      id: 1,
-      name: "Apollo Hospital",
-      location: "Chennai, Tamil Nadu",
-      rating: "4.8",
-      img: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?q=80&w=800",
-      images: [
-        "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c?q=80&w=800",
-        "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f?q=80&w=800",
-        "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800"
-      ],
-      depts: ["Cardiology", "Orthopedics", "Neurology", "Pediatrics"],
-      bedsAvailable: 23,
-      totalBeds: 50
-    },
-
-    {
-      id: 2,
-      name: "Manipal Hospital",
-      location: "Bengaluru, Karnataka",
-      rating: "4.6",
-      img: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800",
-      images: [
-        "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800",
-        "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f?q=80&w=800"
-      ],
-      depts: ["Oncology", "Orthopedics", "General"],
-      bedsAvailable: 12,
-      totalBeds: 40
-    },
-
-    {
-      id: 3,
-      name: "Fortis Healthcare",
-      location: "Mumbai, Maharashtra",
-      rating: "4.7",
-      img: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=800",
-      images: [
-        "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=800",
-        "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c?q=80&w=800"
-      ],
-      depts: ["Pediatrics", "Surgery", "Cardiology"],
-      bedsAvailable: 18,
-      totalBeds: 45
-    },
-
-    {
-      id: 4,
-      name: "Max Super Speciality",
-      location: "Delhi",
-      rating: "4.5",
-      img: "https://images.unsplash.com/photo-1538108149393-fbbd81895907?q=80&w=800",
-      images: [
-        "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c?q=80&w=800",
-        "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f?q=80&w=800",
-        "https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=800"
-      ],
-      depts: ["Gastro", "Cardiology"],
-      bedsAvailable: 9,
-      totalBeds: 30
-    },
-
-    {
-      id: 5,
-      name: "Medanta Hospital",
-      location: "Gurgaon, Haryana",
-      rating: "4.9",
-      img: "https://images.unsplash.com/photo-1504439468489-c8920d796a29?q=80&w=800",
-      images: [
-        "https://images.unsplash.com/photo-1587350846662-3c0c591f4a4c?q=80&w=800",
-        "https://images.unsplash.com/photo-1538108197017-c1a7148ef88f?q=80&w=800",
-        "https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=800"
-      ],
-      depts: ["Neurology", "Urology", "Cardiology"],
-      bedsAvailable: 31,
-      totalBeds: 60
-    }
-  ];
-
-  const labs = [
-    {
-      id: 1,
-      name: "Thyrocare Lab",
-      location: "Mumbai",
-      rating: 4.6,
-      img: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b",
-      about: "Thyrocare is one of India's leading diagnostic labs known for affordable and accurate testing with fast report delivery.",
-      reviews: [
-        { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
-        { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
-      ]
-    },
-    {
-      id: 2,
-      name: "Dr Lal PathLabs",
-      location: "Delhi",
-      rating: 4.7,
-      img: "https://images.unsplash.com/photo-1581594693702-fbdc51b2763b",
-      about: "Dr Lal PathLabs offers a wide range of diagnostic services with NABL accreditation and trusted by millions.",
-      reviews: [
-        { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
-        { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
-      ]
-    },
-    {
-      id: 3,
-      name: "Metropolis Lab",
-      location: "Chennai",
-      rating: 4.5,
-      img: "https://images.unsplash.com/photo-1579154204601-01588f351e67",
-      about: "Metropolis Healthcare provides advanced pathology services with a strong focus on quality and innovation.",
-      reviews: [
-        { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
-        { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
-      ]
-    },
-    {
-      id: 4,
-      name: "SRL Diagnostics",
-      location: "Bangalore",
-      rating: 4.4,
-      img: "https://images.unsplash.com/photo-1582719508461-905c673771fd",
-      about: "SRL Diagnostics is a trusted name offering a wide network of labs with high-quality diagnostic services.",
-      reviews: [
-        { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
-        { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
-      ]
-    },
-    {
-      id: 5,
-      name: "Healthians",
-      location: "Hyderabad",
-      rating: 4.6,
-      img: "https://images.unsplash.com/photo-1580281657527-47b8d3d8b5a3",
-      about: "Healthians specializes in home sample collection with a strong focus on convenience and affordability.",
-      reviews: [
-        { name: "Rohit Sharma", ratingNumber: 5, comment: "Very fast service and accurate reports." },
-        { name: "Neha Gupta", ratingNumber: 4, comment: "Good experience, home collection was smooth." }
-      ]
-    }
-  ];
-  const TIME_SLOTS = [
-    "10:00 AM", "10:30 AM", "11:00 AM",
-    "05:00 PM", "05:30 PM", "06:00 PM"
-  ];
-  const filterData = (data) => {
-    return data.filter(item =>
-      (item.name && item.name.toLowerCase().includes(search.toLowerCase())) ||
-      (item.location && item.location.toLowerCase().includes(search.toLowerCase())) ||
-      (item.specialty && item.specialty.toLowerCase().includes(search.toLowerCase())) ||
-      item.rating?.toString().includes(search)
-    );
+    setSelectedHospital(null);
+    setCurrentImageIndex(0);
+    setPreview(null);
+    setShowConfirmation(false);
+    setHospitalDepartments([]);
+    setHospitalSlots([]);
+    setHospitalSelectedDepartment(null);
+    setHospitalSelectedDate(1);
+    setHospitalSelectedSlot(null);
+    setHospitalPatientNote("");
+    setHospitalBookingMessage("");
+    setHospitalBookingLoading(false);
+    setSelectedLab(null);
+    setShowLabModal(false);
+    setActiveTab("Available Tests");
+    setModalSearch("");
+    setSelectedTests([]);
+    setSelectedPackages([]);
+    setHomePickup(false);
   };
 
+  const handleConfirmAppointment = async () => {
+    if (!currentUser) {
+      alert("Please login first to book appointment");
+      navigate("/login");
+      return;
+    }
+
+    if (currentUser.role !== "PATIENT") {
+      setBookingMessage("Only patients can book appointments.");
+      return;
+    }
+
+    if (!selectedProfile) {
+      alert("Please select patient profile first");
+      navigate("/patient/profile");
+      return;
+    }
+
+    if (!selectedDoctor?.doctorProfileId) {
+      setBookingMessage("Please select a doctor first.");
+      return;
+    }
+
+    if (!selectedBookingClinic?.id) {
+      setBookingMessage("Clinic is not available for this doctor.");
+      return;
+    }
+
+    if (!selectedSlot?.startTime) {
+      setBookingMessage("Please select an available slot.");
+      return;
+    }
+
+    try {
+      setBookingLoading(true);
+      setBookingMessage("");
+
+      const payload = {
+        doctorProfileId: selectedDoctor.doctorProfileId,
+        clinicId: selectedBookingClinic.id,
+        patientProfileId: selectedProfile.id,
+        patientProfileType: selectedProfile.type || "SELF",
+        appointmentDate: formatDateForApi(selectedDate),
+        slotStartTime: selectedSlot.startTime,
+        slotEndTime: selectedSlot.endTime,
+        notes: "Booked from services page",
+      };
+
+      const response = await api.post("/patient/public-appointments", payload);
+
+      if (response.data?.success) {
+        setBookingMessage(response.data.message || "Appointment booked successfully.");
+        setTimeout(() => closeAllModals(), 900);
+      } else {
+        setBookingMessage(response.data?.message || "Unable to book appointment.");
+      }
+    } catch (error) {
+      console.error("Appointment booking failed", error);
+      setBookingMessage(error.message || "Unable to book appointment.");
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  const toggleTest = (id) => {
+    setSelectedTests((prev) => {
+      if (prev.includes(id)) return prev.filter((testId) => testId !== id);
+      return [...prev, id];
+    });
+  };
+
+  const togglePackage = (id) => {
+    setSelectedPackages((prev) => {
+      if (prev.includes(id)) return prev.filter((packageId) => packageId !== id);
+      return [...prev, id];
+    });
+  };
+
+  const handleOpenLabModal = (lab) => {
+    setSelectedLab(lab);
+    setShowLabModal(true);
+    setActiveTab("Available Tests");
+    setModalSearch("");
+    setSelectedTests([]);
+    setSelectedPackages([]);
+    setHomePickup(false);
+  };
+
+  const handleLabBooking = () => {
+    if (!currentUser) {
+      alert("Please login first to book lab test");
+      navigate("/login");
+      return;
+    }
+
+    if (currentUser.role !== "PATIENT") {
+      alert("Only patients can book lab tests.");
+      return;
+    }
+
+    if (!selectedProfile) {
+      alert("Please select patient profile first");
+      navigate("/patient/profile");
+      return;
+    }
+
+    if (selectedTests.length === 0 && selectedPackages.length === 0) {
+      alert("Please select at least one test or package");
+      return;
+    }
+
+    alert("Lab booking request prepared successfully. Backend lab booking API will be connected in next phase.");
+    closeAllModals();
+  };
 
   return (
     <div className="home-wrapper">
-      {/* --- SIDEBAR SYSTEM --- */}
-      <div className={`sidebar-overlay ${isSidebarOpen ? "active" : ""}`} onClick={() => setIsSidebarOpen(false)}></div>
+      <div className="bg-blob blob-1"></div>
+      <div className="bg-blob blob-2"></div>
+
+      <div
+        className={`sidebar-overlay ${isSidebarOpen ? "active" : ""}`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
+
       <aside className={`mobile-sidebar ${isSidebarOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <h2 className="brand-logo-sidebar">Doc<span>Hub</span></h2>
-          <button className="close-sidebar-btn" onClick={() => setIsSidebarOpen(false)}>×</button>
+          <h2 className="brand-logo-sidebar">
+            Doctor's <span>Hub</span>
+          </h2>
+          <button className="close-sidebar-btn" onClick={() => setIsSidebarOpen(false)}>
+            ×
+          </button>
         </div>
-        <div className="sidebar-content">
-          <p className="sidebar-label">Navigation</p>
-          <div className="sidebar-nav-link" onClick={() => { navigate("/"); setIsSidebarOpen(false); }}>🏠 Home</div>
-          <div className="sidebar-nav-link" onClick={() => { navigate("/about"); setIsSidebarOpen(false); }}>ℹ️ About Us</div>
-          <div className="sidebar-nav-link active-side">🛠️ Services</div>
-          <div className="sidebar-nav-link" onClick={() => { navigate("/blogs"); setIsSidebarOpen(false); }}>📰 Doctor Blogs</div>
-          <div className="sidebar-nav-link" onClick={() => { navigate("/contact"); setIsSidebarOpen(false); }}>📞 Contact Us</div>
-          <p className="sidebar-label">SaaS Solutions</p>
-          <div className="sidebar-nav-link" onClick={() => setDoctorSub(!doctorSub)}>👨‍⚕️ For Doctors {doctorSub ? "▾" : "▸"}</div>
-          {doctorSub && <div className="sidebar-sub-link" onClick={() => navigate("/doctor/dashboard")}>→ Dashboard</div>}
-          <div className="sidebar-nav-link" onClick={() => setPatientSub(!patientSub)}>👤 For Patients {patientSub ? "▾" : "▸"}</div>
-          {patientSub && <div className="sidebar-sub-link" onClick={() => navigate("/patient/dashboard")}>→ Portal</div>}
-        </div>
-        <div className="sidebar-footer">
-          <button className="secondary-btn-mob" onClick={() => navigate("/login")}>Login</button>
-          <button className="primary-btn-mob" onClick={() => navigate("/signup")}>Sign Up Now</button>
-        </div>
-      </aside>
 
-      {/* --- HEADER --- */}
-      <header className="home-header">
-        <div className="header-brand" onClick={() => navigate("/")}>
-          <img src={Logo} alt="Doctor's Hub Logo" className="logo-img" />
-          <h1>Doctor's <span>Hub</span></h1>
-        </div>
-        <nav className="header-nav desktop-only">
-          <span className="nav-item" onClick={() => navigate("/")}>Home</span>
-          <span className="nav-item" onClick={() => navigate("/about")}>About Us</span>
-          <div className="nav-item dropdown-toggle " ref={saasRef}>
-            <span className="nav-item active-tab" onClick={() => setSaasDropdown(!saasDropdown)}>
-              Services {saasDropdown ? "▴" : "▾"}
-            </span>
-            {saasDropdown && (
-              <div className="dropdown-menu-desktop">
-                <div className="dropdown-item" onClick={() => navigate("/doctor/dashboard")}>For Doctors</div>
-                <div className="dropdown-item" onClick={() => navigate("/patient/dashboard")}>For Patients</div>
-                <div className="dropdown-divider"></div>
-                <div className="dropdown-item active-tab" onClick={() => navigate("/all-services")}>View All Services</div>
+        {currentUser && (
+          <div className="sidebar-user-container">
+            <div
+              className={`sidebar-profile-card ${sidebarProfileOpen ? "expanded" : ""}`}
+              onClick={() => setSidebarProfileOpen(!sidebarProfileOpen)}
+            >
+              <div className="sidebar-avatar">
+                {currentUser.fullName?.charAt(0)?.toUpperCase() || "U"}
+              </div>
+
+              <div className="sidebar-info">
+                <h3>{currentUser.fullName || "User"}</h3>
+                <p>{currentUser.email || currentUser.role}</p>
+              </div>
+
+              <span className="side-chevron">{sidebarProfileOpen ? "▴" : "▾"}</span>
+            </div>
+
+            {sidebarProfileOpen && (
+              <div className="sidebar-inner-dropdown">
+                <div
+                  className="inner-opt"
+                  onClick={() => {
+                    setIsSidebarOpen(false);
+                    navigateToRoleProfile();
+                  }}
+                >
+                  <span className="inner-icon">👤</span>
+                  My Profile
+                </div>
+
+                <div
+                  className="inner-opt"
+                  onClick={() => {
+                    setIsSidebarOpen(false);
+                    navigateToRoleDashboard();
+                  }}
+                >
+                  <span className="inner-icon">📊</span>
+                  Dashboard
+                </div>
               </div>
             )}
           </div>
-          <span className="nav-item" onClick={() => navigate("/blogs")}>Doctor Blogs</span>
-          <span className="nav-item" onClick={() => navigate("/contact")}>Contact Us</span>
+        )}
+
+        <div className="sidebar-content">
+          <p className="sidebar-label">Navigation</p>
+
+          <div
+            className="sidebar-link"
+            onClick={() => {
+              setIsSidebarOpen(false);
+              navigate("/");
+            }}
+          >
+            🏠 Home
+          </div>
+
+          <div
+            className="sidebar-link"
+            onClick={() => {
+              setIsSidebarOpen(false);
+              navigate("/about");
+            }}
+          >
+            ℹ️ About Us
+          </div>
+
+          <div
+            className="sidebar-link active-side"
+            onClick={() => {
+              setIsSidebarOpen(false);
+              navigate("/all-services");
+            }}
+          >
+            🛠️ Services
+          </div>
+
+          <div
+            className="sidebar-link"
+            onClick={() => {
+              setIsSidebarOpen(false);
+              navigate("/blogs");
+            }}
+          >
+            📰 Doctor Blogs
+          </div>
+
+          <div
+            className="sidebar-link"
+            onClick={() => {
+              setIsSidebarOpen(false);
+              navigate("/contact");
+            }}
+          >
+            📞 Contact Us
+          </div>
+        </div>
+
+        <div className="sidebar-footer">
+          {currentUser ? (
+            <button className="secondary-btn-mob logout-red" onClick={handleLogout}>
+              Logout
+            </button>
+          ) : (
+            <div className="sidebar-auth-grid">
+              <button
+                className="secondary-btn-mob"
+                onClick={() => {
+                  setIsSidebarOpen(false);
+                  navigate("/login");
+                }}
+              >
+                Login
+              </button>
+              <button
+                className="primary-btn-mob"
+                onClick={() => {
+                  setIsSidebarOpen(false);
+                  navigate("/signup");
+                }}
+              >
+                Sign Up
+              </button>
+            </div>
+          )}
+        </div>
+      </aside>
+
+      <header className="home-header">
+        <div className="header-brand" onClick={() => navigate("/")}>
+          <img src={Logo} alt="Doctor's Hub Logo" className="logo-img" />
+          <h1>
+            Doctor's <span>Hub</span>
+          </h1>
+        </div>
+
+        <nav className="header-nav desktop-only">
+          <span className="nav-item" onClick={() => navigate("/")}>
+            Home
+          </span>
+
+          <span className="nav-item" onClick={() => navigate("/about")}>
+            About Us
+          </span>
+
+          <span className="nav-item active-tab" onClick={() => navigate("/all-services")}>
+            Services
+          </span>
+
+          <span className="nav-item" onClick={() => navigate("/blogs")}>
+            Doctor Blogs
+          </span>
+
+          <span className="nav-item" onClick={() => navigate("/contact")}>
+            Contact Us
+          </span>
         </nav>
+
         <div className="auth-buttons">
-          <button className="login-btn-styled desktop-only" onClick={() => navigate("/login")}>Login</button>
-          <button className="primary-btn desktop-only" onClick={() => navigate("/signup")}>SignUp</button>
-          <button className="hamburger-menu" onClick={() => setIsSidebarOpen(true)}>☰</button>
+          {currentUser ? (
+            <div className="profile-wrapper desktop-only" ref={dropdownRef}>
+              <div className="profile-icon" onClick={() => setDropdownOpen(!dropdownOpen)}>
+                {currentUser.fullName?.charAt(0)?.toUpperCase() || "U"}
+              </div>
+
+              {dropdownOpen && (
+                <div className="dropdown-menu alignment-fix">
+                  <div className="user-info-header">
+                    <div className="user-avatar-mini">
+                      {currentUser.fullName?.charAt(0)?.toUpperCase() || "U"}
+                    </div>
+
+                    <div className="user-details">
+                      <span className="user-name">{currentUser.fullName || "User"}</span>
+                      <span className="user-email">{currentUser.email || currentUser.role}</span>
+                    </div>
+                  </div>
+
+                  <div
+                    className="dropdown-item"
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      navigateToRoleProfile();
+                    }}
+                  >
+                    <span className="icon-box">👤</span>
+                    My Profile
+                  </div>
+
+                  <div
+                    className="dropdown-item"
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      navigateToRoleDashboard();
+                    }}
+                  >
+                    <span className="icon-box">📊</span>
+                    Dashboard
+                  </div>
+
+                  <div className="dropdown-item logout-btn" onClick={handleLogout}>
+                    <span className="icon-box">🚪</span>
+                    Logout
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <button className="login-btn-styled desktop-only" onClick={() => navigate("/login")}>
+                Login
+              </button>
+              <button className="primary-btn desktop-only" onClick={() => navigate("/signup")}>
+                SignUp
+              </button>
+            </>
+          )}
+
+          <button className="hamburger-menu" onClick={() => setIsSidebarOpen(true)}>
+            ☰
+          </button>
         </div>
       </header>
 
-      <div className="services-container-premium">
+      <main className="services-container-premium">
         <div className="premium-search-box">
           <div className="search-field-wrapper">
             <span className="search-icon">🔍</span>
@@ -463,22 +1085,20 @@ const AllServicesPage = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
             {search && (
-              <span className="clear-search" onClick={() => setSearch("")}>✕</span>
+              <span className="clear-search" onClick={() => setSearch("")}>
+                ✕
+              </span>
             )}
           </div>
         </div>
-        {/* 🔥 PREMIUM SERVICES SECTION */}
-        <div className="premium-services">
 
-          {/* PERSONAL CARE COORDINATOR */}
-          <div
-            className="premium-service-card"
-            onClick={() => navigate("/care-coordinator")}
-          >
+        <div className="premium-services">
+          <div className="premium-service-card" onClick={() => navigate("/care-coordinator")}>
             <div className="service-text">
               <h3>Personal Care Coordinator</h3>
               <p>
-                Planning treatment from another city or country? We help you find the right hospital, arrange your stay, and guide you throughout your medical journey.
+                Planning treatment from another city or country? We help you find the right hospital,
+                arrange your stay, and guide you throughout your medical journey.
               </p>
             </div>
 
@@ -492,15 +1112,12 @@ const AllServicesPage = () => {
             </button>
           </div>
 
-          {/* HEALTH INSURANCE */}
-          <div
-            className="premium-service-card"
-            onClick={() => navigate("/insurance")}
-          >
+          <div className="premium-service-card" onClick={() => navigate("/insurance")}>
             <div className="service-text">
               <h3>Secure Your Health</h3>
               <p>
-                Avoid unexpected medical expenses. Compare trusted insurance plans with cashless hospital benefits.
+                Avoid unexpected medical expenses. Compare trusted insurance plans with cashless
+                hospital benefits.
               </p>
             </div>
 
@@ -513,543 +1130,844 @@ const AllServicesPage = () => {
               View Plans →
             </button>
           </div>
-
         </div>
 
-        {/* DOCTORS SECTION */}
         <section className="service-section">
           <div className="section-title-box">
-            <div style={{ flex: 1 }}>
-              <h2 className="title-text">Top <span>Doctors</span></h2>
-              <div className="title-line"></div>
+            <div>
+              <h2 className="title-text">
+                Top <span>Doctors</span>
+              </h2>
+              <div className="title-line" />
             </div>
-            <button className="view-all-arrow-btn" onClick={() => navigate("/patient/finddoctors")}>
+
+            <button className="view-all-arrow-btn" onClick={() => handleProtectedViewAll("/patient/finddoctors")}>
               View ALL <span>→</span>
             </button>
           </div>
 
-          <div className="horizontal-card-row" ref={doctorScrollRef} style={{ cursor: 'grab' }}>
-            {filterData(doctors).map((item) => (
-              <div
-                key={item.id}
-                className="premium-v3-card"
-                onClick={() => {
-                  setSelected(item);
-                  setShowBooking(false);
-                }}
-              >
-                <div className="v3-card-top">
-                  <img src={item.img} alt={item.name} />
-                  <div className="v3-rating">⭐ {item.rating}</div>
+          {doctorLoading && <div className="section-state-card">Loading verified doctors...</div>}
+          {doctorError && <div className="section-error-card">{doctorError}</div>}
+          {!doctorLoading && !doctorError && filteredDoctors.length === 0 && (
+            <div className="section-state-card">No doctors found.</div>
+          )}
+
+          {!doctorLoading && !doctorError && filteredDoctors.length > 0 && (
+            <div className="horizontal-card-row" ref={doctorScrollRef}>
+              {filteredDoctors.map((doctor) => (
+                <div
+                  key={doctor.doctorProfileId}
+                  className="premium-v3-card"
+                  onClick={() => openDoctorProfile(doctor)}
+                >
+                  <div className="v3-card-top">
+                    <img
+
+                      src={getSafeDoctorImage(doctor.profilePictureUrl)}
+                      alt={doctor.fullName || "Doctor"}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = defaultDoctorAvatar;
+                      }}
+                    />
+                    <div className="v3-rating">⭐ {getDoctorRating(doctor)}</div>
+                  </div>
+
+                  <div className="v3-card-body">
+                    <h3>{doctor.fullName || "Doctor"}</h3>
+                    <p className="v3-spec">
+                      {doctor.primarySpecialization || "General Physician"}
+                    </p>
+                    <p className="v3-loc">📍 {getDoctorLocation(doctor)}</p>
+                    <p className="v3-exp">💼 {doctor.experienceYears || 0} yrs experience</p>
+                    <p className="v3-exp">🏥 {doctor.clinicName || "Clinic not updated"}</p>
+                    <p className="v3-exp">💰 ₹{doctor.consultationFee || "N/A"} consultation</p>
+
+                    <div className="v3-btn-group">
+                      <button
+                        className="v3-btn secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDoctorProfile(doctor);
+                        }}
+                      >
+                        View Details
+                      </button>
+
+                      <button
+                        className="v3-btn secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDoctorBooking(doctor);
+                        }}
+                      >
+                        Book Now
+                      </button>
+                    </div>
+                  </div>
                 </div>
-
-                <div className="v3-card-body">
-                  <h3>{item.name}</h3>
-                  <p className="v3-spec">{item.specialty}</p>
-                  <p className="v3-loc">📍 {item.location}</p>
-                  <p className="v3-exp">💼 {item.experience} experience</p>
-
-                  <button
-                    className="v3-btn secondary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelected(item);
-                      setShowBooking(true); // 🔥 directly booking open
-                    }}
-                  >
-                    Book Appointment
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* HOSPITALS SECTION */}
-        <section className="service-section">
-          <div className="section-title-box" >
-            <div style={{ flex: 1 }}>
-              <h2 className="title-text">Premium <span>Hospitals</span></h2>
-              <div className="title-line"></div>
+              ))}
             </div>
-            <button className="view-all-arrow-btn" onClick={() => navigate("/patient/hospitals")}>
-              View ALL <span>→</span>
-            </button>
-          </div>
-
-          <div className="horizontal-card-row" ref={hospitalScrollRef} style={{ cursor: 'grab' }}>
-            {filterData(hospitals).map((item) => (
-              <div
-                key={item.id}
-                className="premium-v3-card"
-
-              >
-                <div className="v3-card-top">
-                  <img src={item.img}
-                    alt={item.name}
-                  />
-                  <div className="v3-rating">⭐ {item.rating}</div>
-                </div>
-
-                <div className="v3-card-body">
-                  <h3>{item.name}</h3>
-                  <p className="v3-loc">📍 {item.location}</p>
-
-                  <button
-                    className="v3-btn secondary"
-                    onClick={(e) => {
-                      e.stopPropagation();      // 🔥 IMPORTANT (card click double trigger avoid)
-                      setSelectedHospital(item); // 🔥 SAME modal open
-                    }}
-                  >
-                    View Details
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+          )}
         </section>
 
-        {/* LABS SECTION */}
         <section className="service-section">
           <div className="section-title-box">
-            <div style={{ flex: 1 }}>
-              <h2 className="title-text">Diagnostic <span>Labs</span></h2>
-              <div className="title-line"></div>
+            <div>
+              <h2 className="title-text">
+                Premium <span>Hospitals</span>
+              </h2>
+              <div className="title-line" />
             </div>
-            <button className="view-all-arrow-btn" onClick={() => navigate("/patient/labs")}>
+
+            <button className="view-all-arrow-btn" onClick={() => handleProtectedViewAll("/patient/hospitals")}>
               View ALL <span>→</span>
             </button>
           </div>
 
-          <div className="horizontal-card-row" ref={labScrollRef} style={{ cursor: 'grab' }}>
-            {filterData(labs).map((item) => (
-              <div
-                key={item.id}
-                className="premium-v3-card"
+          {hospitalsLoading && <div className="section-state-card">Loading hospitals...</div>}
 
-              >
-                <div className="v3-card-top">
-                  <img src={item.img} alt={item.name} />
-                  <div className="v3-rating">⭐ {item.rating}</div>
-                </div>
+          {hospitalsError && <div className="section-error-card">{hospitalsError}</div>}
 
-                <div className="v3-card-body">
-                  <h3>{item.name}</h3>
-                  <p className="v3-loc">📍 {item.location}</p>
+          {!hospitalsLoading && !hospitalsError && filteredHospitals.length === 0 && (
+            <div className="section-state-card">No hospitals found.</div>
+          )}
 
-                  <button className="v3-btn secondary" onClick={() => {
-                    setSelectedLab(item); // lab is clicked lab data
-                    setShowModal(true);
-                  }}>Book Test</button>
-                </div>
-              </div>
-            ))}
-          </div>
+          {!hospitalsLoading && !hospitalsError && filteredHospitals.length > 0 && (
+            <div className="hospital-card-row" ref={hospitalScrollRef}>
+              {filteredHospitals.map((hospital) => (
+                <article
+                  key={hospital.id}
+                  className="hospital-service-card"
+                  onClick={() => handleOpenHospitalModal(hospital)}
+                >
+                  <div className="hospital-card-image-wrap">
+                    <img
+                      src={getHospitalImages(hospital)[0] || hospital.imageUrl}
+                      alt={hospital.hospitalName}
+                    />
+
+                    <span className="hospital-card-rating">
+                      ★ {hospital.rating || "New"}
+                    </span>
+
+                    {hospital.emergencyAvailable && (
+                      <span className="hospital-card-emergency">24x7 Emergency</span>
+                    )}
+                  </div>
+
+                  <div className="hospital-card-content">
+                    <h3>{hospital.hospitalName}</h3>
+
+                    <p className="hospital-card-location">
+                      {[hospital.area, hospital.city].filter(Boolean).join(", ")}
+                    </p>
+
+                    <div className="hospital-card-meta">
+                      <div>
+                        <strong>{hospital.availableBeds || 0}</strong>
+                        <span>Available beds</span>
+                      </div>
+
+                      <div>
+                        <strong>{hospital.totalBeds || 0}</strong>
+                        <span>Total beds</span>
+                      </div>
+                    </div>
+
+                    <button
+                      className="hospital-card-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenHospitalModal(hospital);
+                      }}
+                    >
+                      View hospital
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
 
+        <section className="service-section">
+          <div className="section-title-box">
+            <div>
+              <h2 className="title-text">
+                Diagnostic <span>Labs</span>
+              </h2>
+              <div className="title-line" />
+            </div>
 
-      </div>
-      {selected && !showBooking && (
-        <div className="modal-overlay" onClick={() => setSelected(null)}>
+            <button className="view-all-arrow-btn" onClick={() => handleProtectedViewAll("/patient/labs")}>
+              View ALL <span>→</span>
+            </button>
+          </div>
+
+          {labLoading && <div className="section-state-card">Loading verified labs...</div>}
+          {labError && <div className="section-error-card">{labError}</div>}
+          {!labLoading && !labError && filteredLabs.length === 0 && (
+            <div className="section-state-card">No labs found.</div>
+          )}
+
+          {!labLoading && !labError && filteredLabs.length > 0 && (
+            <div className="horizontal-card-row" ref={labScrollRef}>
+              {filteredLabs.map((lab) => (
+                <div key={lab.id} className="premium-v3-card">
+                  <div className="v3-card-top">
+                    <img src={DEFAULT_LAB_IMAGE} alt={lab.name || "Diagnostic Lab"} />
+                    <div className="v3-rating">✅ {getLabRating()}</div>
+                  </div>
+
+                  <div className="v3-card-body">
+                    <h3>{lab.name || "Diagnostic Lab"}</h3>
+                    <p className="v3-spec">Platform Verified</p>
+                    <p className="v3-loc">📍 {getLabLocation(lab)}</p>
+                    <p className="v3-exp">
+                      🧪 {(lab.services || []).slice(0, 2).join(", ") || "Pathology services"}
+                    </p>
+
+                    <button
+                      className="v3-btn secondary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenLabModal(lab);
+                      }}
+                    >
+                      Book Test
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+
+      {showDoctorProfileModal && selectedDoctor && (
+        <div className="modal-overlay" onClick={closeAllModals}>
           <div className="profile-modal-card" onClick={(e) => e.stopPropagation()}>
-
-            <button className="modal-close-x" onClick={() => setSelected(null)}>×</button>
+            <button className="modal-close-x" onClick={closeAllModals}>
+              ×
+            </button>
 
             <div className="modal-header-top">
-              <img src={selected.img} className="modal-avatar" />
+              <img
+                src={getSafeDoctorImage(selectedDoctor.profilePictureUrl)}
+                className="modal-avatar"
+                alt={selectedDoctor.fullName || "Doctor"}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = defaultDoctorAvatar;
+                }}
+              />
 
               <div className="modal-title-info">
-                <h2>{selected.name}</h2>
-                <span className="modal-spec-badge">{selected.specialty}</span>
-                <p>⭐ {selected.rating} ({selected.experience})</p>
+                <h2>{selectedDoctor.fullName || "Doctor"}</h2>
+                <span className="modal-spec-badge">
+                  {selectedDoctor.primarySpecialization || "General Physician"}
+                </span>
+                <p>
+                  ⭐ {getDoctorRating(selectedDoctor)} • {selectedDoctor.experienceYears || 0} yrs
+                </p>
               </div>
             </div>
 
             <div className="modal-body-content">
-              <div className="info-row"><strong>📍 Location:</strong> {selected.location}</div>
-              <div className="info-row"><strong>🏥 Clinic:</strong> City Care Hospital</div>
-              <div className="info-row"><strong>🎓 Education:</strong> MBBS, MD</div>
-              <div className="info-row"><strong>💼 Experience:</strong> {selected.experience}</div>
-              <div className="info-row"><strong>💰 Fee:</strong> ₹500</div>
+              {doctorDetailLoading ? (
+                <div className="section-state-card">Loading doctor details...</div>
+              ) : (
+                <>
+                  <div className="info-row">
+                    <strong>📍 Location:</strong>{" "}
+                    {[
+                      profileDoctor?.area,
+                      profileDoctor?.city || primaryClinic?.city,
+                    ]
+                      .filter(Boolean)
+                      .join(", ") || "Location not updated"}
+                  </div>
 
-              <div className="modal-bio-box">
-                <strong>About Doctor:</strong>
-                <p>Experienced {selected.specialty} specialist providing quality care.</p>
-              </div>
+                  <div className="info-row">
+                    <strong>🏥 Primary Clinic:</strong>{" "}
+                    {primaryClinic?.clinicName ||
+                      selectedDoctor?.clinicName ||
+                      "Clinic not updated"}
+                  </div>
+
+                  <div className="info-row">
+                    <strong>🎓 Education:</strong>{" "}
+                    {profileDoctor?.degrees?.length > 0
+                      ? profileDoctor.degrees.join(", ")
+                      : "Not updated"}
+                  </div>
+
+                  <div className="info-row">
+                    <strong>🩺 Specializations:</strong>{" "}
+                    {profileDoctor?.specializations?.length > 0
+                      ? profileDoctor.specializations.join(", ")
+                      : selectedDoctor?.primarySpecialization || "General Physician"}
+                  </div>
+
+                  <div className="info-row">
+                    <strong>⏳ Experience:</strong>{" "}
+                    {profileDoctor?.experienceYears || selectedDoctor?.experienceYears || 0}+ Years
+                  </div>
+
+                  <div className="info-row">
+                    <strong>💰 Consultation Fee:</strong>{" "}
+                    ₹{primaryClinic?.consultationFee || selectedDoctor?.consultationFee || "N/A"}
+                  </div>
+
+                  <div className="info-row">
+                    <strong>🏛️ Council:</strong>{" "}
+                    {profileDoctor?.councilName || "Not updated"}
+                  </div>
+
+                  <div className="info-row">
+                    <strong>📄 Registration:</strong>{" "}
+                    {profileDoctor?.registrationNumber || "Not updated"}
+                    {profileDoctor?.registrationYear
+                      ? ` (${profileDoctor.registrationYear})`
+                      : ""}
+                  </div>
+
+                  {detailClinics.length > 0 && (
+                    <div className="modal-bio-box">
+                      <strong>Clinics / Hospitals:</strong>
+
+                      {detailClinics.map((clinic) => (
+                        <p key={clinic.id}>
+                          {clinic.isPrimary || clinic.primary ? "⭐ " : ""}
+                          {clinic.clinicName || "Clinic"} — {clinic.city || "City not updated"}
+                          {clinic.area ? `, ${clinic.area}` : ""}
+                          {clinic.consultationFee ? ` • ₹${clinic.consultationFee}` : ""}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="modal-bio-box">
+                    <strong>About Doctor:</strong>
+                    <p>
+                      {profileDoctor?.bio ||
+                        selectedDoctor?.bio ||
+                        `Verified expert in ${selectedDoctor?.primarySpecialization || "healthcare"
+                        }.`}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="modal-actions">
               <button
                 className="primary-modal-btn"
-                onClick={() => setShowBooking(true)}
+                onClick={() => {
+                  setShowDoctorProfileModal(false);
+                  openDoctorBooking(selectedDoctor);
+                }}
               >
-                Book Appointment
+                Book Appointment Now
+              </button>
+
+              <button
+                className="secondary-modal-btn"
+                onClick={() => {
+                  const doctorId =
+                    selectedDoctorDetail?.doctorProfileId ||
+                    selectedDoctor?.doctorProfileId;
+
+                  setShowDoctorProfileModal(false);
+
+                  navigate(`/patient/doctorsprofile/${doctorId}`, {
+                    state: selectedDoctorDetail || selectedDoctor,
+                  });
+                }}
+              >
+                View Full Profile
               </button>
             </div>
-
           </div>
         </div>
       )}
-      {selected && showBooking && (
-        <div className="booking-modal-overlay" onClick={() => setShowBooking(false)}>
-          <div className="booking-modal-card" onClick={(e) => e.stopPropagation()}>
 
-            <button className="modal-close" onClick={() => setShowBooking(false)}>✕</button>
+      {showDoctorBookingModal && selectedDoctor && (
+        <div className="booking-modal-overlay" onClick={closeAllModals}>
+          <div className="booking-modal-card" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={closeAllModals}>
+              ✕
+            </button>
 
             <div className="booking-scroll">
-
               <h2>Book Appointment</h2>
 
-              {/* Doctor mini info */}
               <div className="booking-doctor">
-                <img src={selected.img} />
+                <img
+                  src={getSafeDoctorImage(selectedDoctor?.profilePictureUrl)}
+                  alt={selectedDoctor?.fullName || "Doctor"}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = defaultDoctorAvatar;
+                  }}
+                />
                 <div>
-                  <h3>{selected.name}</h3>
-                  <p>{selected.specialty}</p>
+                  <h3>{selectedDoctor.fullName || "Doctor"}</h3>
+                  <p>{selectedDoctor.primarySpecialization || "General Physician"}</p>
+                  <small>
+                    {primaryClinic?.clinicName || selectedDoctor.clinicName || "Clinic loading..."}
+                  </small>
                 </div>
               </div>
 
-              {/* Date */}
+              {doctorDetailLoading && <div className="section-state-card">Loading clinic details...</div>}
+
+              {!doctorDetailLoading && !primaryClinic && (
+                <div className="section-error-card">No active clinic found for this doctor.</div>
+              )}
+              {!doctorDetailLoading && clinicOptions.length > 0 && (
+                <div className="booking-section">
+                  <p>Select Clinic</p>
+
+                  <select
+                    className="booking-clinic-select"
+                    value={selectedClinicId}
+                    onChange={(e) => {
+                      setSelectedClinicId(e.target.value);
+                      setSelectedSlot(null);
+                      setSlots([]);
+                      setSlotError("");
+                    }}
+                  >
+                    {clinicOptions.map((clinic) => (
+                      <option key={clinic.id} value={clinic.id}>
+                        {clinic.clinicName || "Clinic"} - ₹
+                        {clinic.consultationFee || selectedDoctor?.consultationFee || "N/A"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="booking-section">
                 <p>Select Date</p>
                 <div className="date-list">
-                  {[0, 1, 2, 3, 4].map((d) => {
-                    const date = new Date();
-                    date.setDate(date.getDate() + d);
-                    return (
-                      <button
-                        key={d}
-                        className={`date-chip ${selectedDate === d ? "active" : ""}`}
-                        onClick={() => setSelectedDate(d)}
-                      >
-                        {date.toDateString().slice(0, 10)}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Time */}
-              <div className="booking-section">
-                <p>Select Time</p>
-                <div className="slot-list">
-                  {TIME_SLOTS.map((t) => (
+                  {[0, 1, 2, 3, 4].map((day) => (
                     <button
-                      key={t}
-                      className={`slot ${selectedTime === t ? "active" : ""}`}
-                      onClick={() => setSelectedTime(t)}
+                      key={day}
+                      className={`date-chip ${selectedDate === day ? "active" : ""}`}
+                      onClick={() => setSelectedDate(day)}
                     >
-                      {t}
+                      {formatDateLabel(day)}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Form */}
-               <div className="booking-section">
+              <div className="booking-section">
+                <p>Select Time</p>
+
+                {slotLoading && <div className="section-state-card">Loading available slots...</div>}
+                {slotError && <div className="section-error-card">{slotError}</div>}
+
+                {!slotLoading && !slotError && slots.length === 0 && (
+                  <div className="section-state-card">No slots available for this date.</div>
+                )}
+
+                {!slotLoading && !slotError && slots.length > 0 && (
+                  <div className="slot-list">
+                    {slots.map((slot) => {
+                      const isAvailable = String(slot.status || "").toUpperCase() === "AVAILABLE";
+
+                      return (
+                        <button
+                          key={`${slot.startTime}-${slot.endTime}`}
+                          className={`slot ${selectedSlot?.startTime === slot.startTime ? "active" : ""
+                            }`}
+                          disabled={!isAvailable}
+                          onClick={() => isAvailable && setSelectedSlot(slot)}
+                        >
+                          {slot.displayTime || `${slot.startTime} - ${slot.endTime}`}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className="booking-section">
                 <p className="section-label">Patient Info</p>
 
                 {selectedProfile ? (
                   <div className="selected-patient-card">
                     <h4>{selectedProfile.fullName}</h4>
                     <p>
-                      {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
+                      {selectedProfile.relation} • {selectedProfile.gender || "N/A"} •{" "}
+                      {selectedProfile.type || "SELF"}
                     </p>
                   </div>
                 ) : (
-                  <div className="selected-patient-card" style={{ borderColor: '#fee2e2' }}>
-                    <p style={{ color: "#ef4444", margin: 0 }}>No profile selected</p>
+                  <div className="selected-patient-card error-card">
+                    <p>No profile selected</p>
                   </div>
                 )}
               </div>
 
-              <button className="primary-btn confirm-btn" onClick={handleConfirmBooking}>
-                Confirm Appointment
+              {bookingMessage && <div className="section-state-card">{bookingMessage}</div>}
+
+              <button
+                className="primary-btn confirm-btn"
+                onClick={handleConfirmAppointment}
+                disabled={bookingLoading}
+              >
+                {bookingLoading ? "Booking..." : "Confirm Appointment"}
+              </button>
+
+              <button className="secondary-btn confirm-btn" onClick={closeAllModals}>
+                Go Back
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedHospital && (
+        <div className="hospital-modal-overlay" onClick={() => setSelectedHospital(null)}>
+          <div className="hospital-modal-card" onClick={(e) => e.stopPropagation()}>
+            <button className="hospital-close-btn" onClick={() => setSelectedHospital(null)}>
+              ×
+            </button>
+
+            <div className="hospital-modal-body">
+              <div className="hospital-hero-panel">
+                <div className="hospital-gallery-box">
+                  <img
+                    src={getCurrentHospitalImage()}
+                    alt={selectedHospital.hospitalName}
+                    className="hospital-hero-image"
+                    onClick={() => setPreview(getCurrentHospitalImage())}
+                  />
+
+                  {getHospitalImages(selectedHospital).length > 1 && (
+                    <>
+                      <button
+                        className="hospital-image-arrow left"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          goToPreviousHospitalImage();
+                        }}
+                      >
+                        ‹
+                      </button>
+
+                      <button
+                        className="hospital-image-arrow right"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          goToNextHospitalImage();
+                        }}
+                      >
+                        ›
+                      </button>
+
+                      <div className="hospital-image-count">
+                        {currentImageIndex + 1}/{getHospitalImages(selectedHospital).length}
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div className="hospital-hero-content">
+                  <span className="hospital-premium-badge">Verified Hospital</span>
+                  <h2>{selectedHospital.hospitalName}</h2>
+                  <p>
+                    📍 {[selectedHospital.area, selectedHospital.city].filter(Boolean).join(", ")}
+                  </p>
+
+                  <div className="hospital-mini-stats">
+                    <div>
+                      <strong>⭐ {selectedHospital.rating || "New"}</strong>
+                      <span>Rating</span>
+                    </div>
+                    <div>
+                      <strong>{selectedHospital.availableBeds}</strong>
+                      <span>Beds</span>
+                    </div>
+                    <div>
+                      <strong>{selectedHospital.emergencyAvailable ? "24/7" : "OPD"}</strong>
+                      <span>Emergency</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="hospital-booking-layout">
+                <div className="hospital-booking-main">
+                  <div className="hospital-form-section">
+                    <div className="hospital-section-heading">
+                      <h3>Select Department</h3>
+                      <p>Choose the care department for your appointment.</p>
+                    </div>
+
+                    {hospitalDeptLoading ? (
+                      <div className="hospital-state-box">Loading departments...</div>
+                    ) : (
+                      <div className="hospital-chip-row">
+                        {hospitalDepartments.map((department) => (
+                          <button
+                            key={department.id}
+                            className={`hospital-choice-chip ${hospitalSelectedDepartment?.id === department.id ? "active" : ""
+                              }`}
+                            onClick={() => {
+                              setHospitalSelectedDepartment(department);
+                              setHospitalSelectedSlot(null);
+                            }}
+                          >
+                            {department.departmentName}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="hospital-form-section">
+                    <div className="hospital-section-heading">
+                      <h3>Select Date</h3>
+                      <p>Pick a date to check live availability.</p>
+                    </div>
+
+                    <div className="hospital-date-strip">
+                      {[1, 2, 3, 4, 5, 6].map((day) => (
+                        <button
+                          key={day}
+                          className={`hospital-date-card ${hospitalSelectedDate === day ? "active" : ""
+                            }`}
+                          onClick={() => {
+                            setHospitalSelectedDate(day);
+                            setHospitalSelectedSlot(null);
+                          }}
+                        >
+                          <span>{day === 1 ? "Tomorrow" : formatDateLabel(day).split(",")[0]}</span>
+                          <strong>{formatDateLabel(day)}</strong>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="hospital-form-section">
+                    <div className="hospital-section-heading">
+                      <h3>Available Slots</h3>
+                      <p>Booked and past slots are disabled automatically.</p>
+                    </div>
+
+                    {hospitalSlotLoading ? (
+                      <div className="hospital-state-box">Loading slots...</div>
+                    ) : hospitalSlots.length === 0 ? (
+                      <div className="hospital-state-box">No slots available for this date.</div>
+                    ) : (
+                      <div className="hospital-slot-grid">
+                        {hospitalSlots.map((slot) => {
+                          const disabled = slot.status !== "AVAILABLE";
+
+                          return (
+                            <button
+                              key={`${slot.startTime}-${slot.endTime}`}
+                              disabled={disabled}
+                              className={`hospital-slot-card ${hospitalSelectedSlot?.startTime === slot.startTime ? "active" : ""
+                                } ${disabled ? "disabled" : ""}`}
+                              onClick={() => {
+                                setHospitalSelectedSlot(slot);
+                                setHospitalBookingMessage("");
+                              }}
+                            >
+                              <strong>{slot.startTime}</strong>
+                              <span>{slot.status}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="hospital-form-section">
+                    <div className="hospital-section-heading">
+                      <h3>Reason for Visit</h3>
+                      <p>Optional note for hospital coordination team.</p>
+                    </div>
+
+                    <textarea
+                      className="hospital-note-box"
+                      value={hospitalPatientNote}
+                      onChange={(e) => setHospitalPatientNote(e.target.value)}
+                      placeholder="Example: Chest pain consultation, fever, follow-up visit..."
+                      rows="4"
+                    />
+                  </div>
+                </div>
+
+                <aside className="hospital-summary-card">
+                  <h3>Booking Summary</h3>
+
+                  <div className="hospital-summary-line">
+                    <span>Hospital</span>
+                    <strong>{selectedHospital.hospitalName}</strong>
+                  </div>
+
+                  <div className="hospital-summary-line">
+                    <span>Department</span>
+                    <strong>{hospitalSelectedDepartment?.departmentName || "Not selected"}</strong>
+                  </div>
+
+                  <div className="hospital-summary-line">
+                    <span>Date</span>
+                    <strong>{formatDateLabel(hospitalSelectedDate)}</strong>
+                  </div>
+
+                  <div className="hospital-summary-line">
+                    <span>Slot</span>
+                    <strong>{hospitalSelectedSlot?.startTime || "Not selected"}</strong>
+                  </div>
+
+                  <div className="hospital-patient-summary">
+                    <span>Patient Profile</span>
+                    {selectedProfile ? (
+                      <>
+                        <strong>{selectedProfile.fullName}</strong>
+                        <small>{selectedProfile.type || "SELF"}</small>
+                      </>
+                    ) : (
+                      <small className="hospital-danger-text">No patient profile selected</small>
+                    )}
+                  </div>
+
+                  {hospitalBookingMessage && (
+                    <div className="hospital-booking-message">{hospitalBookingMessage}</div>
+                  )}
+
+                  <button
+                    className="hospital-final-btn"
+                    disabled={hospitalBookingLoading}
+                    onClick={handleHospitalBooking}
+                  >
+                    {hospitalBookingLoading ? "Booking..." : "Confirm Appointment"}
+                  </button>
+                </aside>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showConfirmation && selectedHospital && (
+        <div className="success-overlay">
+          <div className="success-toast">
+            <p className="success-title">Hospital appointment booked ✅</p>
+
+            <div className="success-details">
+              <p>
+                <strong>Hospital:</strong> {selectedHospital.hospitalName}
+              </p>
+              <p>
+                <strong>Department:</strong> {hospitalSelectedDepartment?.departmentName}
+              </p>
+              <p>
+                <strong>Date:</strong> {formatDateLabel(hospitalSelectedDate)}
+              </p>
+              <p>
+                <strong>Slot:</strong> {hospitalSelectedSlot?.startTime}
+              </p>
+            </div>
+
+            <button
+              className="view-details-btn"
+              onClick={() => {
+                setShowConfirmation(false);
+                closeAllModals();
+              }}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+
+      {preview && (
+        <div className="full-preview-overlay active" onClick={() => setPreview(null)}>
+          <img
+            src={preview}
+            className="full-preview-img"
+            alt="Preview"
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          <button className="preview-close-btn" onClick={() => setPreview(null)}>
+            ×
+          </button>
+
+          {selectedHospital && getHospitalImages(selectedHospital).length > 1 && (
+            <>
+              <button
+                className="full-preview-arrow left"
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  const images = getHospitalImages(selectedHospital);
+                  const nextIndex =
+                    currentImageIndex === 0 ? images.length - 1 : currentImageIndex - 1;
+
+                  setCurrentImageIndex(nextIndex);
+                  setPreview(images[nextIndex]);
+                }}
+              >
+                ‹
               </button>
 
               <button
-                className="secondary-btn confirm-btn"
-                onClick={() => setShowBooking(false)}
+                className="full-preview-arrow right"
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  const images = getHospitalImages(selectedHospital);
+                  const nextIndex = (currentImageIndex + 1) % images.length;
+
+                  setCurrentImageIndex(nextIndex);
+                  setPreview(images[nextIndex]);
+                }}
               >
-                Go Back
+                ›
               </button>
-
-            </div>
-          </div>
-        </div>
-      )}
-      {selectedHospital && (
-        <div className="modal-overlay" onClick={() => setSelectedHospital(null)}>
-          <div className="booking-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedHospital(null)}>
-              &times;
-            </button>
-
-            <div className="modal-flex">
-
-              {/* LEFT SIDE */}
-              <div className="modal-info-side">
-
-                {/* ✅ IMAGE SECTION FIXED */}
-                {selectedHospital.images?.length > 0 && (
-                  <>
-                    <img
-                      src={selectedHospital.images[currentImageIndex]}
-                      className="modal-hero-img"
-                      alt=""
-                      onClick={() =>
-                        setPreview(selectedHospital.images[currentImageIndex])
-                      }
-                    />
-
-                    {selectedHospital.images.length > 1 && (
-                      <>
-                        <button
-                          className="arrow left"
-                          onClick={() =>
-                            setCurrentImageIndex((prev) =>
-                              prev === 0
-                                ? selectedHospital.images.length - 1
-                                : prev - 1
-                            )
-                          }
-                        >
-                          ◀
-                        </button>
-
-                        <button
-                          className="arrow right"
-                          onClick={() =>
-                            setCurrentImageIndex((prev) =>
-                              prev === selectedHospital.images.length - 1
-                                ? 0
-                                : prev + 1
-                            )
-                          }
-                        >
-                          ▶
-                        </button>
-                      </>
-                    )}
-
-                    <div className="modal-gallery">
-                      {selectedHospital.images.map((img, i) => (
-                        <img
-                          key={i}
-                          src={img}
-                          alt=""
-                          onClick={() => setCurrentImageIndex(i)}
-                          style={{
-                            border:
-                              i === currentImageIndex
-                                ? "2px solid #10b981"
-                                : "1px solid #eee",
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
-
-                {/* HEADER */}
-                <div className="modal-header-info">
-                  <div className="hosp-logo-mini">
-                    <img src={selectedHospital.images?.[0]} alt="" />
-                  </div>
-
-                  <div className="hosp-title-wrap">
-                    <h2>{selectedHospital.name}</h2>
-                    <p>
-                      📍 {selectedHospital.location}
-                      <span className="star-span">
-                        ⭐ {selectedHospital.rating}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* ABOUT */}
-                <div className="about-section">
-                  <h4>About Hospital</h4>
-                  <p>
-                    Multi-specialty hospital with advanced ICU, emergency,
-                    diagnostics and surgical care.
-                  </p>
-                </div>
-
-                {/* DEPARTMENTS */}
-                <div className="depts-section">
-                  <h4>Departments</h4>
-                  <div className="icon-grid">
-                    {selectedHospital.depts?.map((d, i) => (
-                      <div key={i} className="dept-icon-item">
-                        <span>⚕️</span>
-                        <small>{d}</small>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* FACILITIES */}
-                <div className="facilities-section">
-                  <h4>Facilities</h4>
-                  <div className="icon-grid">
-                    <div className="dept-icon-item">
-                      <span>🏥</span>
-                      <small>ICU</small>
-                    </div>
-                    <div className="dept-icon-item">
-                      <span>🚑</span>
-                      <small>Ambulance</small>
-                    </div>
-                    <div className="dept-icon-item">
-                      <span>💊</span>
-                      <small>Pharmacy</small>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-
-              {/* RIGHT SIDE */}
-              <div className="modal-form-side">
-
-                <h3>Booking & Admission Request</h3>
-
-                <div className="form-group">
-                  <label>Bed Selection</label>
-                  <select className="form-select">
-                    <option>General Ward</option>
-                    <option>Private Room</option>
-                    <option>Deluxe Room</option>
-                    <option>ICU</option>
-                    <option>Ventilator ICU</option>
-                    <option>Emergency Bed</option>
-                    <option>Isolation Ward</option>
-                    <option>Maternity Ward</option>
-                    <option>Pediatric Ward</option>
-                  </select>
-                </div>
-
-                <div className="bed-availability-ui">
-                  <p>Bed Availability</p>
-                  <small className="green-text">
-                    Beds Available: {selectedHospital.bedsAvailable} /{" "}
-                    {selectedHospital.totalBeds}
-                  </small>
-                  <div className="booking-section">
-                    <p>Patient Info</p>
-
-                    {selectedProfile ? (
-                      <div className="selected-patient-card">
-                        <h4>{selectedProfile.fullName}</h4>
-                        <p>
-                          {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
-                        </p>
-                      </div>
-                    ) : (
-                      <p style={{ color: "red" }}>No profile selected</p>
-                    )}
-
-
-                  </div>
-                  <div className="progress-bar">
-                    <div
-                      className="progress-fill"
-                      style={{
-                        width: `${(selectedHospital.bedsAvailable /
-                          selectedHospital.totalBeds) *
-                          100
-                          }%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <textarea placeholder="Reason for admission" rows="3"></textarea>
-                </div>
-
-                <div className="form-group">
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="Emergency Contact Number"
-                  />
-                </div>
-
-                <button className="book-bed-btn">
-                  Book Bed Now
-                </button>
-
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {showConfirmation && (
-        <div className="success-overlay">
-          <div className="success-toast">
-            <p style={{ fontWeight: 'bold', color: '#10B981' }}>Bed booked successfully ✅</p>
-            <div style={{ fontSize: '13px', margin: '10px 0', color: '#666' }}>
-              <p><strong>Hospital:</strong> {selectedHospital?.name}</p>
-              <p><strong>Type:</strong> ICU Bed</p>
-            </div>
-            <button className="view-details-btn" onClick={() => setShowConfirmation(false)}>Confirm</button>
-          </div>
-        </div>
-      )}
-
-      {/* IMAGE FULL PREVIEW */}
-      {preview && (
-        <div className="full-preview-overlay active" onClick={() => setPreview(null)}>
-          <img src={preview} className="full-preview-img" alt="Preview" onClick={(e) => e.stopPropagation()} />
-          <button className="preview-close-btn" onClick={() => setPreview(null)}>×</button>
-
-          {selectedHospital?.images?.length > 1 && (
-            <>
-              <button className="full-preview-arrow left" onClick={(e) => {
-                e.stopPropagation();
-                const idx = selectedHospital.images.indexOf(preview);
-                const newIndex = idx === 0 ? selectedHospital.images.length - 1 : idx - 1;
-                setPreview(selectedHospital.images[newIndex]);
-              }}>◀</button>
-
-              <button className="full-preview-arrow right" onClick={(e) => {
-                e.stopPropagation();
-                const idx = selectedHospital.images.indexOf(preview);
-                const newIndex = idx === selectedHospital.images.length - 1 ? 0 : idx + 1;
-                setPreview(selectedHospital.images[newIndex]);
-              }}>▶</button>
             </>
           )}
         </div>
       )}
-      {/* POPUP MODAL */}
-      {showModal && (
-        <div className="modal-root-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-container-main" onClick={(e) => e.stopPropagation()}>
-            {/* Header */}
-            <div className="modal-header-banner">
-              <div className="header-content-left">
-                <h2>{selectedLab?.name || "Aarogya Diagnostic Center"}</h2>
-                <div className="sub-meta">
-                  <span>⭐ {selectedLab.rating || "4.8"}</span> | <span>📍 {selectedLab.location || "Andheri East, Mumbai"}</span>
+
+      {showLabModal && selectedLab && (
+        <div className="lab-modal-overlay" onClick={closeAllModals}>
+          <div className="lab-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="lab-modal-header">
+              <div className="lab-header-left">
+                <h2>{selectedLab.name || "Diagnostic Lab"}</h2>
+                <div className="lab-meta-row">
+                  <span>✅ Platform Verified</span>
+                  <span>📍 {getLabLocation(selectedLab)}</span>
                 </div>
               </div>
-              <div className="header-actions">
-                <button className="btn-call-lab">📞 Call Lab</button>
-                <button className="modal-close-icon" onClick={() => setShowModal(false)}>✕</button>
+
+              <div className="lab-header-actions">
+                {selectedLab.contactNumber && (
+                  <a className="lab-call-btn" href={`tel:${selectedLab.contactNumber}`}>
+                    📞 Call Lab
+                  </a>
+                )}
+                <button className="lab-close-btn" onClick={closeAllModals}>
+                  ✕
+                </button>
               </div>
             </div>
 
-            {/* Tabs */}
-            <div className="modal-nav-tabs">
-              {['Available Tests', 'Packages', 'About Lab', 'Reviews'].map(tab => (
+            <div className="lab-tabs">
+              {["Available Tests", "Packages", "About Lab", "Reviews"].map((tab) => (
                 <button
                   key={tab}
-                  className={`tab-item ${activeTab === tab ? 'active' : ''}`}
+                  className={`lab-tab ${activeTab === tab ? "active" : ""}`}
                   onClick={() => setActiveTab(tab)}
                 >
                   {tab}
@@ -1057,15 +1975,15 @@ const AllServicesPage = () => {
               ))}
             </div>
 
-            {/* Modal Scrollable Content */}
-            <div className="modal-scroll-area">
-              <div className="modal-grid-body">
-                {/* Available Tests Tab */}
-                {activeTab === 'Available Tests' && (
+            <div className="lab-modal-body">
+              <div className="lab-booking-grid">
+                {activeTab === "Available Tests" && (
                   <div className="booking-form-side">
                     <h3 className="form-heading">Select Tests & Schedule</h3>
+
                     <div className="form-field">
                       <label>Search & Select Tests</label>
+
                       <div className="test-selector-box">
                         <div className="search-box-inner">
                           <span className="search-tiny">🔍</span>
@@ -1077,193 +1995,214 @@ const AllServicesPage = () => {
                             onChange={(e) => setModalSearch(e.target.value)}
                           />
                         </div>
+
                         <div className="test-check-list">
-                          {filteredTests.map(test => (
-                            <div className="check-item" key={test.id} onClick={() => toggleTest(test.id)}>
+                          {filteredTests.length === 0 && (
+                            <div className="section-state-card">No tests found.</div>
+                          )}
+
+                          {filteredTests.map((test) => (
+                            <div
+                              className="check-item"
+                              key={test.id}
+                              onClick={() => toggleTest(test.id)}
+                            >
                               <div className="check-label-grp">
-                                <input type="checkbox" checked={selectedTests.includes(test.id)} readOnly />
-                                <span>{test.name}</span>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedTests.includes(test.id)}
+                                  readOnly
+                                />
+                                <span>{test.testName}</span>
                               </div>
-                              <span className="item-price">₹{test.price}</span>
+                              <span className="item-price">₹{test.price || 0}</span>
                             </div>
                           ))}
                         </div>
                       </div>
                     </div>
 
-                    <div className="two-col-row">
-                      <div className="form-field">
-                        <label>Date</label>
-                        <input type="date" className="input-styled" defaultValue={new Date().toISOString().split('T')[0]} />
-                      </div>
-                      <div className="form-field">
-                        <label>Time Slot</label>
-                        <select className="input-styled">
-                          <option>08:00 AM - 09:00 AM</option>
-                          <option>10:00 AM - 11:00 AM</option>
-                          <option>02:00 PM - 03:00 PM</option>
-                          <option>05:00 PM - 06:00 PM</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="pickup-info-toggle">
-                      <div className="text-col">
-                        <strong>Home Sample Pickup</strong>
-                        <p>Technician will visit your address</p>
-                      </div>
-                      <StandardToggle
-                        id="homePickup"
-                        checked={homePickup}
-                        onChange={() => setHomePickup(!homePickup)}
-                      />
-                    </div>
-
                     <div className="form-field">
-                      <label>Pickup Address</label>
-                      <textarea className="input-styled textarea" placeholder="Flat No, Building, Area Name..."></textarea>
-                    </div>
-                    <div className="booking-section">
-                      <p>Patient Info</p>
-
-                      {selectedProfile ? (
-                        <div className="selected-patient-card">
-                          <h4>{selectedProfile.fullName}</h4>
-                          <p>
-                            {selectedProfile.relation} • {selectedProfile.age || "N/A"} yrs • {selectedProfile.gender}
-                          </p>
+                      <label>Home Sample Pickup</label>
+                      <div className="pickup-row">
+                        <div>
+                          <strong>{homePickup ? "Enabled" : "Disabled"}</strong>
+                          <p>Optional home sample collection with pickup fee.</p>
                         </div>
-                      ) : (
-                        <p style={{ color: "red" }}>No profile selected</p>
-                      )}
-
-
+                        <StandardToggle
+                          id="homePickup"
+                          checked={homePickup}
+                          onChange={() => setHomePickup((prev) => !prev)}
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* Packages Tab */}
-                {activeTab === 'Packages' && (
+                {activeTab === "Packages" && (
                   <div className="booking-form-side">
                     <h3 className="form-heading">Health Packages</h3>
-                    {packagesData.map(pkg => (
-                      <div key={pkg.id} className="package-mini-card">
-                        <div className="pkg-info">
-                          <h4>{pkg.name}</h4>
-                          <p>Includes multiple parameters...</p>
-                          <span className="pkg-price">₹{pkg.price}</span>
-                        </div>
-                        <button
-                          className="btn-add-pkg"
-                          onClick={() => {
-                            if (selectedPackages.includes(pkg.id)) {
-                              setSelectedPackages(selectedPackages.filter(id => id !== pkg.id));
-                            } else {
-                              setSelectedPackages([...selectedPackages, pkg.id]);
-                            }
-                          }}
+
+                    <div className="test-check-list package-list">
+                      {packagesData.map((pack) => (
+                        <div
+                          className="check-item"
+                          key={pack.id}
+                          onClick={() => togglePackage(pack.id)}
                         >
-                          {selectedPackages.includes(pkg.id) ? "Remove" : "Add"}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {activeTab === 'About Lab' && (
-                  <div className="booking-form-side">
-                    <h3 className="form-heading">About Aarogya Diagnostic</h3>
-                    <p className="about-text">
-                      Aarogya Diagnostic Center is a leading medical laboratory in Mumbai, established in 2010.
-                      We use state-of-the-art automated equipment to ensure the highest accuracy.
-                    </p>
-                    <ul className="certs-list">
-                      <li>✅ NABL Accredited</li>
-                      <li>✅ ISO Certified</li>
-                      <li>✅ 15+ Years Experience</li>
-                    </ul>
-                  </div>
-                )}
-
-                {/* Reviews Tab */}
-                {activeTab === 'Reviews' && (
-                  <div className="booking-form-side">
-                    <h3 className="form-heading">User Reviews</h3>
-
-                    {selectedLab.reviews?.length > 0 ? (
-                      selectedLab.reviews.map((rev, i) => (
-                        <div className="review-item" key={i}>
-                          <div className="rev-head">
-                            <strong>{rev.name}</strong>
-                            <span>{"⭐".repeat(Math.round(rev.ratingNumber))}</span>
+                          <div className="check-label-grp">
+                            <input
+                              type="checkbox"
+                              checked={selectedPackages.includes(pack.id)}
+                              readOnly
+                            />
+                            <span>
+                              {pack.name}
+                              <small>{pack.parameters} parameters</small>
+                            </span>
                           </div>
-                          <p>"{rev.comment}"</p>
+                          <span className="item-price">₹{pack.price}</span>
                         </div>
-                      ))
-                    ) : (
-                      <p>No reviews available</p>
-                    )}
+                      ))}
+                    </div>
                   </div>
                 )}
 
+                {activeTab === "About Lab" && (
+                  <div className="booking-form-side">
+                    <h3 className="form-heading">About Lab</h3>
 
-                {/* Billing Summary */}
-                <div className="billing-summary-side">
-                  <div className="summary-card">
-                    <h4>Bill Details</h4>
-                    <div className="summary-row"><span>Test Subtotal</span><span>₹{subtotal}</span></div>
-                    <div className="summary-row"><span>Medical Tax (GST 5%)</span><span>₹{gst}</span></div>
-                    <div className="summary-row"><span>Service Charge</span><span>₹{serviceCharge}</span></div>
-                    {/* Conditional Rendering */}
-                    {homePickup && (
-                      <div className="summary-row"><span>Home Pickup Fee</span><span>₹{pickupFee}</span></div>
-                    )}
-                    <div className="grand-total-row"><span>Payable Amount</span><span>₹{grandTotal}</span></div>
-                    <button className="btn-confirm-booking">Confirm Booking</button>
-                    <p className="safe-text">🔒 100% Safe & Secure Payments</p>
+                    <div className="lab-about-card">
+                      <p>
+                        {selectedLab.name} is a platform verified diagnostic partner offering
+                        reliable tests and sample collection support.
+                      </p>
+
+                      <p>
+                        <strong>Address:</strong>{" "}
+                        {[
+                          selectedLab.addressLine1,
+                          selectedLab.addressLine2,
+                          selectedLab.area,
+                          selectedLab.city,
+                        ]
+                          .filter(Boolean)
+                          .join(", ") || "Address not updated"}
+                      </p>
+
+                      <p>
+                        <strong>Services:</strong>{" "}
+                        {(selectedLab.services || []).join(", ") || "Pathology services"}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
 
+                {activeTab === "Reviews" && (
+                  <div className="booking-form-side">
+                    <h3 className="form-heading">Reviews</h3>
+                    <div className="lab-about-card">
+                      <p>No public reviews available yet.</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="billing-summary-side">
+                  <h3>Billing Summary</h3>
+
+                  <div className="bill-row">
+                    <span>Subtotal</span>
+                    <strong>₹{subtotal}</strong>
+                  </div>
+
+                  <div className="bill-row">
+                    <span>GST</span>
+                    <strong>₹{gst}</strong>
+                  </div>
+
+                  <div className="bill-row">
+                    <span>Service Charge</span>
+                    <strong>₹{serviceCharge}</strong>
+                  </div>
+
+                  <div className="bill-row">
+                    <span>Pickup Fee</span>
+                    <strong>₹{pickupFee}</strong>
+                  </div>
+
+                  <div className="bill-total">
+                    <span>Total</span>
+                    <strong>₹{grandTotal}</strong>
+                  </div>
+
+                  <div className="booking-section">
+                    <p className="section-label">Patient Info</p>
+
+                    {selectedProfile ? (
+                      <div className="selected-patient-card">
+                        <h4>{selectedProfile.fullName}</h4>
+                        <p>
+                          {selectedProfile.relation} • {selectedProfile.gender || "N/A"} •{" "}
+                          {selectedProfile.type || "SELF"}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="selected-patient-card error-card">
+                        <p>No profile selected</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <button className="book-bed-btn" onClick={handleLabBooking}>
+                    Confirm Lab Booking
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
-      {/* --- FOOTER SECTION --- */}
+
       <footer className="main-footer">
         <div className="footer-container">
           <div className="footer-column brand-col">
-            <h2 className="footer-logo">Doc<span>Hub</span></h2>
+            <h2 className="footer-logo">Doc<span style={{ color: 'var(--text-dark)', background: 'white', padding: '0 5px', borderRadius: '4px', marginLeft: '5px' }}>Hub</span></h2>
             <p className="footer-desc">
               Mumbai's trusted healthcare network. Booking appointments,
               finding labs, and managing health records made simple.
             </p>
             <div className="footer-socials">
               <ul className="example-1">
+                {/* Facebook */}
                 <li className="icon-content">
-                  <a href="#" aria-label="Facebook" className="link">
+                  <a href="#" aria-label="Facebook" data-social="facebook" className="link">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
                       <path d="M29.059 15.085C29.058 7.322 22.764 1.028 15 1.028S0.941 7.323 0.941 15.087c0 6.989 5.1 12.787 11.781 13.875l0.081 0.011V19.15H9.232v-4.065h3.57v-3.096a4.962 4.962 0 0 1 5.329 -5.469l-0.017 -0.001c1.124 0.016 2.212 0.115 3.273 0.292l-0.126 -0.018v3.459h-1.774a2.033 2.033 0 0 0 -2.291 2.204l-0.001 -0.008v2.636h3.899l-0.623 4.065h-3.276v9.823c6.762 -1.101 11.862 -6.899 11.863 -13.888" fill="currentColor"></path>
                     </svg>
                   </a>
                   <div className="tooltip">Facebook</div>
                 </li>
+
+                {/* Instagram */}
                 <li className="icon-content">
-                  <a href="#" aria-label="Instagram" className="link">
+                  <a href="#" aria-label="Instagram" data-social="instagram" className="link">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                       <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" fill="currentColor"></path>
                     </svg>
                   </a>
                   <div className="tooltip">Instagram</div>
                 </li>
+
+                {/* LinkedIn */}
                 <li className="icon-content">
-                  <a href="#" aria-label="LinkedIn" className="link">
+                  <a href="#" aria-label="LinkedIn" data-social="linkedin" className="link">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                       <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z" fill="currentColor"></path>
                     </svg>
                   </a>
                   <div className="tooltip">LinkedIn</div>
                 </li>
+
                 {/* WhatsApp */}
                 <li className="icon-content">
                   <a href="#" aria-label="WhatsApp" data-social="whatsapp" className="link">
@@ -1276,14 +2215,17 @@ const AllServicesPage = () => {
               </ul>
             </div>
           </div>
+
           <div className="footer-column">
             <h4>Services</h4>
             <ul className="footer-list">
               <li onClick={() => navigate("/all-services")}>Find Doctors</li>
               <li onClick={() => navigate("/all-services")}>Find Hospitals</li>
               <li onClick={() => navigate("/all-services")}>Find Labs</li>
+
             </ul>
           </div>
+
           <div className="footer-column">
             <h4>Support</h4>
             <ul className="footer-list">
@@ -1294,22 +2236,56 @@ const AllServicesPage = () => {
               <li onClick={() => navigate("/contact")}>Contact Us</li>
             </ul>
           </div>
+
           <div className="footer-column">
             <h4>Contact Us</h4>
             <div className="footer-contact-info">
               <p>📍 Andheri West, Mumbai, MH</p>
-              <p>📞 +91  98765 - 43210</p>
+              <p>📞 +91 98765 - 43210</p>
               <p>✉️ support@dochub.com</p>
             </div>
           </div>
         </div>
+
         <div className="footer-bottom">
           <div className="footer-bottom-content">
             <p>&copy; 2026 Doctor's Hub Mumbai. All Rights Reserved.</p>
           </div>
         </div>
-
       </footer>
+      {loginPromptOpen && (
+        <div className="login-prompt-overlay" onClick={() => setLoginPromptOpen(false)}>
+          <div className="login-prompt-card" onClick={(e) => e.stopPropagation()}>
+            <button className="login-prompt-close" onClick={() => setLoginPromptOpen(false)}>
+              ×
+            </button>
+
+            <div className="login-prompt-icon">🔐</div>
+
+            <h2>Login Required</h2>
+            <p>Please login first to view all services and continue booking.</p>
+
+            <div className="login-prompt-actions">
+              <button
+                className="login-prompt-primary"
+                onClick={() => {
+                  setLoginPromptOpen(false);
+                  navigate("/login", { state: { redirectTo: loginRedirectPath } });
+                }}
+              >
+                Login Now
+              </button>
+
+              <button
+                className="login-prompt-secondary"
+                onClick={() => setLoginPromptOpen(false)}
+              >
+                Not Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

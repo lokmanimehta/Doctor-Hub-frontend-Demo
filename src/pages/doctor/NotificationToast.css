@@ -1,0 +1,134 @@
+.notification-toast-wrapper {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  perspective: 1000px;
+}
+
+.notification-toast-card {
+  width: 380px;
+  background: rgba(255, 255, 255, 0.95);-webkit-backdrop-filter: blur(10px); /* Add this line first */
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 
+              0 20px 48px -12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideInRight 0.5s ease-out;
+}
+
+.notification-toast-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  background: #ffffff;
+}
+
+.notification-toast-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.notification-toast-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-status-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #0d9488;
+  border-radius: 50%;
+}
+
+.notification-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.notification-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notification-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.01em;
+}
+
+.notification-message {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #475569;
+  font-weight: 400;
+}
+
+.notification-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 4px;
+  margin-left: 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-close-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Animations */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 480px) {
+  .notification-toast-wrapper {
+    top: 16px;
+    right: 16px;
+    left: 16px;
+  }
+
+  .notification-toast-card {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .notification-title {
+    font-size: 15px;
+  }
+
+  .notification-message {
+    font-size: 13px;
+  }
+}

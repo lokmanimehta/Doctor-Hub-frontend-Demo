@@ -10,7 +10,11 @@ import {
   FiActivity,
   FiExternalLink,
   FiPlusCircle,
-  FiThumbsUp
+  FiThumbsUp,
+  FiAlertTriangle,
+  FiArrowRight,
+  FiUserCheck,
+  FiHome
 } from "react-icons/fi";
 import { patientAppointmentsDummyData } from "../../utils/patientAppointmentsDummyData";
 import { prescriptionsDummyData } from "../../utils/prescriptionsDummyData";
@@ -20,7 +24,8 @@ import "./Dashboard.css";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isRecovered, setIsRecovered] = useState(false);
-
+  const [symptomText, setSymptomText] = useState("");
+const [triageResult, setTriageResult] = useState(null);
   const { welcomeMessage, upcomingAppointment, healthSummary } = patientDashboardData;
 
   const wellnessTips = [
@@ -36,7 +41,105 @@ const Dashboard = () => {
   const pendingLabTests = [
     { id: 1, testName: "CBC & Lipid Profile", lab: "City Diagnostic", date: "24 Feb" },
   ];
+ const handleSymptomCheck = () => {
+  const text = symptomText.toLowerCase().trim();
 
+  if (!text) {
+    setTriageResult({
+      level: "info",
+      title: "Enter symptoms first",
+      message: "Please type your symptoms to get guidance.",
+      cta: null,
+      specialty: null,
+      reason: null
+    });
+    return;
+  }
+
+  // Emergency symptoms
+  if (
+    text.includes("chest pain") ||
+    text.includes("breathing problem") ||
+    text.includes("breathlessness") ||
+    text.includes("stroke") ||
+    text.includes("unconscious") ||
+    text.includes("severe bleeding")
+  ) {
+    setTriageResult({
+      level: "urgent",
+      title: "Urgent Care Recommended",
+      message:
+        "Your symptoms may need urgent medical attention. Please check nearby hospitals or emergency care immediately.",
+      cta: "hospital",
+      specialty: null,
+      reason: "Emergency warning symptoms detected"
+    });
+    return;
+  }
+
+  // Specialty mapping
+  if (text.includes("rash") || text.includes("itching") || text.includes("skin allergy")) {
+    setTriageResult({
+      level: "doctor",
+      title: "Dermatologist Recommended",
+      message:
+        "Your symptoms look related to skin concerns. You may consult a Dermatologist.",
+      cta: "doctor",
+      specialty: "Dermatologist",
+      reason: "Matched symptoms: rash / itching / skin allergy"
+    });
+    return;
+  }
+
+  if (text.includes("headache") || text.includes("migraine") || text.includes("dizziness")) {
+    setTriageResult({
+      level: "doctor",
+      title: "Neurologist / Physician Recommended",
+      message:
+        "Your symptoms may need consultation with a Neurologist or General Physician.",
+      cta: "doctor",
+      specialty: "Neurologist",
+      reason: "Matched symptoms: headache / migraine / dizziness"
+    });
+    return;
+  }
+
+  if (text.includes("bp") || text.includes("blood pressure")) {
+    setTriageResult({
+      level: "doctor",
+      title: "Cardiologist Recommended",
+      message:
+        "Your symptoms may be related to blood pressure or heart health. A Cardiologist may be suitable.",
+      cta: "doctor",
+      specialty: "Cardiologist",
+      reason: "Matched symptoms: BP / blood pressure"
+    });
+    return;
+  }
+
+  if (text.includes("diabetes") || text.includes("fever") || text.includes("cough") || text.includes("cold") || text.includes("vomiting") || text.includes("stomach pain")) {
+    setTriageResult({
+      level: "doctor",
+      title: "Physician Recommended",
+      message:
+        "Your symptoms look suitable for a General Physician consultation.",
+      cta: "doctor",
+      specialty: "Physician",
+      reason: "Matched symptoms: general illness / fever / cough / diabetes"
+    });
+    return;
+  }
+
+  setTriageResult({
+    level: "home",
+    title: "Basic Care Guidance",
+    message:
+      "Your symptoms may be mild, but if they continue or worsen, please consult a doctor. You can also use Help & Support for more guidance.",
+    cta: "help",
+    specialty: null,
+    reason: "No strong specialty match found"
+  });
+};
   return (
     <div className="patient-dashboard-container">
       {/* --- HEADER --- */}
@@ -50,6 +153,101 @@ const Dashboard = () => {
           <p>"{dailyTip}"</p>
         </div>
       </header>
+      <div className="ai-symptom-card">
+  <div className="ai-symptom-card-top">
+    <div>
+      <p className="ai-symptom-label">AI TRIAGE ASSIST</p>
+      <h2>AI Symptom Checker</h2>
+      <p className="ai-symptom-subtext">
+        Enter your symptoms and get quick guidance on whether you may need home care, a doctor, or urgent hospital support.
+      </p>
+    </div>
+
+    <div className="ai-triage-badge">
+      <FiAlertTriangle />
+      <span>Preliminary Guidance Only</span>
+    </div>
+  </div>
+
+  <div className="ai-symptom-input-wrap">
+    <textarea
+      className="ai-symptom-textarea"
+      placeholder="Example: fever, cough, headache, chest pain..."
+      value={symptomText}
+      onChange={(e) => setSymptomText(e.target.value)}
+    />
+
+    <div className="ai-symptom-actions">
+      <button className="ai-check-btn" onClick={handleSymptomCheck}>
+        Check Symptoms
+      </button>
+
+      <button
+        className="ai-clear-btn"
+        onClick={() => {
+          setSymptomText("");
+          setTriageResult(null);
+        }}
+      >
+        Clear
+      </button>
+    </div>
+  </div>
+
+  {triageResult && (
+    <div className={`ai-triage-result ${triageResult.level}`}>
+      <div className="ai-result-header">
+        <h3>{triageResult.title}</h3>
+      </div>
+
+      <p>{triageResult.message}</p>
+      {triageResult.specialty && (
+  <div className="ai-specialty-box">
+    <strong>Recommended Specialty:</strong> {triageResult.specialty}
+    <br />
+    <span>{triageResult.reason}</span>
+  </div>
+)}
+
+      <div className="ai-result-actions">
+       {triageResult.cta === "doctor" && (
+  <button
+    className="ai-result-btn"
+    onClick={() =>
+      navigate("/patient/finddoctors", {
+        state: {
+          recommendedSpecialty: triageResult.specialty,
+          symptomQuery: symptomText,
+          triageTitle: triageResult.title
+        }
+      })
+    }
+  >
+    <FiUserCheck /> Find Matching Doctors
+  </button>
+)}
+
+        {triageResult.cta === "hospital" && (
+          <button
+            className="ai-result-btn urgent"
+            onClick={() => navigate("/patient/hospitals")}
+          >
+            <FiAlertTriangle /> Emergency Hospitals
+          </button>
+        )}
+
+        {triageResult.cta === "help" && (
+          <button
+            className="ai-result-btn secondary"
+            onClick={() => navigate("/patient/help")}
+          >
+            <FiHome /> Get More Help
+          </button>
+        )}
+      </div>
+    </div>
+  )}
+</div>
 
       {/* --- UPCOMING APPOINTMENT --- */}
       {upcomingAppointment && (

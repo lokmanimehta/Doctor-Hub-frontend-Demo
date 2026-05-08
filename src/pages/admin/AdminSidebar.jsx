@@ -20,7 +20,7 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
     { name: "System Logs", path: "/admin/system-logs", icon: "📑" },
     { name: "Ads-Management", path: "/admin/ads-management", icon: "📢" },
     { name: "Feedback", path: "/admin/feedback", icon: "💬" },
-    
+    { name: "Blogs", path: "/admin/blogs", icon: "📰" },
   ];
 
   // Mobile resize handling

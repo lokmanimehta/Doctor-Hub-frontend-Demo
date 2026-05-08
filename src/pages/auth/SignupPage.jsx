@@ -1,16 +1,16 @@
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  User, Mail, Phone, Briefcase, GraduationCap, Lock, ArrowRight, Stethoscope, HeartPulse
+  User, Mail, Phone, GraduationCap, Lock, ArrowRight, Stethoscope, HeartPulse
 } from "lucide-react";
 import "./Signup.css";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-// import { signupUser } from "../../services/authService";
+import { signupUser } from "../../services/authService";
 // High-res images for premium look
 import patientImg from "../../assets/images/patientlogin.png";
 import doctorImg from "../../assets/images/doctorlogin.png";
-// import api from "../../services/api"
+import api from "../../services/api"
 const SignupPage = () => {
   const navigate = useNavigate();
   const [signupStep, setSignupStep] = useState("form");
@@ -29,9 +29,11 @@ const SignupPage = () => {
 
   const [newMember, setNewMember] = useState({
     fullName: "",
-    age: "",
+    relation: "",
     gender: "",
-    relation: ""
+    dateOfBirth: "",
+    bloodGroup: "",
+    mobileNumber: ""
   });
   const [formData, setFormData] = useState({
     fullName: "",
@@ -43,14 +45,10 @@ const SignupPage = () => {
     confirmPassword: ""
   });
 
-  const suggestionsData = {
-    specialization: [
-      "Cardiology", "Dermatology", "Neurology", "Pediatrics",
-      "Orthopedics", "General Physician", "Psychiatry",
-      "Radiology", "Oncology", "Gastroenterology"
-    ],
-    credentials: ["MBBS", "MD", "MS", "BDS", "DNB", "FRCS", "PhD", "MCh"]
-  };
+  const [masterData, setMasterData] = useState({
+  specializations: [],
+  degrees: []
+});
 
   const [filteredSpecs, setFilteredSpecs] = useState([]);
   const [filteredCreds, setFilteredCreds] = useState([]);
@@ -64,38 +62,57 @@ const SignupPage = () => {
       setPopup(prev => ({ ...prev, visible: false }));
     }, 3000);
   };
+  useEffect(() => {
+  const fetchDoctorMasterData = async () => {
+    try {
+      const [degreeResponse, specializationResponse] = await Promise.all([
+        api.get("/doctor/master/degrees"),
+        api.get("/doctor/master/specializations")
+      ]);
 
-  const handleInputChange = (e, type) => {
-
-    const value = e.target.value.toLowerCase()
-
-    if (type === "specialization") {
-
-      setSpecInput(value)
-
-      const filtered = suggestionsData.specialization.filter(item =>
-        item.toLowerCase().includes(value)
-      )
-
-      setFilteredSpecs(filtered)
-      setActiveField("specialization")
-
+      setMasterData({
+        degrees: Array.isArray(degreeResponse.data)
+          ? degreeResponse.data.map((item) => item.name)
+          : [],
+        specializations: Array.isArray(specializationResponse.data)
+          ? specializationResponse.data.map((item) => item.name)
+          : []
+      });
+    } catch  {
+      showPopup("Failed to load doctor dropdown data", "error");
     }
+  };
 
-    if (type === "credentials") {
+  fetchDoctorMasterData();
+}, []);
 
-      setCredInput(value)
+const handleInputChange = (e, type) => {
+  const value = e.target.value;
 
-      const filtered = suggestionsData.credentials.filter(item =>
-        item.toLowerCase().includes(value)
-      )
+  if (type === "specialization") {
+    setSpecInput(value);
 
-      setFilteredCreds(filtered)
-      setActiveField("credentials")
+    const filtered = masterData.specializations.filter((item) =>
+      item.toLowerCase().includes(value.toLowerCase())
+    );
 
-    }
-
+    setFilteredSpecs(filtered);
+    setActiveField("specialization");
   }
+
+  if (type === "credentials") {
+    setCredInput(value);
+
+    const filtered = masterData.degrees.filter((item) =>
+      item.toLowerCase().includes(value.toLowerCase())
+    );
+
+    setFilteredCreds(filtered);
+    setActiveField("credentials");
+  }
+};
+
+  
   const validateForm = () => {
     const { fullName, email, mobile, password, confirmPassword, credentials, specialization } = formData;
     if (fullName.trim().length < 3) { showPopup("Full Name must be at least 3 characters", "error"); return false; }
@@ -121,52 +138,6 @@ const SignupPage = () => {
     return true;
   };
 
-  // const handleSignup = async (e) => {
-  //   e.preventDefault();
-
-  //   if (!validateForm()) return;
-
-  //   try {
-  //     const payload = {
-  //       fullName: formData.fullName,
-  //       email: formData.email,
-  //       mobile: formData.mobile,
-  //       password: formData.password,
-  //       acceptedTerms: acceptedTerms,
-  //       role: role.toUpperCase(),
-  // specialization: role === "doctor"
-  //   ?  formData.specialization : [],
-  // credentials: role === "doctor" ? formData.credentials : []
-  //     };
-
-  //     setLoading(true);
-
-  // await signupUser(payload);
-
-  // setLoading(false);
-
-  //     setEmailForOtp(formData.email);
-
-  //     showPopup("📧 OTP sent to your email", "success");
-
-  //     setSignupStep("otp");
-  //     setTimer(60);
-
-  // const interval = setInterval(()=>{
-  //    setTimer(prev=>{
-  //       if(prev===1){
-  //          clearInterval(interval);
-  //          return 0;
-  //       }
-  //       return prev-1;
-  //    });
-  // },1000);
-
-  //   } catch (err) {
-  //     showPopup(err.message || "Signup failed", "error");
-  //   }
-  // };
-
   const handleSignup = async (e) => {
     e.preventDefault();
 
@@ -175,19 +146,7 @@ const SignupPage = () => {
     try {
       setLoading(true);
 
-      // ✅ Dummy signup users (simulate DB)
-      const dummyUsers = JSON.parse(localStorage.getItem("dummyUsers")) || [];
-
-      // ❌ check duplicate email
-      const exists = dummyUsers.find(
-        (u) => u.email === formData.email
-      );
-
-      if (exists) {
-        throw new Error("User already exists with this email");
-      }
-
-      const newUser = {
+      const payload = {
         fullName: formData.fullName,
         email: formData.email,
         mobile: formData.mobile,
@@ -195,26 +154,27 @@ const SignupPage = () => {
         role: role.toUpperCase(),
         specialization: role === "doctor" ? formData.specialization : [],
         credentials: role === "doctor" ? formData.credentials : [],
-        familyMembers: familyMembers
+        familyMembers: role === "patient"
+          ? familyMembers.map((member) => ({
+            fullName: member.fullName,
+            relation: member.relation,
+            gender: member.gender,
+            dateOfBirth: member.dateOfBirth,
+            bloodGroup: member.bloodGroup,
+            mobileNumber: member.mobileNumber
+          }))
+          : []
       };
 
-      // ✅ store in localStorage (dummy DB)
-      dummyUsers.push(newUser);
-      localStorage.setItem("dummyUsers", JSON.stringify(dummyUsers));
-      localStorage.setItem("currentUser", JSON.stringify(newUser));
-      // Save per user (BEST PRACTICE)
-      localStorage.setItem(
-        `familyMembers_${formData.email}`,
-        JSON.stringify(familyMembers)
-      );
+      await signupUser(payload);
+
       setEmailForOtp(formData.email);
 
-      showPopup("📧 OTP sent (dummy)", "success");
+      showPopup("📧 OTP sent to your email", "success");
 
       setSignupStep("otp");
       setTimer(60);
 
-      // ✅ fake OTP timer
       const interval = setInterval(() => {
         setTimer((prev) => {
           if (prev === 1) {
@@ -226,105 +186,69 @@ const SignupPage = () => {
       }, 1000);
 
     } catch (err) {
-      showPopup(err.message, "error");
+      showPopup(err.message || "Signup failed", "error");
     } finally {
       setLoading(false);
     }
   };
-  // const verifyOtp = async () => {
-
-  //   if (!otp) {
-  //     showPopup("Please enter OTP", "error");
-  //     return;
-  //   }
-
-  //   try {
-
-  //     await api.post("/auth/verify-otp", {
-  //       email: emailForOtp,
-  //       otp
-  //     });
-
-  //     showPopup("🎉 Account verified successfully!", "success");
-
-  //     setTimeout(() => {
-  //       navigate("/login");
-  //     }, 2000);
-
-  //   } catch (err) {
-  //     showPopup(err.message || "OTP verification failed", "error");
-  //   }
-
-  // };
-
-  const verifyOtp = async () => {
-    if (!otp) {
-      showPopup("Please enter OTP", "error");
-      return;
-    }
-
-    try {
-      // ✅ Dummy OTP always "123456"
-      if (otp !== "123456") {
-        throw new Error("Invalid OTP");
-      }
-
-      showPopup("🎉 Account verified successfully!", "success");
-
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500);
-
-    } catch (err) {
-      showPopup(err.message || "OTP verification failed", "error");
-    }
-  };
-  // const resendOtp = async () => {
-
-  //   try{
-
-  //     await api.post("/auth/resend-otp",{
-  //   email: emailForOtp
-  // })
 
 
+const verifyOtp = async () => {
+  const trimmedOtp = otp.trim();
 
-  //     showPopup("🔁 OTP sent again", "success")
-  //     setTimer(60)
+  if (!trimmedOtp) {
+    showPopup("Please enter OTP", "error");
+    return;
+  }
 
-  // const interval = setInterval(()=>{
-  //    setTimer(prev=>{
-  //       if(prev===1){
-  //          clearInterval(interval)
-  //          return 0
-  //       }
-  //       return prev-1
-  //    })
-  // },1000)
-  //   }catch(err){
-  //  showPopup(err.message || "Error occurred","error")
-  // }
-  // }
-  const resendOtp = async () => {
-    try {
-      showPopup("🔁 Dummy OTP resent (use 123456)", "success");
+  if (!/^[0-9]{6}$/.test(trimmedOtp)) {
+    showPopup("OTP must be exactly 6 digits", "error");
+    return;
+  }
 
-      setTimer(60);
+  try {
+    await api.post("/auth/verify-otp", {
+      identifier: emailForOtp.trim(),
+      otp: trimmedOtp
+    });
 
-      const interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev === 1) {
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+    showPopup("🎉 Account verified successfully!", "success");
 
-    } catch (err) {
-      showPopup(err.message || "Error occurred", "error");
-    }
-  };
+    setTimeout(() => {
+      navigate("/login");
+    }, 2000);
+
+  } catch (err) {
+    showPopup(err.message || "OTP verification failed", "error");
+  }
+};
+
+const resendOtp = async () => {
+  if (timer > 0) return;
+
+  try {
+    await api.post("/auth/resend-otp", {
+      identifier: emailForOtp.trim()
+    });
+
+    showPopup("🔁 OTP sent again", "success");
+    setTimer(60);
+
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev === 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+  } catch (err) {
+    showPopup(err.message || "Error occurred", "error");
+  }
+};
+
   return (
     <div className="auth-container">
       {popup.visible && (
@@ -342,7 +266,7 @@ const SignupPage = () => {
         <div className="auth-visual">
           <div className="auth-visual-content">
             <img
-              src={role === "patient" ? patientImg : doctorImg}
+              src={role === "patient"  ? patientImg : doctorImg}
               alt="Healthcare"
               className="auth-image"
             />
@@ -352,7 +276,7 @@ const SignupPage = () => {
         <div className="auth-form-section">
           <div className="role-badge-container">
             <div className="role-toggle-btn" onClick={() => setRole(role === "patient" ? "doctor" : "patient")}>
-              Are you a {role === "patient" ? "doctor" : "patient"}? <span>Register here</span>
+              Are you a {role === "patient" ? "doctor" : "patient"} ? <span>Register here</span>
             </div>
           </div>
 
@@ -375,7 +299,7 @@ const SignupPage = () => {
                   />
                 </div>
 
-                <div className="input-wrapper">
+                <div className="input-wrapper full-width">
                   <Mail className="input-icon" size={18} />
                   <input
                     type="email"
@@ -386,7 +310,7 @@ const SignupPage = () => {
                   />
                 </div>
 
-                <div className="input-wrapper">
+                <div className="input-wrapper full-width">
                   <Phone className="input-icon" size={18} />
                   <input
                     type="tel"
@@ -433,7 +357,7 @@ const SignupPage = () => {
                           onChange={(e) => handleInputChange(e, "credentials")}
                           onFocus={() => {
                             setActiveField("credentials")
-                            setFilteredCreds(suggestionsData.credentials)
+                            setFilteredCreds(masterData.degrees)
                           }}
                         />
 
@@ -503,7 +427,7 @@ const SignupPage = () => {
                           onChange={(e) => handleInputChange(e, "specialization")}
                           onFocus={() => {
                             setActiveField("specialization")
-                            setFilteredSpecs(suggestionsData.specialization)
+                            setFilteredSpecs(masterData.specializations)
                           }}
                         />
 
@@ -541,7 +465,7 @@ const SignupPage = () => {
                   </>
                 )}
 
-                <div className="input-wrapper">
+                <div className="input-wrapper full-width">
                   <Lock className="input-icon" size={18} />
                   <input
                     type={showPassword ? "text" : "password"}
@@ -552,12 +476,13 @@ const SignupPage = () => {
                   />
                   <span
                     className="show-hide-icon"
-                    onClick={() => setShowConfirmPassword(prev => !prev)}>
-                    {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                    onClick={() => setShowPassword(prev => !prev)}
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
                   </span>
                 </div>
 
-                <div className="input-wrapper">
+                <div className="input-wrapper full-width">
                   <Lock className="input-icon" size={18} />
                   <input
                     type={showConfirmPassword ? "text" : "password"}
@@ -568,9 +493,9 @@ const SignupPage = () => {
                   />
                   <span
                     className="show-hide-icon"
-                    onClick={() => setShowPassword(prev => !prev)}
+                    onClick={() => setShowConfirmPassword(prev => !prev)}
                   >
-                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                    {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
                   </span>
                 </div>
               </div>
@@ -601,100 +526,156 @@ const SignupPage = () => {
               <p className="footer-text">
                 Already have an account? <span onClick={() => navigate("/login")}>Login Now</span>
               </p>
-              <div className="family-section">
-                <div className="family-header">
-                  <h4>Family Members (Optional)</h4>
-                  <button
-                    type="button"
-                    onClick={() => setShowFamilyForm(!showFamilyForm)}
-                    className="add-family-btn"
-                  >
-                    + Add Member
-                  </button>
-                </div>
 
-                {showFamilyForm && (
-                  <div className="family-form">
-                    <input
-                      type="text"
-                      placeholder="Full Name"
-                      value={newMember.fullName}
-                      onChange={(e) =>
-                        setNewMember({ ...newMember, fullName: e.target.value })
-                      }
-                    />
-
-                    <input
-                      type="number"
-                      placeholder="Age"
-                      value={newMember.age}
-                      onChange={(e) =>
-                        setNewMember({ ...newMember, age: e.target.value })
-                      }
-                    />
-
-                    <select
-                      value={newMember.gender}
-                      onChange={(e) =>
-                        setNewMember({ ...newMember, gender: e.target.value })
-                      }
-                    >
-                      <option value="">Gender</option>
-                      <option>Male</option>
-                      <option>Female</option>
-                    </select>
-
-                    <select
-                      value={newMember.relation}
-                      onChange={(e) =>
-                        setNewMember({ ...newMember, relation: e.target.value })
-                      }
-                    >
-                      <option value="">Relation</option>
-                      <option>Mother</option>
-                      <option>Father</option>
-                      <option>Sibling</option>
-                    </select>
-
+              {role === "patient" && (
+                <div className="family-section">
+                  <div className="family-header">
+                    <h4>Family Members (Optional)</h4>
                     <button
                       type="button"
-                      onClick={() => {
-                        if (!newMember.fullName) return;
-
-                        setFamilyMembers([
-                          ...familyMembers,
-                          { ...newMember, id: Date.now(), type: "FAMILY" }
-                        ]);
-
-                        setNewMember({
-                          fullName: "",
-                          age: "",
-                          gender: "",
-                          relation: ""
-                        });
-
-                        setShowFamilyForm(false);
-                      }}
+                      onClick={() => setShowFamilyForm(!showFamilyForm)}
+                      className="add-family-btn"
                     >
-                      Save Member
+                      + Add Member
                     </button>
                   </div>
-                )}
 
-                {/* Show added members */}
-                {familyMembers.length > 0 && (
-                  <div className="family-list">
-                    {familyMembers.map((m) => (
-                      <div key={m.id} className="family-chip">
-                        {m.fullName} ({m.relation})
-                        <span onClick={() => {
-                          setFamilyMembers(familyMembers.filter(f => f.id !== m.id));
-                        }}> ❌ </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                  {showFamilyForm && (
+                    <div className="family-form">
+                      <input
+                        type="text"
+                        placeholder="Full Name"
+                        value={newMember.fullName}
+                        onChange={(e) =>
+                          setNewMember({ ...newMember, fullName: e.target.value })
+                        }
+                      />
+
+                      <input
+                        type="date"
+                        value={newMember.dateOfBirth}
+                        onChange={(e) =>
+                          setNewMember({ ...newMember, dateOfBirth: e.target.value })
+                        }
+                      />
+
+                      <select
+                        value={newMember.gender}
+                        onChange={(e) =>
+                          setNewMember({ ...newMember, gender: e.target.value })
+                        }
+                      >
+                        <option value="">Gender</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                        <option>Other</option>
+                      </select>
+
+                      <select
+                        value={newMember.bloodGroup}
+                        onChange={(e) =>
+                          setNewMember({ ...newMember, bloodGroup: e.target.value })
+                        }
+                      >
+                        <option value="">Blood Group (Optional)</option>
+                        <option>A+</option>
+                        <option>A-</option>
+                        <option>B+</option>
+                        <option>B-</option>
+                        <option>AB+</option>
+                        <option>AB-</option>
+                        <option>O+</option>
+                        <option>O-</option>
+                      </select>
+
+                      <select
+                        value={newMember.relation}
+                        onChange={(e) =>
+                          setNewMember({ ...newMember, relation: e.target.value })
+                        }
+                      >
+                        <option value="">Relation</option>
+                        <option>Mother</option>
+                        <option>Father</option>
+                        <option>Brother</option>
+                        <option>Sister</option>
+                        <option>Spouse</option>
+                        <option>Son</option>
+                        <option>Daughter</option>
+                        <option>Grandfather</option>
+                        <option>Grandmother</option>
+                        <option>Other</option>
+                      </select>
+
+                      <input
+                        type="tel"
+                        placeholder="Mobile Number (Optional)"
+                        value={newMember.mobileNumber}
+                        onChange={(e) =>
+                          setNewMember({ ...newMember, mobileNumber: e.target.value })
+                        }
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (
+                            !newMember.fullName.trim() ||
+                            !newMember.relation ||
+                            !newMember.gender ||
+                            !newMember.dateOfBirth
+                          ) {
+                            showPopup("Please fill all required family member details", "error");
+                            return;
+                          }
+                          if (new Date(newMember.dateOfBirth) > new Date()) {
+                            showPopup("Date of birth cannot be in the future", "error");
+                            return;
+                          }
+                          if (
+                            newMember.mobileNumber &&
+                            !/^[6-9]\d{9}$/.test(newMember.mobileNumber)
+                          ) {
+                            showPopup("Family member mobile number must be a valid 10-digit Indian number", "error");
+                            return;
+                          }
+
+                          setFamilyMembers([
+                            ...familyMembers,
+                            { ...newMember, id: Date.now(), type: "FAMILY" }
+                          ]);
+
+                          setNewMember({
+                            fullName: "",
+                            relation: "",
+                            gender: "",
+                            dateOfBirth: "",
+                            bloodGroup: "",
+                            mobileNumber: ""
+                          });
+
+                          setShowFamilyForm(false);
+                        }}
+                      >
+                        Save Member
+                      </button>
+                    </div>
+                  )}
+
+                  {familyMembers.length > 0 && (
+                    <div className="family-list">
+                      {familyMembers.map((m) => (
+                        <div key={m.id} className="family-chip">
+                          {m.fullName} ({m.relation}) - {m.gender}
+                          <span onClick={() => {
+                            setFamilyMembers(familyMembers.filter(f => f.id !== m.id));
+                          }}> ❌ </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </form>
           )}
           {signupStep === "otp" && (

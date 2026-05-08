@@ -292,3 +292,264 @@
   .summary-stats-mini { flex-direction: column; }
   .patient-dashboard-container { padding: 15px; }
 }
+/* =========================
+   AI SYMPTOM CHECKER
+========================= */
+.ai-symptom-card {
+  background: linear-gradient(135deg, #ecfdf5 0%, #f8fffd 100%);
+  border: 1px solid #bbf7d0;
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 30px;
+  box-shadow: 0 18px 36px rgba(16, 185, 129, 0.12);
+}
+
+.ai-symptom-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.ai-symptom-label {
+  margin: 0 0 8px 0;
+  font-size: 11px;
+  font-weight: 800;
+  color: #059669;
+  letter-spacing: 1px;
+}
+
+.ai-symptom-card h2 {
+  margin: 0;
+  font-size: 28px;
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.ai-symptom-subtext {
+  margin: 10px 0 0 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.7;
+  max-width: 760px;
+}
+
+.ai-triage-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #0f766e;
+  border: 1px solid #a7f3d0;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ai-symptom-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ai-symptom-textarea {
+  width: 100%;
+  min-height: 120px;
+  border-radius: 16px;
+  border: 1px solid #d1fae5;
+  background: #ffffff;
+  padding: 16px 18px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #0f172a;
+  outline: none;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.ai-symptom-textarea:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.08);
+}
+
+.ai-symptom-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ai-check-btn,
+.ai-clear-btn,
+.ai-result-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.ai-check-btn {
+  background: var(--p-primary);
+  color: #ffffff;
+}
+
+.ai-check-btn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.ai-clear-btn {
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #dbe3ee;
+}
+
+.ai-clear-btn:hover {
+  background: #f8fafc;
+}
+
+.ai-triage-result {
+  margin-top: 18px;
+  border-radius: 18px;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.ai-triage-result h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.ai-triage-result p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+.ai-result-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.ai-result-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--p-primary);
+  color: #ffffff;
+}
+
+.ai-result-btn:hover {
+  transform: translateY(-1px);
+}
+
+.ai-result-btn.secondary {
+  background: #0f172a;
+}
+
+.ai-result-btn.urgent {
+  background: #dc2626;
+}
+
+.ai-triage-result.info {
+  border-color: #cbd5e1;
+}
+
+.ai-triage-result.home {
+  border-color: #bfdbfe;
+  background: #f8fbff;
+}
+
+.ai-triage-result.doctor {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.ai-triage-result.urgent {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .ai-symptom-card {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .ai-symptom-card-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ai-triage-badge {
+    width: fit-content;
+  }
+
+  .ai-symptom-card h2 {
+    font-size: 22px;
+  }
+
+  .ai-symptom-actions {
+    flex-direction: column;
+  }
+
+  .ai-check-btn,
+  .ai-clear-btn,
+  .ai-result-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .ai-symptom-card {
+    padding: 16px;
+  }
+
+  .ai-symptom-card h2 {
+    font-size: 20px;
+  }
+
+  .ai-symptom-subtext,
+  .ai-triage-result p {
+    font-size: 13px;
+  }
+
+  .ai-symptom-textarea {
+    min-height: 110px;
+    padding: 14px;
+  }
+}
+.ai-specialty-box {
+  margin-top: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: #1e293b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.ai-specialty-box strong {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.ai-specialty-box span {
+  color: #64748b;
+  font-size: 13px;
+}

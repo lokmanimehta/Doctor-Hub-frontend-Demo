@@ -1,15 +1,28 @@
-import { Navigate } from "react-router-dom";
+import { useContext } from "react";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
-const ProtectedRoute = ({ role, children }) => {
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+const ProtectedRoute = ({ allowedRoles }) => {
+  const { currentUser, isAuthenticated, authLoading } = useContext(AuthContext);
+  const location = useLocation();
 
-  // if no user, go to login
-  if (!user) return <Navigate to="/login" />;
+  if (authLoading) {
+    return <div>Loading...</div>;
+  }
 
-  // if role mismatch, go home
-  if (role && user.role !== role) return <Navigate to="/" />;
+  if (!isAuthenticated || !currentUser) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
 
-  return children;
+  if (
+    allowedRoles &&
+    Array.isArray(allowedRoles) &&
+    !allowedRoles.includes(currentUser.role)
+  ) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

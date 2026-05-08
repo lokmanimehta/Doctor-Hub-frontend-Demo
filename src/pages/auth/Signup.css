@@ -5,6 +5,13 @@
   --text-main: #1F2937;
   --text-light: #6B7280;
   --white: #ffffff;
+  --border: #e5eaf1;
+  --input-bg: #fbfcfe;
+  --danger: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 .auth-container {
@@ -12,34 +19,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-soft);
-  font-family: 'Inter', sans-serif;
+  background: #f4f7fb;
+  font-family: "Inter", sans-serif;
   padding: 20px;
 }
-.show-hide-icon {
-  cursor: pointer;
-  font-size: 18px;
-  color: #64748b; /* subtle grey */
-  display: flex;
-  align-items: center;
-}
 
-.show-hide-icon:hover {
-  color: var(--primary);
-}
 .auth-wrapper {
   width: 100%;
   max-width: 1100px;
+  min-height: 700px;
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   background: var(--white);
   border-radius: 32px;
   overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
-  min-height: 700px;
 }
 
-/* Left Illustration Panel */
 .auth-visual {
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
   display: flex;
@@ -50,67 +46,93 @@
   height: 100%;
 }
 
-.auth-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: drop-shadow(0 20px 30px rgba(16, 185, 129, 0.15));
-}
-
 .auth-visual-content {
   width: 100%;
   height: 100%;
 }
 
-/* Right Form Section */
+.auth-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  filter: drop-shadow(0 20px 30px rgba(16, 185, 129, 0.15));
+}
+
 .auth-form-section {
-  padding: 50px;
+  padding: 48px 50px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background: #ffffff;
 }
 
 .role-badge-container {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .role-toggle-btn {
-  background: var(--bg-soft);
+  background: #fbfffd;
   color: var(--primary-dark);
   padding: 10px 18px;
   border-radius: 50px;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   border: 1px solid #dcfce7;
+  transition: 0.2s ease;
+}
+
+.role-toggle-btn:hover {
+  background: var(--bg-soft);
 }
 
 .role-toggle-btn span {
   text-decoration: underline;
   margin-left: 4px;
+  color: #64748b;
+}
+
+.form-header {
+  margin-bottom: 24px;
 }
 
 .form-header h1 {
-  font-size: 2.2rem;
-  font-weight: 800;
+  font-size: 2.15rem;
+  line-height: 1.35;
+  font-weight: 900;
   color: var(--text-main);
-  margin-bottom: 8px;
+  margin: 0 0 8px;
+  letter-spacing: -0.6px;
 }
 
-.form-header span { color: var(--primary); }
+.form-header h1 span {
+  color: #087f73;
+  display: block;
+}
+
+.form-header p {
+  color: var(--text-light);
+  font-size: 1rem;
+  margin: 0;
+  font-weight: 500;
+}
 
 .input-group {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 15px;
-  margin-top: 25px;
+  margin-top: 24px;
 }
 
-.full-width { grid-column: span 2; }
+.full-width {
+  grid-column: span 1;
+  width: 100%;
+}
 
-/* Fixed Input Wrapper & Icon Overlap Logic */
 .input-wrapper {
   position: relative;
   display: flex;
@@ -118,80 +140,27 @@
   width: 100%;
 }
 
-.show-hide-icon{
-position:absolute;
-right:16px;
-top:50%;
-transform:translateY(-50%);
-cursor:pointer;
-font-size:18px;
-color:#6b7280;
-}
 .input-icon {
   position: absolute;
   left: 16px;
   top: 50%;
-  transform: translateY(-50%); /* Centers icon vertically */
+  transform: translateY(-50%);
   color: var(--text-light);
   pointer-events: none;
   z-index: 10;
 }
-.selected-tags{
-display:flex;
-flex-wrap:wrap;
-gap:8px;
-margin-bottom:6px;
-}
-
-.tag{
-background:#10b981;
-color:white;
-padding:6px 10px;
-border-radius:20px;
-font-size:12px;
-display:flex;
-align-items:center;
-gap:6px;
-font-weight:500;
-}
-
-.tag button{
-display:flex;
-align-items:center;
-justify-content:center;
-
-width:18px;
-height:18px;
-
-background:white;
-color:#10b981;
-
-border:none;
-border-radius:50%;
-
-font-size:12px;
-font-weight:bold;
-cursor:pointer;
-
-transition:all 0.2s ease;
-}
-
-.tag button:hover{
-background:#059669;
-color:white;
-}
 
 .auth-input {
   width: 100% !important;
-  padding:14px 44px 14px 48px !important; /* Forces text to start after icon */
-  background: #f9fafb;
-  border: 1.5px solid #f3f4f6;
-  border-radius: 14px;
+  height: 54px;
+  padding: 0 44px 0 48px !important;
+  background: #fbfcfe;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
   font-size: 0.95rem;
   outline: none;
-  transition: 0.3s;
+  transition: 0.25s ease;
   color: var(--text-main);
-  box-sizing: border-box; /* Important for padding calculations */
 }
 
 .auth-input::placeholder {
@@ -205,19 +174,81 @@ color:white;
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
 }
 
-/* Suggestions List */
+.show-hide-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  z-index: 12;
+}
+
+.show-hide-icon:hover {
+  color: var(--primary);
+}
+
+.relative {
+  position: relative;
+}
+
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.tag {
+  background: #10b981;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.tag button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: white;
+  color: #10b981;
+  border: none;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.tag button:hover {
+  background: #059669;
+  color: white;
+}
+
 .suggestions-list {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 6px);
   left: 0;
   right: 0;
   background: white;
-  border: 1px solid #f3f4f6;
+  border: 1px solid #e5eaf1;
   border-radius: 10px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 14px 24px rgba(15, 23, 42, 0.12);
   z-index: 50;
   list-style: none;
-  padding: 5px;
+  padding: 6px;
+  margin: 0;
   max-height: 200px;
   overflow-y: auto;
 }
@@ -227,162 +258,14 @@ color:white;
   cursor: pointer;
   border-radius: 8px;
   font-size: 0.9rem;
+  color: var(--text-main);
 }
 
 .suggestions-list li:hover {
   background: var(--bg-soft);
-  color: var(--primary);
-}
-/* Terms & Privacy Checkbox */
-
-.terms-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  margin-bottom: 25px;
-  font-size: 14px;
-  color: #64748b;
+  color: var(--primary-dark);
 }
 
-.terms-checkbox input {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-.terms-checkbox label {
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.terms-checkbox span {
-  color: #3b8e63;
-  font-weight: 600;
-  cursor: pointer;
-}
-.signup-btn {
-  width: 100%;
-  background: var(--primary);
-  color: white;
-  padding: 16px;
-  border-radius: 14px;
-  font-weight: 700;
-  border: none;
-  margin-top: 25px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  box-shadow: 0 10px 15px rgba(16, 185, 129, 0.2);
-  transition: 0.2s;
-}
-.selected-tags{
-display:flex;
-flex-wrap:wrap;
-gap:6px;
-margin-bottom:5px;
-}
-
-.tag{
-background:#10b981;
-color:white;
-padding:4px 10px;
-border-radius:20px;
-font-size:12px;
-display:flex;
-align-items:center;
-gap:6px;
-}
-
-.tag button{
-background:none;
-border:none;
-color:white;
-cursor:pointer;
-font-weight:bold;
-}
-.signup-btn:hover {
-  background: var(--primary-dark);
-}
-.resend-btn {
-  width: 100%;
-  background: var(--primary);
-  color: white;
-  padding: 16px;
-  border-radius: 14px;
-  font-weight: 700;
-  border: none;
-  margin-top: 25px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  box-shadow: 0 10px 15px rgba(16, 185, 148, 0.2);
-  transition: 0.2s;
-}
-
-.signup-btn:hover {
-  background: var(--primary-dark);
-}
-
-.footer-text {
-  text-align: center;
-  margin-top: 20px;
-  color: var(--text-light);
-}
-
-.footer-text span {
-  color: var(--primary);
-  font-weight: 700;
-  cursor: pointer;
-}
-
-/* Toasts */
-.popup-toast {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 15px 25px;
-  border-radius: 12px;
-  color: white;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  animation: slideIn 0.3s ease-out;
-}
-.success-toast { background: var(--primary); }
-.error-toast { background: #EF4444; }
-
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-/* Responsive Media Query */
-
-.otp-section{
-margin-top:20px;
-text-align:center;
-}
-.otp-section button{
-margin-top:12px;
-}
-
-.otp-section h3{
-margin-bottom:10px;
-}
-
-.otp-section p{
-color:#64748b;
-margin-bottom:20px;
-}
-
-
-/* --- Professional Animated Checkbox (Signup) --- */
 .terms-checkbox {
   display: flex;
   align-items: center;
@@ -392,12 +275,11 @@ margin-bottom:20px;
   width: 100%;
 }
 
-/* Container for the animated checkbox */
 .checkbox-wrapper-12 {
   position: relative;
   width: 24px;
   height: 24px;
-  flex-shrink: 0; /* Mobile par checkbox chota na ho */
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -411,12 +293,11 @@ margin-bottom:20px;
 
 .checkbox-wrapper-12 .cbx input {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   border: 2px solid #bfbfc0;
-  border-radius: 50%; /* Circle look */
+  border-radius: 50%;
   appearance: none;
   cursor: pointer;
   z-index: 3;
@@ -426,9 +307,15 @@ margin-bottom:20px;
 }
 
 .checkbox-wrapper-12 .cbx input:checked {
-  background: #10b981; /* Signup theme green */
+  background: #10b981;
   border-color: #10b981;
   animation: jelly 0.6s ease;
+}
+
+.checkbox-wrapper-12 .cbx label {
+  display: block;
+  width: 24px;
+  height: 24px;
 }
 
 .checkbox-wrapper-12 .cbx svg {
@@ -458,83 +345,125 @@ margin-bottom:20px;
 .terms-checkbox label {
   font-size: 14px;
   color: #64748b;
-  cursor: pointer;-webkit-user-select: none;
+  cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
   font-weight: 500;
+  line-height: 1.4;
 }
 
 .terms-checkbox label span {
   color: #10b981;
   font-weight: 700;
 }
-/* Base popup */
+
+.signup-btn,
+.resend-btn {
+  width: 100%;
+  background: #087f73;
+  color: white;
+  padding: 16px;
+  border-radius: 12px;
+  font-weight: 800;
+  border: none;
+  margin-top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 14px 25px rgba(8, 127, 115, 0.2);
+  transition: 0.2s ease;
+  min-height: 56px;
+}
+
+.signup-btn:hover,
+.resend-btn:hover {
+  background: #066a60;
+  transform: translateY(-1px);
+}
+
+.signup-btn:disabled,
+.resend-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.footer-text {
+  text-align: center;
+  margin-top: 20px;
+  color: var(--text-light);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.footer-text span {
+  color: #087f73;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.footer-text span:hover {
+  text-decoration: underline;
+}
+
 .popup-toast {
   position: fixed;
   top: 20px;
   right: 20px;
-  padding: 12px 18px;
-  border-radius: 8px;
-  font-weight: 500;
+  padding: 13px 20px;
+  border-radius: 10px;
+  color: white;
+  z-index: 9999;
   display: flex;
   align-items: center;
-  gap: 8px;
-  z-index: 9999;
-  animation: slideIn 0.3s ease;
+  gap: 10px;
+  animation: slideIn 0.3s ease-out;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 18px 30px rgba(15, 23, 42, 0.18);
 }
 
-/* SUCCESS */
 .success-toast {
-  background-color: #10b981;   /* green */
-  color: #ffffff;              /* white text */
+  background: var(--primary);
+  color: #ffffff;
 }
 
-/* ERROR */
 .error-toast {
-  background-color: #ef4444;   /* red */
-  color: #e40000;
-}
-.popup-toast {
-  background: black !important;
-  color: yellow !important;
+  background: var(--danger);
+  color: #ffffff;
 }
 
-/* animation */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-/* Jelly Keyframes */
-@keyframes jelly {
-  0% { transform: scale(1, 1); }
-  30% { transform: scale(1.25, 0.75); }
-  40% { transform: scale(0.75, 1.25); }
-  50% { transform: scale(1.15, 0.85); }
-  65% { transform: scale(0.95, 1.05); }
-  75% { transform: scale(1.05, 0.95); }
-  100% { transform: scale(1, 1); }
+.otp-section {
+  margin-top: 20px;
+  text-align: center;
 }
 
-
-/* Browser ka default eye icon hatane ke liye */
-input::-ms-reveal,
-input::-ms-clear {
-  display: none;
+.otp-section h3 {
+  margin: 0 0 10px;
+  font-size: 26px;
+  color: var(--text-main);
+  font-weight: 900;
 }
 
-/* Chrome/Safari ke liye (agar version support kare) */
-input::-webkit-contacts-auto-fill-button,
-input::-webkit-credentials-auto-fill-button {
-  visibility: hidden;
-  display: none !important;
-  pointer-events: none;
+.otp-section p {
+  color: #64748b;
+  margin: 0 0 20px;
+  line-height: 1.5;
 }
-/* 🔷 FAMILY SECTION WRAPPER */
+
+.otp-section button {
+  margin-top: 12px;
+}
+
+.otp-section .auth-input {
+  text-align: center;
+  padding: 0 20px !important;
+  letter-spacing: 5px;
+  font-weight: 800;
+}
+
 .family-section {
   margin-top: 20px;
   padding: 16px;
@@ -543,77 +472,79 @@ input::-webkit-credentials-auto-fill-button {
   border: 1px solid #e0e7ff;
 }
 
-/* 🔷 HEADER */
 .family-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+  gap: 12px;
 }
 
 .family-header h4 {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
+  margin: 0;
 }
 
-/* 🔷 ADD BUTTON */
 .add-family-btn {
   background: #3b82f6;
   color: #fff;
   border: none;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 8px;
   font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   transition: 0.2s;
+  white-space: nowrap;
 }
 
 .add-family-btn:hover {
   background: #2563eb;
 }
 
-/* 🔷 FORM BOX */
 .family-form {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: 10px;
   margin-top: 10px;
 }
 
-/* 🔷 INPUTS */
 .family-form input,
 .family-form select {
-  padding: 8px 10px;
+  width: 100%;
+  padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid #cbd5e1;
   font-size: 13px;
   outline: none;
   transition: 0.2s;
+  background: #ffffff;
 }
 
 .family-form input:focus,
 .family-form select:focus {
   border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* 🔷 SAVE BUTTON */
 .family-form button {
-  grid-column: span 2;
-  padding: 8px;
+  grid-column: span 1;
+  padding: 10px;
   background: #10b981;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: 0.2s;
+  font-weight: 700;
 }
 
 .family-form button:hover {
   background: #059669;
 }
 
-/* 🔷 FAMILY LIST */
 .family-list {
   margin-top: 12px;
   display: flex;
@@ -621,34 +552,36 @@ input::-webkit-credentials-auto-fill-button {
   gap: 8px;
 }
 
-/* 🔷 CHIP UI */
 .family-chip {
   background: #e0f2fe;
   color: #0369a1;
   padding: 6px 10px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
 }
+
 .family-chip span {
   margin-left: 6px;
   cursor: pointer;
 }
-/* 🔙 BACK BUTTON WRAPPER */
+
 .back-btn-premium {
   margin-top: 16px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   background: #f1f5f9;
   border: none;
-  padding: 8px 14px;
+  padding: 10px 14px;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.25s ease;
+  width: 100%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-/* 🔳 ICON BOX */
 .back-btn-icon-box {
   background: #e2e8f0;
   padding: 6px;
@@ -659,17 +592,17 @@ input::-webkit-credentials-auto-fill-button {
   transition: all 0.25s ease;
 }
 
-/* 📝 TEXT */
 .back-btn-text {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: #1e293b;
   transition: all 0.25s ease;
+  margin: 0;
 }
 
-/* 🔥 HOVER EFFECT */
 .back-btn-premium:hover {
   background: #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .back-btn-premium:hover .back-btn-icon-box {
@@ -681,50 +614,129 @@ input::-webkit-credentials-auto-fill-button {
   color: #2563eb;
 }
 
-/* ⚡ ACTIVE CLICK EFFECT */
 .back-btn-premium:active {
   transform: scale(0.96);
 }
-.back-btn-premium {
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
 }
 
-.back-btn-premium:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
 }
-/* --- COMPLETE MOBILE RESPONSIVE FIXES --- */
-@media (max-width: 768px) {
-  /* 1. Layout Adjustments */
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes jelly {
+  0% { transform: scale(1, 1); }
+  30% { transform: scale(1.25, 0.75); }
+  40% { transform: scale(0.75, 1.25); }
+  50% { transform: scale(1.15, 0.85); }
+  65% { transform: scale(0.95, 1.05); }
+  75% { transform: scale(1.05, 0.95); }
+  100% { transform: scale(1, 1); }
+}
+
+@media (max-width: 1200px) {
+  .auth-wrapper {
+    max-width: 1080px;
+  }
+
+  .auth-form-section {
+    padding: 44px 42px;
+  }
+}
+
+@media (max-width: 992px) {
   .auth-container {
-    padding: 10px; /* Thoda space side mein */
-    align-items: flex-start; /* Lambe forms ke liye scroll easy hoga */
+    align-items: flex-start;
+    padding: 16px;
   }
 
   .auth-wrapper {
-  grid-template-columns: 1fr;
-  min-height: initial;      /* 'auto' ki jagah 'initial' ya 'unset' use karo */
-  height: auto;             /* Isse content ke hisaab se height badh jayegi */
-  border-radius: 20px;
-  margin-top: 20px;
-}
+    grid-template-columns: 1fr;
+    max-width: 620px;
+    min-height: 0;
+    border-radius: 24px;
+  }
 
   .auth-visual {
-    display: none; /* Mobile par illustration ki jarurat nahi */
+    height: 300px;
   }
 
-  /* 2. Form Padding & Spacing */
+  .auth-image {
+    object-position: center 38%;
+  }
+
   .auth-form-section {
-    padding: 30px 20px; /* Padding kam kar di mobile ke liye */
+    padding: 34px 28px;
   }
 
-  .form-header h1 {
-    font-size: 1.7rem; /* Heading choti ki */
+  .role-badge-container {
+    justify-content: center;
+    margin-bottom: 22px;
+  }
+
+  .form-header {
     text-align: center;
   }
 
-  /* 3. Grid to Single Column */
+  .form-header h1 {
+    font-size: 1.85rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 10px;
+    align-items: flex-start;
+    background: #f4f7fb;
+  }
+
+  .auth-wrapper {
+    grid-template-columns: 1fr;
+    min-height: initial;
+    height: auto;
+    border-radius: 20px;
+    margin-top: 10px;
+    max-width: 520px;
+  }
+
+  .auth-visual {
+    display: block;
+    height: 230px;
+  }
+
+  .auth-form-section {
+    padding: 28px 20px;
+  }
+
+  .form-header h1 {
+    font-size: 1.7rem;
+    text-align: center;
+  }
+
+  .form-header p {
+    text-align: center;
+    font-size: 0.95rem;
+  }
+
   .input-group {
-    grid-template-columns: 1fr; /* Saare inputs full width */
+    grid-template-columns: 1fr;
     gap: 12px;
   }
 
@@ -732,20 +744,21 @@ input::-webkit-credentials-auto-fill-button {
     grid-column: span 1;
   }
 
-  /* 4. Input & Button Sizing */
   .auth-input {
-    font-size: 16px; /* Mobile keyboard zoom issue fix karne ke liye */
+    height: 52px;
+    font-size: 16px;
     padding: 12px 40px 12px 44px !important;
   }
 
-  .signup-btn, .resend-btn {
+  .signup-btn,
+  .resend-btn {
     padding: 14px;
     font-size: 15px;
+    min-height: 52px;
   }
 
-  /* 5. Family Section Fix */
   .family-form {
-    grid-template-columns: 1fr; /* Family inputs bhi stack honge */
+    grid-template-columns: 1fr;
   }
 
   .family-form button {
@@ -758,9 +771,12 @@ input::-webkit-credentials-auto-fill-button {
     align-items: flex-start;
   }
 
-  /* 6. Terms & Checkbox Fix */
+  .add-family-btn {
+    width: 100%;
+  }
+
   .terms-checkbox {
-    align-items: flex-start; /* Multi-line text ke liye */
+    align-items: flex-start;
   }
 
   .terms-checkbox label {
@@ -768,16 +784,15 @@ input::-webkit-credentials-auto-fill-button {
     line-height: 1.4;
   }
 
-  /* 7. Toast & Popups */
   .popup-toast {
     width: calc(100% - 40px);
     left: 20px;
     right: 20px;
     top: 10px;
     justify-content: center;
+    text-align: center;
   }
 
-  /* 8. Profile Selector Modal (Login Page wala logic) */
   .profile-selector-popup {
     width: 90%;
     max-height: 80vh;
@@ -785,13 +800,91 @@ input::-webkit-credentials-auto-fill-button {
   }
 }
 
-/* Extra Small Devices */
 @media (max-width: 480px) {
-  .form-header h1 {
-    font-size: 1.4rem;
+  .auth-container {
+    padding: 0;
+    background: #ffffff;
   }
-  
+
+  .auth-wrapper {
+    border-radius: 0;
+    box-shadow: none;
+    margin-top: 0;
+    max-width: 100%;
+  }
+
+  .auth-visual {
+    height: 210px;
+    border-radius: 0 0 22px 22px;
+  }
+
+  .auth-form-section {
+    padding: 24px 16px 30px;
+  }
+
   .role-badge-container {
-    justify-content: center; /* Center role toggle on very small screens */
+    justify-content: center;
+  }
+
+  .role-toggle-btn {
+    width: 100%;
+    text-align: center;
+    font-size: 13px;
+  }
+
+  .form-header h1 {
+    font-size: 1.45rem;
+  }
+
+  .form-header p {
+    font-size: 0.9rem;
+  }
+
+  .auth-input {
+    height: 50px;
+    border-radius: 10px;
+  }
+
+  .family-section {
+    padding: 14px;
+  }
+}
+.input-group {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 15px !important;
+}
+
+.input-wrapper,
+.input-wrapper.full-width,
+.full-width {
+  width: 100% !important;
+  grid-column: 1 / -1 !important;
+}
+
+.auth-input {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .input-group {
+    grid-template-columns: 1fr !important;
+  }
+
+  .input-wrapper,
+  .input-wrapper.full-width,
+  .full-width {
+    width: 100% !important;
+    grid-column: 1 / -1 !important;
+  }
+}
+@media (max-width: 768px) {
+  .auth-visual {
+    display: none !important;
+  }
+
+  .auth-wrapper {
+    grid-template-columns: 1fr !important;
   }
 }

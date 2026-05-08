@@ -474,3 +474,43 @@ html, body {
     scroll-snap-align: start;
   }
 }
+.ai-doctor-recommendation-banner {
+  background: linear-gradient(135deg, #ecfdf5 0%, #f8fffd 100%);
+  border: 1px solid #bbf7d0;
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 24px rgba(16, 185, 129, 0.08);
+}
+
+.ai-doctor-recommendation-banner h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.ai-doctor-recommendation-banner p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.ai-doctor-recommendation-banner span {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #64748b;
+}
+.ai-result-btn.secondary {
+  background: #0f172a;
+  color: #ffffff !important;
+}
+
+.ai-result-btn.secondary svg {
+  color: #ffffff !important;
+}
+
+.ai-result-btn.secondary:hover {
+  color: #ffffff !important;
+}

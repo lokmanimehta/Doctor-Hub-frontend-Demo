@@ -1,25 +1,39 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AuthContext } from "./AuthContext";
+import { restoreUserSession } from "../services/authService";
 
 export const AuthProvider = ({ children }) => {
-
-  const [currentUser, setCurrentUser] = useState(() => {
-    const storedUser = localStorage.getItem("currentUser");
-    if (!storedUser || storedUser === "undefined") return null;
-    return JSON.parse(storedUser);
-  });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const hasBootstrapped = useRef(false);
 
   useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem("currentUser", JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem("currentUser");
-    }
-  }, [currentUser]);
+    if (hasBootstrapped.current) return;
+    hasBootstrapped.current = true;
 
-  return (
-    <AuthContext.Provider value={{ currentUser, setCurrentUser }}>
-      {children}
-    </AuthContext.Provider>
-  );
+    const bootstrapAuth = async () => {
+      try {
+        const restoredUser = await restoreUserSession();
+        setCurrentUser(restoredUser || null);
+      } catch (error) {
+        console.error("Auth restore failed:", error);
+        setCurrentUser(null);
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    bootstrapAuth();
+  }, []);
+
+  const value = useMemo(() => {
+    return {
+      currentUser,
+      setCurrentUser,
+      authLoading,
+      isAuthenticated: !!currentUser
+    };
+  }, [currentUser, authLoading]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

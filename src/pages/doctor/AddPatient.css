@@ -68,8 +68,13 @@
 /* ✅ Personal Details Layout Fix */
 .personal-details-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1.2fr;
+  grid-template-columns: 1.8fr 1.2fr 1.2fr;
   gap: 15px;
+}
+.save-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
 }
 
 textarea { height: 100px; resize: none; }

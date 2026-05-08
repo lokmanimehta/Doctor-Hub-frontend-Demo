@@ -1,41 +1,173 @@
 :root {
   --primary: #0f766e;
+  --primary-dark: #0b5f59;
+  --primary-light: #ecfdf5;
   --bg: #f8fafc;
   --white: #ffffff;
   --text-dark: #1e293b;
   --text-muted: #64748b;
   --border: #e2e8f0;
-  --shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+  --shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  --danger-bg: #fff7ed;
+  --danger-border: #fdba74;
+  --danger-text: #c2410c;
 }
 
 .help-container {
   min-height: 100vh;
   background: var(--bg);
   padding: 24px;
-  max-width: 800px;
+  max-width: 900px;
   margin: auto;
 }
 
 .help-container h1 {
-  font-size: 28px;
+  font-size: 30px;
   color: var(--text-dark);
+  margin: 0 0 8px 0;
+  font-weight: 800;
 }
 
 .subtitle {
   color: var(--text-muted);
-  margin-bottom: 20px;
-  font-size: 14px;
+  margin-bottom: 22px;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
+/* AI HELP CARD */
+.ai-help-card {
+  background: linear-gradient(135deg, #ecfdf5 0%, #f8fffd 100%);
+  border: 1px solid #bbf7d0;
+  border-radius: 20px;
+  padding: 22px;
+  margin-bottom: 22px;
+  box-shadow: var(--shadow);
+}
+
+.ai-help-label {
+  margin: 0 0 8px 0;
+  font-size: 11px;
+  font-weight: 800;
+  color: #059669;
+  letter-spacing: 1px;
+}
+
+.ai-help-text h3 {
+  margin: 0 0 10px 0;
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.ai-help-text p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.ai-help-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.ai-primary-btn,
+.ai-secondary-btn,
+.support-btn,
+.emergency-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ai-primary-btn {
+  background: var(--primary);
+  color: var(--white);
+}
+
+.ai-primary-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.ai-secondary-btn {
+  background: #ffffff;
+  color: var(--text-dark);
+  border: 1px solid var(--border);
+}
+
+.ai-secondary-btn:hover {
+  background: #f1f5f9;
+}
+
+/* SEARCH */
 .help-search {
   width: 100%;
-  padding: 14px;
+  padding: 14px 16px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  margin-bottom: 24px;
+  margin-bottom: 22px;
   font-size: 14px;
+  background: var(--white);
+  outline: none;
+  transition: 0.2s ease;
 }
 
+.help-search:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.08);
+}
+
+/* QUICK ACTIONS */
+.quick-help-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.quick-help-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-help-card:hover {
+  transform: translateY(-3px);
+  border-color: #cbd5e1;
+}
+
+.quick-help-card h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+.quick-help-card p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.quick-help-card.emergency {
+  background: #fffaf5;
+  border-color: #fed7aa;
+}
+
+/* FAQ */
 .faq-list {
   display: flex;
   flex-direction: column;
@@ -44,55 +176,183 @@
 
 .faq-item {
   background: var(--white);
-  border-radius: 14px;
+  border-radius: 16px;
   box-shadow: var(--shadow);
   overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .faq-title {
-  padding: 16px;
+  padding: 16px 18px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   color: var(--text-dark);
+  gap: 12px;
+}
+
+.faq-title span {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--primary);
 }
 
 .faq-content {
-  padding: 0 16px 16px;
+  padding: 0 18px 18px;
   color: var(--text-muted);
   font-size: 14px;
+  line-height: 1.7;
 }
 
 .no-data {
   text-align: center;
   color: var(--text-muted);
+  padding: 18px;
 }
 
+/* SUPPORT BOX */
 .support-box {
   margin-top: 32px;
   background: var(--white);
-  padding: 20px;
-  border-radius: 16px;
+  padding: 22px;
+  border-radius: 18px;
   box-shadow: var(--shadow);
   text-align: center;
+  border: 1px solid var(--border);
 }
 
 .support-box h3 {
-  margin-bottom: 6px;
+  margin: 0 0 8px 0;
   color: var(--text-dark);
+  font-size: 20px;
 }
 
-.emergency-note {
-  margin-top: 20px;
-  font-size: 12px;
+.support-box p {
+  margin: 0;
   color: var(--text-muted);
-  text-align: center;
+  line-height: 1.7;
 }
 
-/* Mobile */
-@media (max-width: 600px) {
+.support-btn {
+  margin-top: 16px;
+  background: var(--primary);
+  color: var(--white);
+}
+
+.support-btn:hover {
+  background: var(--primary-dark);
+}
+
+/* EMERGENCY ALERT */
+.emergency-alert-box {
+  margin-top: 22px;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: 18px;
+  padding: 20px;
+  text-align: left;
+}
+
+.emergency-alert-box h4 {
+  margin: 0 0 8px 0;
+  color: var(--danger-text);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.emergency-alert-box p {
+  margin: 0;
+  color: #7c2d12;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.emergency-btn {
+  margin-top: 16px;
+  background: #ea580c;
+  color: var(--white);
+}
+
+.emergency-btn:hover {
+  background: #c2410c;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
   .help-container {
     padding: 16px;
+  }
+
+  .help-container h1 {
+    font-size: 24px;
+  }
+
+  .ai-help-card {
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  .ai-help-text h3 {
+    font-size: 18px;
+  }
+
+  .ai-help-actions {
+    flex-direction: column;
+  }
+
+  .ai-primary-btn,
+  .ai-secondary-btn,
+  .support-btn,
+  .emergency-btn {
+    width: 100%;
+  }
+
+  .quick-help-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-help-card {
+    border-radius: 14px;
+  }
+
+  .faq-item,
+  .support-box,
+  .emergency-alert-box {
+    border-radius: 14px;
+  }
+
+  .faq-title {
+    padding: 15px 16px;
+    font-size: 14px;
+  }
+
+  .faq-content {
+    padding: 0 16px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .help-container {
+    padding: 14px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .help-search {
+    padding: 12px 14px;
+  }
+
+  .quick-help-card h4 {
+    font-size: 15px;
+  }
+
+  .quick-help-card p,
+  .faq-content,
+  .emergency-alert-box p {
+    font-size: 13px;
   }
 }

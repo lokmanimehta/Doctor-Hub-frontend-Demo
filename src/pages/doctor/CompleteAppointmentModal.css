@@ -1,0 +1,173 @@
+.complete-appointment-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 4000;
+  padding: 16px;
+}
+
+.complete-appointment-modal {
+  width: 100%;
+  max-width: 640px;
+  background: #ffffff;
+  border-radius: 22px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  overflow: hidden;
+}
+
+.complete-appointment-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 24px 24px 18px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.complete-modal-kicker {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #0f766e;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.complete-appointment-modal-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #0f172a;
+}
+
+.complete-modal-subtitle {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.complete-modal-close {
+  border: none;
+  background: #f8fafc;
+  color: #334155;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.complete-appointment-form {
+  padding: 22px 24px 24px;
+}
+
+.complete-modal-section {
+  margin-bottom: 18px;
+}
+
+.complete-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.complete-visit-fields {
+  display: grid;
+  gap: 16px;
+}
+
+.complete-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.complete-form-field label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.complete-form-field input,
+.complete-form-field textarea {
+  width: 100%;
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #0f172a;
+  background: #ffffff;
+  outline: none;
+}
+
+.complete-form-field input:focus,
+.complete-form-field textarea:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.08);
+}
+
+.complete-form-error {
+  margin: 0 0 16px;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.complete-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.complete-modal-btn {
+  min-height: 46px;
+  border: none;
+  border-radius: 14px;
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.complete-modal-btn.secondary {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.complete-modal-btn.primary {
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.complete-modal-btn:disabled,
+.complete-modal-close:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .complete-appointment-modal {
+    max-width: 100%;
+  }
+
+  .complete-appointment-modal-header,
+  .complete-appointment-form {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .complete-modal-actions {
+    flex-direction: column;
+  }
+
+  .complete-modal-btn {
+    width: 100%;
+  }
+}

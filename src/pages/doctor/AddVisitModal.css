@@ -1,131 +1,239 @@
-/* --- MODAL OVERLAY --- */
-.modal-overlay {
+.visit-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  -webkit-backdrop-filter: blur(10px); /* For Safari support */
-  backdrop-filter: blur(2px);
+  background: rgba(15, 23, 42, 0.48);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  z-index: 9999;
+  padding: 42px 16px;
+  overflow-y: auto;
+  z-index: 20000;
+  box-sizing: border-box;
 }
 
-/* --- MODAL CARD --- */
-.modal-card {
-  background: #fff;
-  width: 420px;
-  padding: 24px;
-  border-radius: 14px;
-  z-index: 10000;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-  animation: scaleIn 0.2s ease;
-}
-
-@keyframes scaleIn {
-  from {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.modal-card label {
-  font-size: 14px;
-  font-weight: 500;
-  display: block;
-  margin-top: 10px;
-  color: #374151;
-}
-
-.modal-card input,
-.modal-card textarea {
+.visit-modal-card {
   width: 100%;
-  padding: 8px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  max-width: 640px;
+  background: #ffffff;
+  border-radius: 22px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.20);
+  overflow: hidden;
+  position: relative;
+  z-index: 20001;
+}
+
+.visit-modal-header {
+  padding: 24px 24px 18px;
+  border-bottom: 1px solid #eef2f7;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.visit-modal-eyebrow {
+  margin: 0 0 6px 0;
+  font-size: 11px;
+  font-weight: 800;
+  color: #059669;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.visit-modal-header h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.visit-modal-subtext {
+  margin: 8px 0 0 0;
+  color: #64748b;
   font-size: 14px;
+  line-height: 1.6;
 }
 
-.modal-card textarea {
-  min-height: 80px;
+.visit-modal-error {
+  margin: 18px 24px 0;
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.visit-modal-body {
+  padding: 22px 24px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.visit-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.visit-form-group label {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.visit-form-group input,
+.visit-form-group textarea {
+  width: 100%;
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  padding: 13px 14px;
+  font-size: 14px;
+  color: #0f172a;
+  background: #ffffff;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.visit-form-group input::placeholder,
+.visit-form-group textarea::placeholder {
+  color: #94a3b8;
+}
+
+.visit-form-group input:focus,
+.visit-form-group textarea:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.10);
+}
+
+.visit-form-group textarea {
   resize: vertical;
+  min-height: 140px;
+  line-height: 1.6;
 }
 
-/* --- ACTIONS --- */
-.modal-actions {
+.visit-modal-actions {
+  padding: 18px 24px 24px;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 15px;
 }
 
-.cancel-btn {
-  background: #ccc;
-  color: #333;
+.visit-cancel-btn,
+.visit-save-btn {
   border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
+  border-radius: 12px;
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 800;
   cursor: pointer;
-  font-weight: 500;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 
-.cancel-btn:hover {
-  background: #bbb;
+.visit-cancel-btn {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #dbe3ee;
 }
 
-.save-btn {
-  background: #0b7d6e;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background 0.2s;
+.visit-cancel-btn:hover:not(:disabled) {
+  background: #e2e8f0;
 }
 
-.save-btn:hover {
-  background: #09685c;
+.visit-save-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(16, 185, 129, 0.18);
 }
 
-/* ================================================================
-   ALL-SCREEN RESPONSIVE MEDIA QUERIES
-================================================================ */
+.visit-save-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(16, 185, 129, 0.24);
+}
 
-@media (max-width: 480px) {
-  .modal-card {
-    width: 92%; /* Professional fit for mobile phones */
-    padding: 20px;
-    margin: 0 10px;
-    border-radius: 12px;
+.visit-cancel-btn:disabled,
+.visit-save-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* TABLET */
+@media (max-width: 768px) {
+  .visit-modal-overlay {
+    padding: 22px 14px;
   }
 
-  .modal-actions {
-    flex-direction: column-reverse; /* Stacks buttons for mobile thumb reach */
-    gap: 8px;
-    margin-top: 20px;
+  .visit-modal-card {
+    max-width: 100%;
+    border-radius: 18px;
   }
 
-  .save-btn, .cancel-btn {
-    width: 100%; /* Full width for better mobile UX */
-    padding: 12px;
-    text-align: center;
-    font-size: 15px;
+  .visit-modal-header {
+    padding: 20px 18px 16px;
   }
 
-  .modal-card label {
+  .visit-modal-header h3 {
+    font-size: 24px;
+  }
+
+  .visit-modal-subtext {
     font-size: 13px;
   }
+
+  .visit-modal-body {
+    padding: 18px 18px 8px;
+    gap: 16px;
+  }
+
+  .visit-modal-error {
+    margin: 16px 18px 0;
+  }
+
+  .visit-modal-actions {
+    padding: 16px 18px 20px;
+    flex-direction: column;
+  }
+
+  .visit-cancel-btn,
+  .visit-save-btn {
+    width: 100%;
+  }
 }
 
-@media (max-width: 320px) {
-  .modal-card {
-    padding: 15px;
+/* MOBILE */
+@media (max-width: 480px) {
+  .visit-modal-overlay {
+    padding: 14px 10px;
+  }
+
+  .visit-modal-card {
+    border-radius: 16px;
+  }
+
+  .visit-modal-header {
+    padding: 18px 16px 14px;
+  }
+
+  .visit-modal-header h3 {
+    font-size: 22px;
+  }
+
+  .visit-modal-body {
+    padding: 16px 16px 6px;
+  }
+
+  .visit-modal-actions {
+    padding: 14px 16px 18px;
+  }
+
+  .visit-form-group input,
+  .visit-form-group textarea {
+    font-size: 13px;
+    padding: 12px;
   }
 }

@@ -1,574 +1,480 @@
-// // src/pages/doctor/Availability.jsx
-// import React, { useState, useEffect } from "react";
-// import "./Availability.css";
-
-// const Availability = ({ doctorId }) => {
-//   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-//   const defaultSlots = [
-//     "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM",
-//     "11:00 AM", "11:30 AM", "12:00 PM",
-//     "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM"
-//   ];
-
-//   const [slots, setSlots] = useState({});
-//   const [loading, setLoading] = useState(true);
-//   const [popup, setPopup] = useState(null);
-
-//   // Fetch availability
-//   const fetchAvailability = async () => {
-//     if (!doctorId) return; // Graceful fallback if doctorId not available
-//     try {
-//       setLoading(true);
-//       const res = await fetch(`http://localhost:8080/api/doctor-availability/${doctorId}`);
-//       console.log("Fetch response status:", res.status);
-//       if (!res.ok) throw new Error("Failed to fetch availability");
-//       const data = await res.json();
-//       console.log("Fetched availability:", data);
-
-//       const temp = {};
-//       days.forEach(day => {
-//         temp[day] = defaultSlots.map(time => {
-//           const slot = Array.isArray(data) ? data.find(s => s.day === day && s.time === time) : null;
-//           return { time, status: slot?.status || "available" };
-//         });
-//       });
-//       setSlots(temp);
-//     } catch (err) {
-//       console.error(err);
-//       setPopup({ text: "Failed to fetch availability", type: "warning" });
-
-//       // fallback: all slots available
-//       const temp = {};
-//       days.forEach(day => {
-//         temp[day] = defaultSlots.map(time => ({ time, status: "available" }));
-//       });
-//       setSlots(temp);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchAvailability();
-//   }, [doctorId]);
-
-//   // Check if day is fully blocked
-//   const isDayFullyBlocked = (day) =>
-//     slots[day]?.every(slot => slot.status === "blocked");
-
-//   // Block/unblock full day
-//   const handleBlockFullDay = async (day) => {
-//     if (!doctorId) return;
-//     try {
-//       const url = `http://localhost:8080/api/doctor-availability/${doctorId}/block-day?day=${encodeURIComponent(day)}`;
-//       const res = await fetch(url, { method: "PUT" });
-//       if (res.ok) {
-//         const updated = { ...slots };
-//         updated[day] = updated[day].map(slot => ({ ...slot, status: "blocked" }));
-//         setSlots(updated);
-//         setPopup({ text: `All slots for ${day} blocked`, type: "warning" });
-//       }
-//     } catch (err) {
-//       console.error(err);
-//       setPopup({ text: "Failed to block day", type: "warning" });
-//     }
-//   };
-
-//   const handleUnblockFullDay = async (day) => {
-//     if (!doctorId) return;
-//     try {
-//       const url = `http://localhost:8080/api/doctor-availability/${doctorId}/unblock-day?day=${encodeURIComponent(day)}`;
-//       const res = await fetch(url, { method: "PUT" });
-//       if (res.ok) {
-//         const updated = { ...slots };
-//         updated[day] = updated[day].map(slot => ({ ...slot, status: "available" }));
-//         setSlots(updated);
-//         setPopup({ text: `All slots for ${day} are now available`, type: "success" });
-//       }
-//     } catch (err) {
-//       console.error(err);
-//       setPopup({ text: "Failed to unblock day", type: "warning" });
-//     }
-//   };
-
-//   // Update single slot
-//   const handleSlotAction = async (day, time) => {
-//     if (!doctorId) return;
-//     try {
-//       const slot = slots[day]?.find(s => s.time === time);
-//       if (!slot) return;
-
-//       let newStatus = slot.status === "available" ? "blocked" : "available";
-//       if (slot.status === "booked") newStatus = "blocked";
-
-//       const url = `http://localhost:8080/api/doctor-availability/${doctorId}/update-slot?day=${encodeURIComponent(day)}&time=${encodeURIComponent(time)}&status=${encodeURIComponent(newStatus)}`;
-//       const res = await fetch(url, { method: "PUT" });
-
-//       if (res.ok) {
-//         const updated = { ...slots };
-//         updated[day] = updated[day].map(s => s.time === time ? { ...s, status: newStatus } : s);
-//         setSlots(updated);
-//         setPopup({ text: `Slot ${time} is now ${newStatus}`, type: "success" });
-//       } else {
-//         console.error("Failed to update slot");
-//         setPopup({ text: "Failed to update slot", type: "warning" });
-//       }
-//     } catch (err) {
-//       console.error(err);
-//       setPopup({ text: "Failed to update slot", type: "warning" });
-//     }
-//   };
-
-//   // Auto-hide popup
-//   useEffect(() => {
-//     if (popup) {
-//       const timer = setTimeout(() => setPopup(null), 4000);
-//       return () => clearTimeout(timer);
-//     }
-//   }, [popup]);
-
-//   // If doctorId is missing
-//   // Doctor panel always has doctorId
-// if (!doctorId) {
-//   // For safety, just show loading
-//   return <div className="doctor-page"><h2>Loading Availability...</h2></div>;
-// }
-
-
-//   if (loading) return <div className="doctor-page"><h2>Loading Availability...</h2></div>;
-
-//   return (
-//     <div className="doctor-page">
-//       <h2>Doctor Availability</h2>
-//       <div className="availability-container">
-//         {days.map(day => (
-//           <div key={day} className="availability-day">
-//             <div className="day-header">
-//               <h4>{day}</h4>
-//               {!isDayFullyBlocked(day) ? (
-//                 <button className="block-day-btn" onClick={() => handleBlockFullDay(day)}>Block Full Day</button>
-//               ) : (
-//                 <button className="unblock-day-btn" onClick={() => handleUnblockFullDay(day)}>Unblock Day</button>
-//               )}
-//             </div>
-
-//             <div className="slots-container">
-//               {slots[day]?.map(slot => (
-//                 <button
-//                   key={slot.time}
-//                   className={`slot-btn ${slot.status}`}
-//                   onClick={() => handleSlotAction(day, slot.time)}
-//                   disabled={slot.status === "booked"}
-//                 >
-//                   {slot.time}
-//                 </button>
-//               ))}
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-
-//       {popup && (
-//         <div className={`availability-popup ${popup.type}`}>
-//           <p>{popup.text}</p>
-//           <button onClick={() => setPopup(null)}>×</button>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Availability;
-
-
-
-// src/pages/doctor/Availability.jsx
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useState, useEffect } from "react";
-// import "./Availability.css";
-
-// const Availability = () => {
-
-//   const days = [
-//     "Monday", "Tuesday", "Wednesday",
-//     "Thursday", "Friday", "Saturday", "Sunday"
-//   ];
-
-//   const defaultSlots = [
-//     "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM",
-//     "11:00 AM", "11:30 AM", "12:00 PM",
-//     "4:00 PM", "4:30 PM", "5:00 PM",
-//     "5:30 PM", "6:00 PM", "6:30 PM"
-//   ];
-
-//   // 🔹 Create initial dummy slots (NO useEffect needed)
-// const createInitialSlots = () => {
-//   const temp = {};
-
-//   days.forEach(day => {
-//     temp[day] = defaultSlots.map(time => {
-      
-//       // 👇 Example dummy booked logic
-//       const isBooked =
-//         (day === "Monday" && time === "10:00 AM") ||
-//         (day === "Wednesday" && time === "4:30 PM");
-
-//       return {
-//         time,
-//         status: isBooked ? "booked" : "available"
-//       };
-//     });
-//   });
-
-//   return temp;
-// };
-
-//   // ✅ Only ONE state declaration
-//   const [slots, setSlots] = useState(createInitialSlots);
-//   const [popup, setPopup] = useState(null);
-
-//   // 🔹 Check if full day is blocked
-//   const isDayFullyBlocked = (day) =>
-//     slots[day]?.every(slot => slot.status === "blocked");
-
-//   // 🔹 Block full day
-//   const handleBlockFullDay = (day) => {
-//     const updated = { ...slots };
-
-//     updated[day] = updated[day].map(slot => ({
-//       ...slot,
-//       status: "blocked"
-//     }));
-
-//     setSlots(updated);
-//     setPopup({ text: `All slots for ${day} blocked`, type: "warning" });
-//   };
-
-//   // 🔹 Unblock full day
-//   const handleUnblockFullDay = (day) => {
-//     const updated = { ...slots };
-
-//     updated[day] = updated[day].map(slot => ({
-//       ...slot,
-//       status: "available"
-//     }));
-
-//     setSlots(updated);
-//     setPopup({ text: `All slots for ${day} are now available`, type: "success" });
-//   };
-
-//   // 🔹 Toggle single slot
-// const handleSlotAction = (day, time) => {
-//   const updated = { ...slots };
-
-//   updated[day] = updated[day].map(slot => {
-
-//     // ❌ If booked → do nothing
-//     if (slot.status === "booked") {
-//       return slot;
-//     }
-
-//     if (slot.time === time) {
-//       const newStatus =
-//         slot.status === "available" ? "blocked" : "available";
-
-//       return { ...slot, status: newStatus };
-//     }
-
-//     return slot;
-//   });
-
-//   setSlots(updated);
-// };
-
-
-//   // 🔹 Auto hide popup
-//   useEffect(() => {
-//     if (popup) {
-//       const timer = setTimeout(() => setPopup(null), 3000);
-//       return () => clearTimeout(timer);
-//     }
-//   }, [popup]);
-
-//   return (
-//     <div className="doctor-page">
-//       <h2>Doctor Availability</h2>
-
-//       <div className="availability-container">
-//         {days.map(day => (
-//           <div key={day} className="availability-day">
-
-//             <div className="day-header">
-//               <h4>{day}</h4>
-
-//               {!isDayFullyBlocked(day) ? (
-//                 <button
-//                   className="block-day-btn"
-//                   onClick={() => handleBlockFullDay(day)}
-//                 >
-//                   Block Full Day
-//                 </button>
-//               ) : (
-//                 <button
-//                   className="unblock-day-btn"
-//                   onClick={() => handleUnblockFullDay(day)}
-//                 >
-//                   Unblock Day
-//                 </button>
-//               )}
-//             </div>
-
-//             <div className="slots-container">
-//               {slots[day]?.map(slot => (
-//                 <button
-//   key={slot.time}
-//   className={`slot-btn ${slot.status}`}
-//   onClick={() => handleSlotAction(day, slot.time)}
-//   disabled={slot.status === "booked"}
-// >
-//                   {slot.time}
-//                 </button>
-//               ))}
-//             </div>
-
-//           </div>
-//         ))}
-//       </div>
-
-//       {popup && (
-//         <div className={`availability-popup ${popup.type}`}>
-//           <p>{popup.text}</p>
-//           <button onClick={() => setPopup(null)}>×</button>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Availability;
-
-
-
-import React, { useState } from "react";
-import "./Availability.css";
+import React, { useEffect, useMemo, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import "./Availability.css";
+import {
+  getDoctorAvailabilityClinics,
+  getDoctorDayAvailability,
+  blockDoctorAvailabilityDay,
+  unblockDoctorAvailabilityDay,
+  blockDoctorAvailabilitySlot,
+  unblockDoctorAvailabilitySlot
+} from "../../services/doctorService";
+
+const formatDateToApi = (date) => {
+  if (!date) return "";
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const formatDisplayDate = (date) => {
+  if (!date) return "";
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+};
+
+const getStatusLabel = (status) => {
+  if (status === "AVAILABLE") return "Available";
+  if (status === "BLOCKED") return "Blocked";
+  if (status === "BOOKED") return "Booked";
+  if (status === "PAST") return "Past";
+  return "Unknown";
+};
 
 const Availability = () => {
+  const [clinics, setClinics] = useState([]);
+  const [selectedClinic, setSelectedClinic] = useState("");
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const defaultSlots = [
-    "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM",
-    "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM", "1:00 PM",
-    "5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM",
-    "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM"
-  ];
+  const [dayData, setDayData] = useState(null);
 
-  const clinics = [
-    { id: "H1", name: "City Care Clinic" },
-    { id: "H2", name: "Metro Hospital" },
-    { id: "H3", name: "Sunrise Hospital" }
-  ];
+  const [loadingClinics, setLoadingClinics] = useState(true);
+  const [loadingAvailability, setLoadingAvailability] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  const [selectedClinic, setSelectedClinic] = useState("H1");
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [slots, setSlots] = useState([]);
-  const [popup, setPopup] = useState(null);
+  const [pageError, setPageError] = useState("");
+  const [toast, setToast] = useState(null);
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const apiDate = useMemo(() => formatDateToApi(selectedDate), [selectedDate]);
 
-  const isPastDate = selectedDate ? selectedDate < today : false;
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
 
-  const showToast = (text, type) => {
-    setPopup({ text, type });
-    setTimeout(() => setPopup(null), 3000);
+    window.clearTimeout(window.__availabilityToastTimer);
+    window.__availabilityToastTimer = window.setTimeout(() => {
+      setToast(null);
+    }, 3000);
   };
 
-  const generateSlots = (clinic, date) => {
-    const generated = defaultSlots.map((time, index) => {
-      let status = "available";
-      if (index % 5 === 0) status = "booked";
-      if (index % 7 === 0) status = "blocked";
+  const loadClinics = async () => {
+    try {
+      setLoadingClinics(true);
+      setPageError("");
 
-      return {
-        doctorId: "D1",
-        hospitalId: clinic,
-        date,
-        time,
-        status
-      };
-    });
-    setSlots(generated);
-  };
+      const response = await getDoctorAvailabilityClinics();
+      const clinicList = Array.isArray(response) ? response : [];
 
-  const isFullDayBlocked = () => {
-    return slots.length > 0 && slots.every(slot => slot.status !== "available");
-  };
+      setClinics(clinicList);
 
-  const handleFullDayToggle = () => {
-    if (isPastDate) return;
-
-    const currentlyBlocked = isFullDayBlocked();
-
-    const updated = slots.map(slot => {
-      if (slot.status === "booked") return slot;
-      return {
-        ...slot,
-        status: currentlyBlocked ? "available" : "blocked"
-      };
-    });
-
-    setSlots(updated);
-
-    showToast(
-      currentlyBlocked ? "Day is now available" : "Full day has been blocked",
-      currentlyBlocked ? "success" : "warning"
-    );
-  };
-
-  const handleSlotToggle = (time) => {
-    if (isPastDate) return;
-
-    let newStatus = "";
-
-    const updated = slots.map(slot => {
-      if (slot.time === time && slot.status !== "booked") {
-        newStatus = slot.status === "available" ? "blocked" : "available";
-        return { ...slot, status: newStatus };
+      if (clinicList.length > 0) {
+        const primaryClinic =
+          clinicList.find((clinic) => clinic?.isPrimary) || clinicList[0];
+        setSelectedClinic(String(primaryClinic.id));
+      } else {
+        setSelectedClinic("");
       }
-      return slot;
-    });
-
-    setSlots(updated);
-
-    if (newStatus === "blocked") {
-      showToast(`${time} slot blocked`, "warning");
-    } else if (newStatus === "available") {
-      showToast(`${time} slot available`, "success");
+    } catch (err) {
+      setPageError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Unable to load doctor clinics."
+      );
+    } finally {
+      setLoadingClinics(false);
     }
+  };
+
+  const loadAvailability = async (clinicId, dateValue) => {
+    if (!clinicId || !dateValue) {
+      setDayData(null);
+      return;
+    }
+
+    try {
+      setLoadingAvailability(true);
+      setPageError("");
+
+      const response = await getDoctorDayAvailability(Number(clinicId), dateValue);
+      setDayData(response || null);
+    } catch (err) {
+      setDayData(null);
+      setPageError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Unable to load availability for selected date."
+      );
+    } finally {
+      setLoadingAvailability(false);
+    }
+  };
+
+  useEffect(() => {
+    loadClinics();
+
+    return () => {
+      window.clearTimeout(window.__availabilityToastTimer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (selectedClinic && apiDate) {
+      loadAvailability(selectedClinic, apiDate);
+    }
+  }, [selectedClinic, apiDate]);
+
+  const selectedClinicDetails = useMemo(() => {
+    return clinics.find((clinic) => String(clinic.id) === String(selectedClinic)) || null;
+  }, [clinics, selectedClinic]);
+
+  const editableSlots = useMemo(() => {
+    if (!Array.isArray(dayData?.slots)) return [];
+    return dayData.slots.filter(
+      (slot) => slot?.status !== "BOOKED" && slot?.status !== "PAST"
+    );
+  }, [dayData]);
+
+  const isFullDayBlocked = useMemo(() => {
+    if (!editableSlots.length) return false;
+    return editableSlots.every((slot) => slot?.status === "BLOCKED");
+  }, [editableSlots]);
+
+  const summaryStats = useMemo(() => {
+    const slots = Array.isArray(dayData?.slots) ? dayData.slots : [];
+
+    return {
+      total: slots.length,
+      available: slots.filter((slot) => slot.status === "AVAILABLE").length,
+      blocked: slots.filter((slot) => slot.status === "BLOCKED").length,
+      booked: slots.filter((slot) => slot.status === "BOOKED").length
+    };
+  }, [dayData]);
+
+  const refreshAvailability = async () => {
+    if (!selectedClinic || !apiDate) return;
+    await loadAvailability(selectedClinic, apiDate);
+  };
+
+  const handleFullDayToggle = async () => {
+    if (!selectedClinic || !apiDate || actionLoading) return;
+
+    try {
+      setActionLoading(true);
+
+      const payload = {
+        clinicId: Number(selectedClinic),
+        date: apiDate
+      };
+
+      if (isFullDayBlocked) {
+        await unblockDoctorAvailabilityDay(payload);
+        showToast("Day unblocked successfully.", "success");
+      } else {
+        await blockDoctorAvailabilityDay(payload);
+        showToast("Full day blocked successfully.", "warning");
+      }
+
+      await refreshAvailability();
+    } catch (err) {
+      showToast(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Unable to update day availability.",
+        "warning"
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSlotToggle = async (slot) => {
+    if (!slot || !slot.canToggle || actionLoading) return;
+
+    try {
+      setActionLoading(true);
+
+      const payload = {
+        clinicId: Number(selectedClinic),
+        date: apiDate,
+        startTime: slot.startTime,
+        endTime: slot.endTime
+      };
+
+      if (slot.status === "AVAILABLE") {
+        await blockDoctorAvailabilitySlot(payload);
+        showToast(`${slot.displayTime} blocked successfully.`, "warning");
+      } else if (slot.status === "BLOCKED") {
+        await unblockDoctorAvailabilitySlot(payload);
+        showToast(`${slot.displayTime} is available now.`, "success");
+      }
+
+      await refreshAvailability();
+    } catch (err) {
+      showToast(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Unable to update slot availability.",
+        "warning"
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const getSlotClassName = (slot) => {
+    const status = slot?.status?.toLowerCase();
+
+    if (status === "available") {
+      return "availability-slot availability-slot--available";
+    }
+
+    if (status === "blocked") {
+      return "availability-slot availability-slot--blocked";
+    }
+
+    if (status === "booked") {
+      return "availability-slot availability-slot--booked";
+    }
+
+    if (status === "past") {
+      return "availability-slot availability-slot--past";
+    }
+
+    return "availability-slot";
   };
 
   return (
     <div className="availability-page">
+      <div className="availability-shell">
+        <div className="availability-hero">
+          <div className="availability-hero__content">
+            <p className="availability-hero__eyebrow">Doctor Availability</p>
+            <h1 className="availability-hero__title">Manage Daily Schedule</h1>
+            <p className="availability-hero__subtitle">
+              Select a clinic and date to view slots. Tap available slots to block
+              them, or tap blocked slots to make them available again.
+            </p>
+          </div>
+        </div>
 
-      <div className="availability-header">
-        <h2>Set Availability</h2>
-        <p>Morning: 9:00 AM - 1:00 PM | Evening: 5:00 PM - 9:00 PM</p>
-      </div>
-
-      <div className="availability-controls">
-
-        <div className="field-group">
-          <label>Select Hospital</label>
-          <select
-            value={selectedClinic}
-            onChange={(e) => {
-              const clinic = e.target.value;
-              setSelectedClinic(clinic);
-              if (selectedDate) {
-                const formatted = selectedDate.toISOString().split("T")[0];
-                generateSlots(clinic, formatted);
-              }
-            }}
-          >
-            {clinics.map((clinic) => (
-              <option key={clinic.id} value={clinic.id}>
-                {clinic.name}
+        <div className="availability-panel availability-panel--filters">
+          <div className="availability-field">
+            <label htmlFor="availability-clinic">Clinic</label>
+            <select
+              id="availability-clinic"
+              value={selectedClinic}
+              onChange={(e) => setSelectedClinic(e.target.value)}
+              disabled={loadingClinics || actionLoading}
+            >
+              <option value="">
+                {loadingClinics ? "Loading clinics..." : "Select clinic"}
               </option>
-            ))}
-          </select>
+
+              {clinics.map((clinic) => (
+                <option key={clinic.id} value={clinic.id}>
+                  {clinic.clinicName}
+                  {clinic.city ? ` - ${clinic.city}` : ""}
+                  {clinic.isPrimary ? " (Primary)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="availability-field">
+            <label htmlFor="availability-date">Date</label>
+            <DatePicker
+              id="availability-date"
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              dateFormat="yyyy-MM-dd"
+              className="availability-datepicker"
+              minDate={new Date()}
+              showPopperArrow={false}
+              disabled={actionLoading}
+              placeholderText="Choose date"
+            />
+          </div>
         </div>
 
-        <div className="field-group">
-          <label>Select Date</label>
-          <DatePicker
-            selected={selectedDate}
-            onChange={(date) => {
-              setSelectedDate(date);
-              if (date) {
-                const formatted = date.toISOString().split("T")[0];
-                generateSlots(selectedClinic, formatted);
-              }
-            }}
-            dateFormat="yyyy-MM-dd"
-            placeholderText="Choose date"
-            className="custom-datepicker"
-            showPopperArrow={false}
-          />
-        </div>
+        {pageError && (
+          <div className="availability-panel availability-feedback availability-feedback--error">
+            <p>{pageError}</p>
+          </div>
+        )}
 
+        {!pageError && loadingAvailability && (
+          <div className="availability-panel availability-feedback">
+            <div className="availability-loader" />
+            <p>Loading availability...</p>
+          </div>
+        )}
+
+        {!pageError && !loadingAvailability && selectedClinic && dayData && (
+          <>
+            <div className="availability-panel availability-panel--overview">
+              <div className="availability-overview__top">
+                <div>
+                  <p className="availability-overview__label">Selected Clinic</p>
+                  <h2 className="availability-overview__clinic">
+                    {dayData.clinicName || selectedClinicDetails?.clinicName || "N/A"}
+                  </h2>
+                  <p className="availability-overview__date">
+                    {formatDisplayDate(selectedDate)} • {dayData.dayOfWeek || "N/A"}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className={`availability-day-button ${
+                    isFullDayBlocked
+                      ? "availability-day-button--unblock"
+                      : "availability-day-button--block"
+                  }`}
+                  onClick={handleFullDayToggle}
+                  disabled={
+                    actionLoading ||
+                    !Array.isArray(dayData?.slots) ||
+                    dayData.slots.length === 0
+                  }
+                >
+                  {actionLoading
+                    ? "Please wait..."
+                    : isFullDayBlocked
+                    ? "Unblock Full Day"
+                    : "Block Full Day"}
+                </button>
+              </div>
+
+              <div className="availability-stats">
+                <div className="availability-stat-card">
+                  <span>Total Slots</span>
+                  <strong>{summaryStats.total}</strong>
+                </div>
+
+                <div className="availability-stat-card availability-stat-card--available">
+                  <span>Available</span>
+                  <strong>{summaryStats.available}</strong>
+                </div>
+
+                <div className="availability-stat-card availability-stat-card--blocked">
+                  <span>Blocked</span>
+                  <strong>{summaryStats.blocked}</strong>
+                </div>
+
+                <div className="availability-stat-card availability-stat-card--booked">
+                  <span>Booked</span>
+                  <strong>{summaryStats.booked}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="availability-panel availability-panel--legend">
+              <div className="availability-legend-item">
+                <span className="availability-legend-dot availability-legend-dot--available" />
+                <span>Available</span>
+              </div>
+
+              <div className="availability-legend-item">
+                <span className="availability-legend-dot availability-legend-dot--blocked" />
+                <span>Blocked</span>
+              </div>
+
+              <div className="availability-legend-item">
+                <span className="availability-legend-dot availability-legend-dot--booked" />
+                <span>Booked</span>
+              </div>
+
+              <div className="availability-legend-item">
+                <span className="availability-legend-dot availability-legend-dot--past" />
+                <span>Past</span>
+              </div>
+            </div>
+
+            <div className="availability-panel availability-panel--slots">
+              <div className="availability-section-header">
+                <div>
+                  <h3>Time Slots</h3>
+                  <p>
+                    Doctor can directly manage slot availability from here.
+                  </p>
+                </div>
+              </div>
+
+              {!dayData.slots || dayData.slots.length === 0 ? (
+                <div className="availability-empty-state">
+                  <h3>No schedule found</h3>
+                  <p>
+                    No weekly availability is configured for this clinic on the
+                    selected day.
+                  </p>
+                </div>
+              ) : (
+                <div className="availability-slots-grid">
+                  {dayData.slots.map((slot) => (
+                    <button
+                      key={`${slot.startTime}-${slot.endTime}`}
+                      type="button"
+                      className={getSlotClassName(slot)}
+                      onClick={() => handleSlotToggle(slot)}
+                      disabled={!slot.canToggle || actionLoading}
+                    >
+                      <span className="availability-slot__time">
+                        {slot.displayTime}
+                      </span>
+                      <span className="availability-slot__status">
+                        {getStatusLabel(slot.status)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {!pageError &&
+          !loadingAvailability &&
+          !selectedClinic &&
+          !loadingClinics && (
+            <div className="availability-panel availability-empty-state">
+              <h3>No clinic found</h3>
+              <p>
+                Please add at least one active clinic in doctor profile before
+                managing availability.
+              </p>
+            </div>
+          )}
       </div>
 
-      {selectedDate && (
-        <div className="day-card">
-
-          <div className="day-card-header">
-            <h4>
-              {selectedDate.toISOString().split("T")[0]}
-              {isPastDate && (
-                <span className="view-only-tag">(View Only)</span>
-              )}
-            </h4>
-
-            <button
-              className={`btn-block-action ${
-                isFullDayBlocked() ? "unblock" : "block"
-              }`}
-              onClick={handleFullDayToggle}
-              disabled={isPastDate}
-            >
-              {isFullDayBlocked() ? "Unblock Day" : "Block Full Day"}
-            </button>
-          </div>
-
-          <div className="slots-grid">
-            {slots.map((slot) => (
-              <button
-                key={slot.time}
-                className={`slot-item ${slot.status}`}
-                onClick={() => handleSlotToggle(slot.time)}
-                disabled={slot.status === "booked" || isPastDate}
-              >
-                {slot.time}
-              </button>
-            ))}
-          </div>
-
-        </div>
-      )}
-
-      {popup && (
-        <div className={`toast-notification ${popup.type}`}>
-          <div className="toast-main">
-            <span className="toast-icon">
-              {popup.type === "success" ? "✅" : "⚠️"}
+      {toast && (
+        <div
+          className={`availability-toast ${
+            toast.type === "warning"
+              ? "availability-toast--warning"
+              : "availability-toast--success"
+          }`}
+        >
+          <div className="availability-toast__content">
+            <span className="availability-toast__icon">
+              {toast.type === "warning" ? "⚠️" : "✅"}
             </span>
-            <p className="toast-message">{popup.text}</p>
+            <p>{toast.message}</p>
             <button
-              className="toast-close-btn"
-              onClick={() => setPopup(null)}
+              type="button"
+              className="availability-toast__close"
+              onClick={() => setToast(null)}
             >
-              &times;
+              ×
             </button>
           </div>
-          <div className="toast-progress-bar"></div>
         </div>
       )}
-
     </div>
   );
 };
 
 export default Availability;
-

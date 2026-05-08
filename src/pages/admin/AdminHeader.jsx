@@ -59,6 +59,8 @@ const { logoutUser } = useAuthActions(setCurrentUser);
   "/admin/profile": "My Profile",
 
   "/admin/settings": "System Settings",
+  
+  "/admin/blogs": "Blog Management",
 };
 
   const currentTitle =

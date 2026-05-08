@@ -1,44 +1,77 @@
 .doctor-header {
-  height: 80px;
-  background: #10b981;
+  height: 82px;
+  background: linear-gradient(135deg,#10b981  0%, #10b981 100%);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 40px;
-  color: white;
+  padding: 0 28px;
+  color: #ffffff;
   position: sticky;
   top: 0;
   z-index: 1100;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  -webkit-backdrop-filter: blur(10px); /* Add this line first */
+  backdrop-filter: blur(8px);
 }
 
-.header-left { 
-  display: flex; 
-  align-items: center; 
-  gap: 20px; 
-}
-
-.mobile-toggle { 
-  display: none; 
-  background: rgba(255,255,255,0.2); 
-  border: none; 
-  color: white; 
-  padding: 10px; 
-  border-radius: 8px; 
-  cursor: pointer; 
-  font-size: 20px;
-}
-
-.page-title { 
-  font-size: 24px; 
-  font-weight: 700; 
-  margin: 0; 
-  white-space: nowrap;
-}
-
-.header-right { 
+.header-left {
   display: flex;
   align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.mobile-toggle {
+  display: none;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all 0.25s ease;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-toggle:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+.header-title-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.header-subtitle {
+  margin: 0 0 3px 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 420px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex-shrink: 0;
 }
 
 .header-profile-section {
@@ -46,70 +79,109 @@
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  padding: 6px 12px;
-  border-radius: 50px;
-  background: rgba(255,255,255,0.1);
-  transition: 0.3s;
+  padding: 7px 10px 7px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  transition: all 0.25s ease;
+  outline: none;
 }
 
-.header-profile-section:hover { 
-  background: rgba(255,255,255,0.2); 
+.header-profile-section:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
 }
 
-.profile-info { 
-  text-align: right; 
+.header-profile-section:focus-visible {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
 }
 
-.profile-name { 
-  display: block; 
-  font-size: 14px; 
-  font-weight: 600; 
+.profile-info {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
-.header-avatar { 
-  width: 42px; 
-  height: 42px; 
-  border-radius: 50%; 
-  border: 2px solid white; 
-  object-fit: cover; 
+.profile-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.1;
 }
 
-/* ======================================================
-   DROPDOWN MENU - EXACT PATIENT STYLE FIX
-   ====================================================== */
+.profile-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+}
+
+.header-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 15px;
+}
+
 .header-dropdown-menu {
   position: absolute;
-  top: 85px; /* Header height ke thoda niche */
-  right: 20px; /* Screen ke edge se gap (Patient Header style) */
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  width: 220px; /* Fixed width taaki patla na ho */
-  padding: 15px;
+  top: calc(100% + 12px);
+  right: 0;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.18);
+  width: 260px;
+  padding: 14px;
   border: 1px solid #e2e8f0;
   z-index: 2000;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  animation: slideDown 0.2s ease-out;
+  gap: 6px;
+  animation: slideDown 0.18s ease-out;
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .dropdown-user-info {
   padding: 8px 10px 12px 10px;
   border-bottom: 1px solid #f1f5f9;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .dropdown-user-info .name {
   display: block;
   font-weight: 700;
-  color: #1e293b;
+  color: #0f172a;
   font-size: 15px;
+  line-height: 1.3;
 }
 
 .dropdown-user-info .role {
@@ -117,62 +189,224 @@
   font-size: 11px;
   color: #64748b;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   margin-top: 4px;
 }
 
 .header-dropdown-menu button {
   width: 100%;
-  padding: 12px 15px;
+  padding: 12px 14px;
   text-align: left;
   border: none;
   background: none;
   font-size: 14px;
   color: #334155;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   gap: 12px;
-  transition: 0.2s;
-  font-weight: 500;
+  transition: all 0.2s ease;
+  font-weight: 600;
 }
 
 .header-dropdown-menu button:hover {
   background: #f8fafc;
-  color: #10b981;
+  color: #0f766e;
 }
 
 .logout-btn-text {
-  color: #ef4444 !important;
-  background: #fff5f5 !important;
-  margin-top: 5px;
+  color: #dc2626 !important;
+  background: #fef2f2 !important;
+  margin-top: 4px;
 }
 
-/* ======================================================
-   MOBILE RESPONSIVE
-   ====================================================== */
+.logout-btn-text:hover {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+}
+
 @media (max-width: 768px) {
-  .doctor-header { 
-    padding: 0 15px; 
-    height: 70px; 
+  .doctor-header {
+    padding: 0 12px;
+    height: 68px;
   }
-  
-  .mobile-toggle { 
-    display: block; 
+
+  .header-left {
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
   }
-  
-  .profile-info { 
-    display: none; 
+
+  .mobile-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    flex-shrink: 0;
   }
-  
-  .page-title { 
-    font-size: 18px; 
+
+  .header-title-wrap {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .header-subtitle {
+    display: none;
+  }
+
+  .page-title {
+    font-size: 16px;
+    line-height: 1.2;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .header-right {
+    margin-left: 10px;
+    flex-shrink: 0;
+  }
+
+  .profile-info {
+    display: none;
+  }
+
+  .header-profile-section {
+    padding: 4px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 50%;
+    justify-content: center;
+  }
+
+  .header-avatar,
+  .header-avatar-fallback {
+    width: 38px;
+    height: 38px;
+    font-size: 14px;
   }
 
   .header-dropdown-menu {
-    top: 75px; /* Mobile header ke hisab se top position */
-    right: 15px; /* Mobile edge gap */
-    width: 200px; /* Mobile par bhi full width content dikhega */
+    top: calc(100% + 8px);
+    right: 0;
+    width: 220px;
+    padding: 12px;
   }
+
+  .dropdown-user-info .name {
+    font-size: 14px;
+    word-break: break-word;
+  }
+
+  .dropdown-user-info .role {
+    font-size: 10px;
+  }
+
+  .header-dropdown-menu button {
+    padding: 11px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .doctor-header {
+    padding: 0 10px;
+    height: 64px;
+  }
+
+  .header-left {
+    gap: 8px;
+  }
+
+  .mobile-toggle {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .page-title {
+    font-size: 15px;
+  }
+
+  .header-profile-section {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 3px;
+  }
+
+  .header-avatar,
+  .header-avatar-fallback {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+  }
+
+  .header-dropdown-menu {
+    width: 205px;
+    right: -2px;
+  }
+}
+.header-notification-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.header-notification-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.header-notification-btn svg {
+  font-size: 18px;
+}
+
+.header-notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.28);
+}
+
+@media (max-width: 768px) {
+  .header-notification-btn {
+    width: 40px;
+    height: 40px;
+    margin-right: 8px;
+  }
+
+  .header-notification-btn svg {
+    font-size: 16px;
+  }
+}
+.header-toast-anchor {
+  position: relative;
 }

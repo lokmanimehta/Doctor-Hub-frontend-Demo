@@ -1,64 +1,89 @@
-import api from "./api";
+import api, {
+  clearAuthStorage,
+  refreshAccessToken,
+  storeSessionData
+} from "./api";
 import { useNavigate } from "react-router-dom";
 
 /* =========================
    LOGIN
-   ========================= */
+========================= */
 export const loginUser = async (credentials) => {
-
   const res = await api.post("/auth/login", credentials);
 
-  console.log("LOGIN RESPONSE FULL:", res.data);
+  const data = res?.data?.data;
+  const accessToken = data?.accessToken;
+  const refreshToken = data?.refreshToken;
+  const user = data?.user;
 
-  const accessToken = res.data.data.accessToken;
-  const refreshToken = res.data.data.refreshToken;
-  const user = res.data.data.user;
+  if (!accessToken || !refreshToken || !user) {
+    throw new Error("Invalid login response from server");
+  }
 
-  sessionStorage.setItem("accessToken", accessToken);
-  localStorage.setItem("refreshToken", refreshToken);
-  localStorage.setItem("currentUser", JSON.stringify(user));
+  storeSessionData({
+    accessToken,
+    refreshToken,
+    user,
+    rememberMe: !!credentials.rememberMe
+  });
 
   return user;
-
 };
 
+/* =========================
+   RESTORE SESSION
+========================= */
+export const restoreUserSession = async () => {
+  const refreshToken =
+    localStorage.getItem("refreshToken") || sessionStorage.getItem("refreshToken");
+
+  if (!refreshToken) {
+    clearAuthStorage();
+    return null;
+  }
+
+  try {
+    const refreshResult = await refreshAccessToken();
+    return refreshResult.user || null;
+  } catch {
+    clearAuthStorage();
+    return null;
+  }
+};
 
 /* =========================
    SIGNUP
-   ========================= */
-
+========================= */
 export const signupUser = async (userData) => {
-
   const res = await api.post("/auth/signup", userData);
-
   return res.data;
-
 };
-
 
 /* =========================
    LOGOUT
-   ========================= */
-
+========================= */
 export const useAuthActions = (setCurrentUser) => {
   const navigate = useNavigate();
 
   const logoutUser = async () => {
     try {
-      const refreshToken = localStorage.getItem("refreshToken");
+      const refreshToken =
+        localStorage.getItem("refreshToken") ||
+        sessionStorage.getItem("refreshToken");
+
       if (refreshToken) {
         await api.post("/auth/logout", { refreshToken });
       }
     } catch (err) {
       console.error("Logout API failed", err);
     } finally {
-      sessionStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("currentUser");
+      clearAuthStorage();
 
-      if (setCurrentUser) setCurrentUser(null);
+      if (setCurrentUser) {
+        setCurrentUser(null);
+      }
 
-      navigate("/");
+      navigate("/", { replace: true });
     }
   };
 
@@ -68,26 +93,31 @@ export const useAuthActions = (setCurrentUser) => {
 /* =========================
    FORGOT PASSWORD
 ========================= */
-
 export const forgotPassword = async (identifier) => {
-
-  const res = await api.post("/auth/forgot-password", {
-    identifier
-  });
-
+  const res = await api.post("/auth/forgot-password", { identifier });
   return res.data;
-
 };
-
 
 /* =========================
    RESET PASSWORD
 ========================= */
-
 export const resetPassword = async (data) => {
-
   const res = await api.post("/auth/reset-password", data);
-
   return res.data;
+};
 
+/* =========================
+   FAMILY PROFILE
+========================= */
+export const getPatientProfiles = async () => {
+  const res = await api.get("/patient/profiles");
+  return res.data;
+};
+
+/* =========================
+   DOCTOR PATIENT API
+========================= */
+export const createDoctorPatient = async (payload) => {
+  const response = await api.post("/doctor/patients", payload);
+  return response.data;
 };

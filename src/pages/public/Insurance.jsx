@@ -1,74 +1,76 @@
 import React from "react";
-import { ShieldCheck, HeartPulse, CheckCircle2, HelpCircle } from "lucide-react";
+import { ArrowLeft, Bell, ShieldCheck, Clock, HeartPulse } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import "./Insurance.css";
 
 const Insurance = () => {
-  const plans = [
-    {
-      name: "Standard Shield",
-      price: "₹499/mo",
-      tag: "Basic Security",
-      features: ["5,000+ Network Hospitals", "Ambulance Charges", "Day Care Procedures", "1-Year Waiting Period"],
-    },
-    {
-      name: "Global Gold",
-      price: "₹1,499/mo",
-      tag: "Most Recommended",
-      features: ["Worldwide Coverage", "Zero Waiting Period", "Maternity & Newborn", "Air Ambulance", "OPD Cover"],
-      dark: true
-    }
-  ];
+  const navigate = useNavigate();
 
   return (
-    <div className="ins-container">
-      <div className="ins-header">
-        <h1>Health Insurance Plans</h1>
-        <p>Direct cashless tie-ups with India's leading healthcare providers.</p>
-      </div>
+    <main className="insurance-coming-page">
+      <section className="insurance-coming-card">
+        <button
+          type="button"
+          className="insurance-back-btn"
+          onClick={() => navigate("/all-services")}
+        >
+          <ArrowLeft size={17} />
+          Back to Services
+        </button>
 
-      <div className="ins-grid">
-        {plans.map((plan, i) => (
-          <div key={i} className={`ins-card ${plan.dark ? "dark-card" : ""}`}>
-            <div className="plan-header">
-              <span className="plan-tag">{plan.tag}</span>
-              <h3>{plan.name}</h3>
-              <div className="price">{plan.price} <span>/month</span></div>
-            </div>
-            
-            <ul className="plan-features">
-              {plan.features.map((f, idx) => (
-                <li key={idx}><CheckCircle2 size={16} /> {f}</li>
-              ))}
-            </ul>
-
-            <button className="ins-btn">Compare & Apply</button>
-          </div>
-        ))}
-      </div>
-
-      {/* NEW: FAQ SECTION */}
-      <div className="ins-faq-section">
-        <div className="faq-header">
-          <HelpCircle size={24} />
-          <h2>Understand Your Plan</h2>
+        <div className="insurance-icon-wrap">
+          <ShieldCheck size={42} />
         </div>
-        <div className="faq-grid">
-          <div className="faq-box">
-            <h4>What is Cashless Treatment?</h4>
-            <p>You don't pay anything at the hospital. We settle the bill directly with the provider.</p>
+
+        <span className="insurance-badge">Coming Soon</span>
+
+        <h1>Health Insurance Support is currently unavailable.</h1>
+
+        <p>
+          We are working on a safer and more reliable insurance assistance
+          experience. This feature will be available soon with verified plan
+          information and advisor support.
+        </p>
+
+        <div className="insurance-info-grid">
+          <div className="insurance-info-box">
+            <Clock size={22} />
+            <h3>In Progress</h3>
+            <span>Feature under setup</span>
           </div>
-          <div className="faq-box">
-            <h4>Pre-existing Disease coverage?</h4>
-            <p>Our Gold plan covers chronic conditions after only 30 days of cooling period.</p>
+
+          <div className="insurance-info-box">
+            <HeartPulse size={22} />
+            <h3>Health Focused</h3>
+            <span>Designed for patients</span>
+          </div>
+
+          <div className="insurance-info-box">
+            <Bell size={22} />
+            <h3>Available Soon</h3>
+            <span>Launch planned later</span>
           </div>
         </div>
-      </div>
 
-      <div className="ins-trust-bar">
-        <div className="trust-item"><ShieldCheck size={28}/> <span>IRDAI Certified</span></div>
-        <div className="trust-item"><HeartPulse size={28}/> <span>99.2% Claim Ratio</span></div>
-      </div>
-    </div>
+        <div className="insurance-actions">
+          <button
+            type="button"
+            className="insurance-primary-btn"
+            onClick={() => navigate("/all-services")}
+          >
+            Explore Other Services
+          </button>
+
+          <button
+            type="button"
+            className="insurance-secondary-btn"
+            onClick={() => navigate("/contact")}
+          >
+            Contact Support
+          </button>
+        </div>
+      </section>
+    </main>
   );
 };
 

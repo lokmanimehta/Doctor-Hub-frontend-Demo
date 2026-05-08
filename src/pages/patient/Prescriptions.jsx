@@ -1,307 +1,504 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import "./Prescriptions.css";
-import { 
-    FiSearch, FiDownload, FiShare2, FiEye, FiActivity, FiX, 
-    FiCheckCircle, FiInfo, FiShoppingBag, FiExternalLink, FiCalendar, 
-    FiMapPin, FiMic, FiAlertTriangle, FiClock, FiShield 
+import {
+  FiSearch,
+  FiEye,
+  FiDownload,
+  FiShare2,
+  FiX,
+  FiCalendar,
+  FiMapPin,
+  FiMic,
+  FiClock,
+  FiFileText,
+  FiShoppingBag,
+  FiCheckCircle,
+  FiUser,
+  FiActivity
 } from "react-icons/fi";
 
-const dummyPrescriptions = [
-    { 
-        id: 1, docName: "Dr. Aisha Khan", docImg: "https://i.pravatar.cc/150?u=aisha", 
-        date: "24 Feb 2026", diagnosis: "Chronic Hypertension", status: "Active", 
-        clinic: "City Heart Hospital", specialization: "Cardiologist",
-        // AI Feature: Voice-to-Prescription Summary
-        aiVoiceSummary: "Patient reports mild chest tightness. BP recorded 150/95. Suggesting salt-free diet and 30-min morning walk.",
-        // AI Feature: Automated Follow-ups
-        followUps: [
-            { task: "BP Checkup", date: "02 Mar 2026", status: "Upcoming" },
-            { task: "Salt-Free Diet Review", date: "10 Mar 2026", status: "Pending" }
-        ],
-        medicines: [
-            { 
-                name: "Telmisartan 40mg", dose: "1-0-0", dur: "30 Days", instr: "Empty Stomach",
-                // AI Feature: Smart Drug Recommendation / Interaction Info
-                aiDrugInfo: "Effective for hypertension. No interactions found with current EHR history."
-            },
-            { 
-                name: "Amlodipine 5mg", dose: "0-0-1", dur: "30 Days", instr: "After Meal",
-                aiDrugInfo: "Avoid grapefruit juice. AI flagged: Slight edema risk monitored."
-            }
-        ], 
-        notes: "Monitor BP every morning. Reduce salt intake and walk for 30 mins daily." 
-    },
-    { 
-        id: 2, docName: "Dr. Sameer Verma", docImg: "https://i.pravatar.cc/150?u=sameer", 
-        date: "10 Jan 2026", diagnosis: "Severe Viral Flu", status: "Past", 
-        clinic: "Apex Family Care", specialization: "General Physician",
-        aiVoiceSummary: "High fever for 2 days. Dictated Paracetamol and bed rest.",
-        followUps: [{ task: "Recovery Check", date: "15 Jan 2026", status: "Completed" }],
-        medicines: [
-            { name: "Paracetamol 650mg", dose: "1-1-1", dur: "5 Days", instr: "After Meal", aiDrugInfo: "Safe for short term. Max 4g per day." },
-            { name: "Vitamin C 500mg", dose: "1-0-0", dur: "10 Days", instr: "After Breakfast", aiDrugInfo: "Immunity booster." }
-        ], 
-        notes: "Complete bed rest for 3 days. Drink plenty of warm fluids like soup." 
-    },
-    { 
-        id: 3, docName: "Dr. Raj Patel", docImg: "https://i.pravatar.cc/150?u=raj", 
-        date: "15 Dec 2025", diagnosis: "Lower Back Pain", status: "Past", 
-        clinic: "Ortho Spine Center", specialization: "Orthopedic",
-        aiVoiceSummary: "Mechanical back pain. Suggested stretching and posture correction.",
-        followUps: [{ task: "Physiotherapy Session", date: "20 Dec 2025", status: "Missed" }],
-        medicines: [
-            { name: "Etoshine 90mg", dose: "0-0-1", dur: "7 Days", instr: "After Meal", aiDrugInfo: "NSAID. Take only when pain is severe." },
-            { name: "Pantocid 40mg", dose: "1-0-0", dur: "7 Days", instr: "30 min Before Food", aiDrugInfo: "Gastro-protection for Etoshine." }
-        ], 
-        notes: "Avoid lifting heavy weights. Daily light stretching exercises recommended." 
-    },
-    { 
-        id: 4, docName: "Dr. Meera Joshi", docImg: "https://i.pravatar.cc/150?u=meera", 
-        date: "05 Nov 2025", diagnosis: "Skin Allergy", status: "Past", 
-        clinic: "Dermacare Clinic", specialization: "Dermatologist",
-        aiVoiceSummary: "Urticaria symptoms. Dictated Levocetirizine for itching.",
-        followUps: [],
-        medicines: [
-            { name: "Levocetirizine 5mg", dose: "0-0-1", dur: "14 Days", instr: "At Night", aiDrugInfo: "May cause drowsiness." },
-            { name: "Mometasone Cream", dose: "Apply", dur: "7 Days", instr: "Affected area", aiDrugInfo: "Topical steroid. Use thin layer." }
-        ], 
-        notes: "Avoid harsh soaps. Apply calamine if itching persists. No dairy for 1 week." 
-    }
+const prescriptionData = [
+  {
+    id: 1,
+    doctorName: "Dr. Aisha Khan",
+    specialization: "Cardiologist",
+    clinic: "City Heart Hospital",
+    date: "24 Feb 2026",
+    status: "Active",
+    diagnosis: "Chronic Hypertension",
+    symptoms:
+      "Mild chest tightness, occasional headache, elevated blood pressure readings.",
+    voiceSummary:
+      "Patient reports mild chest tightness and elevated blood pressure. Continue anti-hypertensive management and lifestyle control.",
+    treatmentPlan:
+      "Continue blood pressure medicines regularly, monitor BP daily, reduce salt intake, and maintain a 30-minute walk routine.",
+    patientInstructions:
+      "Check blood pressure every morning, avoid excessive salt, and do not skip medicines without consulting your doctor.",
+    medicines: [
+      {
+        name: "Telmisartan 40mg",
+        dosage: "1-0-0",
+        duration: "30 Days",
+        timing: "Before breakfast",
+        info: "Take at the same time daily. Continue unless doctor advises otherwise."
+      },
+      {
+        name: "Amlodipine 5mg",
+        dosage: "0-0-1",
+        duration: "30 Days",
+        timing: "After dinner",
+        info: "May cause mild swelling in some patients. Inform doctor if swelling increases."
+      }
+    ],
+    followUps: [
+      { task: "BP Checkup", date: "02 Mar 2026", status: "Upcoming" },
+      { task: "Diet Review", date: "10 Mar 2026", status: "Pending" }
+    ]
+  },
+  {
+    id: 2,
+    doctorName: "Dr. Sameer Verma",
+    specialization: "General Physician",
+    clinic: "Apex Family Care",
+    date: "10 Jan 2026",
+    status: "Past",
+    diagnosis: "Severe Viral Flu",
+    symptoms: "High fever, throat pain, weakness, body ache.",
+    voiceSummary:
+      "High fever for two days with weakness and throat irritation. Symptomatic treatment and rest advised.",
+    treatmentPlan:
+      "Bed rest, oral hydration, fever management, warm fluids, and observation of fever pattern for 3 to 5 days.",
+    patientInstructions:
+      "Drink warm fluids, take proper rest, and return for review if fever continues beyond 3 days.",
+    medicines: [
+      {
+        name: "Paracetamol 650mg",
+        dosage: "1-1-1",
+        duration: "5 Days",
+        timing: "After meal",
+        info: "Do not exceed advised dose. Use only as prescribed."
+      },
+      {
+        name: "Vitamin C 500mg",
+        dosage: "1-0-0",
+        duration: "10 Days",
+        timing: "After breakfast",
+        info: "Supportive supplement for recovery."
+      }
+    ],
+    followUps: [
+      { task: "Recovery Check", date: "15 Jan 2026", status: "Completed" }
+    ]
+  },
+  {
+    id: 3,
+    doctorName: "Dr. Raj Patel",
+    specialization: "Orthopedic",
+    clinic: "Ortho Spine Center",
+    date: "15 Dec 2025",
+    status: "Past",
+    diagnosis: "Mechanical Lower Back Pain",
+    symptoms: "Lower back pain during movement, stiffness after long sitting.",
+    voiceSummary:
+      "Mechanical lower back pain with posture-related stiffness. Pain relief and activity modification advised.",
+    treatmentPlan:
+      "Pain control, posture correction, stretching exercises, and avoiding heavy weight lifting for at least one week.",
+    patientInstructions:
+      "Avoid bending suddenly, do stretching exercises, and consult again if pain spreads to the leg.",
+    medicines: [
+      {
+        name: "Etoshine 90mg",
+        dosage: "0-0-1",
+        duration: "7 Days",
+        timing: "After dinner",
+        info: "Take only after food and avoid self-extending the course."
+      },
+      {
+        name: "Pantocid 40mg",
+        dosage: "1-0-0",
+        duration: "7 Days",
+        timing: "30 min before breakfast",
+        info: "Helps reduce stomach irritation with pain medicine."
+      }
+    ],
+    followUps: [
+      { task: "Physiotherapy Review", date: "20 Dec 2025", status: "Missed" }
+    ]
+  }
 ];
 
 const Prescriptions = () => {
-    const [search, setSearch] = useState("");
-    const [filter, setFilter] = useState("All");
-    const [selectedPres, setSelectedPres] = useState(null);
-    const [toast, setToast] = useState("");
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("All");
+  const [selectedPrescription, setSelectedPrescription] = useState(null);
+  const [toast, setToast] = useState("");
 
-    const showToast = (msg) => { 
-        setToast(msg); 
-        setTimeout(() => setToast(""), 3000); 
-    };
+  const showToast = (message) => {
+    setToast(message);
+    setTimeout(() => setToast(""), 2500);
+  };
 
-    const filteredData = useMemo(() => {
-        return dummyPrescriptions.filter(p => {
-            const matchesSearch = p.docName.toLowerCase().includes(search.toLowerCase()) || 
-                                 p.diagnosis.toLowerCase().includes(search.toLowerCase()) ||
-                                 p.clinic.toLowerCase().includes(search.toLowerCase());
-            const matchesTab = filter === "All" || p.status === filter;
-            return matchesSearch && matchesTab;
-        });
-    }, [search, filter]);
+  const filteredPrescriptions = useMemo(() => {
+    return prescriptionData.filter((item) => {
+      const query = search.toLowerCase();
 
-    return (
-        <div className="pres-container">
-            {/* Header Section */}
-            <header className="pres-header-premium">
-                <div className="header-titles">
-                    <h1>Prescriptions Vault</h1>
-                    <p>AI-Powered medical history and instant digital prescriptions</p>
-                </div>
-                
-                <div className="search-controls">
-                    <div className="premium-search">
-                        <FiSearch className="s-icon" />
-                        <input 
-                            type="text" 
-                            placeholder="Search records, doctors, or clinics..." 
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
-                    <div className="filter-pills">
-                        {["All", "Active", "Past"].map(tab => (
-                            <button 
-                                key={tab} 
-                                className={`pill ${filter === tab ? "active" : ""}`}
-                                onClick={() => setFilter(tab)}
-                            >
-                                {tab}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </header>
+      const matchesSearch =
+        item.doctorName.toLowerCase().includes(query) ||
+        item.diagnosis.toLowerCase().includes(query) ||
+        item.clinic.toLowerCase().includes(query) ||
+        item.specialization.toLowerCase().includes(query);
 
-            {/* AI Banner: EHR Timeline & Automation Info */}
-            <div className="ai-insight-banner">
-                <div className="ai-icon-box">
-                    <FiShield className="shield-icon" />
-                </div>
-                <div className="ai-banner-text">
-                    <h4>EHR Connectivity Active</h4>
-                    <p>Your history is being monitored for drug interactions and automated refill reminders.</p>
-                </div>
-            </div>
+      const matchesFilter = filter === "All" || item.status === filter;
 
-            {/* Featured Section: Ongoing Medication & Automated Follow-ups */}
-            <section className="ongoing-highlight">
-                <div className="highlight-content">
-                    <div className="highlight-text">
-                        <h3><FiActivity className="pulse-icon" /> Live Treatment Plan</h3>
-                        <p>Based on your latest EHR and Voice-to-Prescription data</p>
-                    </div>
-                    <div className="medication-grid-mini">
-                        {dummyPrescriptions[0].medicines.map((m, i) => (
-                            <div key={i} className="mini-med-card">
-                                <div className="med-info">
-                                    <span className="med-name">{m.name}</span>
-                                    <span className="med-dosage">{m.dose} • {m.instr}</span>
-                                </div>
-                                <button className="alert-btn" onClick={() => showToast(`AI Reminder set for ${m.name}`)}>
-                                    Auto-Remind
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                    
-                    {/* New Addition: Automated Follow-up Reminders */}
-                    <div className="follow-up-section">
-                        <span className="follow-label"><FiClock /> Automated Follow-ups</span>
-                        <div className="follow-up-pills">
-                            {dummyPrescriptions[0].followUps.map((f, i) => (
-                                <div key={i} className="follow-pill">
-                                    {f.task} - <strong>{f.date}</strong>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
+      return matchesSearch && matchesFilter;
+    });
+  }, [search, filter]);
 
-            {/* Records Grid */}
-            <div className="records-grid">
-                {filteredData.length > 0 ? filteredData.map(pres => (
-                    <div key={pres.id} className="premium-record-card">
-                        <div className="card-status-indicator" data-status={pres.status}></div>
-                        <div className="card-main-info">
-                            <div className="doctor-profile">
-                                <img src={pres.docImg} alt={pres.docName} />
-                                <div className="doc-details">
-                                    <h4>{pres.docName}</h4>
-                                    <span>{pres.specialization}</span>
-                                </div>
-                            </div>
-                            <div className="diagnosis-info">
-                                <span className="label">Diagnosis</span>
-                                <p>{pres.diagnosis}</p>
-                            </div>
-                            
-                            {/* AI Voice Summary Preview */}
-                            <div className="voice-summary-preview">
-                                <FiMic className="mic-icon" />
-                                <span>{pres.aiVoiceSummary}</span>
-                            </div>
+  const activePrescription =
+    prescriptionData.find((item) => item.status === "Active") || prescriptionData[0];
 
-                            <div className="meta-footer">
-                                <span><FiMapPin /> {pres.clinic}</span>
-                                <span><FiCalendar /> {pres.date}</span>
-                            </div>
-                        </div>
-                        <div className="card-actions">
-                            <button className="btn-icon" title="View Details" onClick={() => setSelectedPres(pres)}>
-                                <FiEye />
-                            </button>
-                            <button className="btn-icon" title="Download PDF" onClick={() => showToast("Preparing Digital Prescription...")}>
-                                <FiDownload />
-                            </button>
-                            <button className="btn-icon" title="Share with Clinic" onClick={() => showToast("EHR Access Shared!")}>
-                                <FiShare2 />
-                            </button>
-                        </div>
-                    </div>
-                )) : (
-                    <div className="no-results" style={{textAlign: 'center', padding: '40px'}}>
-                        <p>No health records found for "{search}"</p>
-                    </div>
-                )}
-            </div>
+  return (
+    <div className="prescriptions-page">
+      <div className="prescriptions-shell">
+        <header className="page-header">
+          <div className="page-header-text">
+            <h1>My Prescriptions</h1>
+            <p>
+              View your doctor-approved prescriptions, medicines, treatment plan,
+              and follow-up instructions in one place.
+            </p>
+          </div>
+        </header>
 
-            {/* Professional Modal / Bottom Sheet */}
-            {selectedPres && (
-  <div className="modal-backdrop" onClick={() => setSelectedPres(null)}>
-    <div className="premium-modal" onClick={e => e.stopPropagation()}>
-      <div className="modal-head">
-        <div className="title-grp">
-          <h2>Medical Record Detail</h2>
-          <p>{selectedPres.clinic} • {selectedPres.date}</p>
-        </div>
-        <button className="close-btn" onClick={() => setSelectedPres(null)}><FiX /></button>
-      </div>
-      
-      <div className="modal-scroll-area">
-        {/* AI Voice Section */}
-        <div className="ai-voice-card">
-          <h4><FiMic /> AI Voice Transcription</h4>
-          <p>{selectedPres.aiVoiceSummary}</p>
-        </div>
+        <section className="toolbar-card">
+          <div className="search-box">
+            <FiSearch className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search by doctor, diagnosis, clinic"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
 
-        {/* Diagnosis Summary */}
-        <div className="doc-notes-minimal">
-          <span className="label">Diagnosis</span>
-          <h4>{selectedPres.diagnosis}</h4>
-        </div>
+          <div className="filter-tabs">
+            {["All", "Active", "Past"].map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                className={filter === tab ? "filter-tab active" : "filter-tab"}
+                onClick={() => setFilter(tab)}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </section>
 
-        {/* Medicines as Cards (No Table) */}
-        <h4 className="section-title">Verified Medication</h4>
-        <div className="meds-list-container">
-          {selectedPres.medicines.map((m, i) => (
-            <div key={i} className="med-detail-card">
-              <div className="med-card-header">
-                <span className="med-card-name">{m.name}</span>
-                <span className="dose-badge">{m.dose}</span>
-              </div>
-              <div className="med-card-body">
-                <div className="med-meta-row">
-                  <span><strong>Duration:</strong> {m.dur}</span>
-                  <span><strong>Timing:</strong> {m.instr}</span>
-                </div>
-                <div className="ai-drug-info-box">
-                  <FiInfo /> <span>{m.aiDrugInfo}</span>
-                </div>
+        <section className="hero-card">
+          <div className="hero-top">
+            <div className="hero-left">
+              <span className="hero-label">Current treatment</span>
+              <h2>{activePrescription.diagnosis}</h2>
+
+              <div className="hero-doctor-details">
+                <p className="hero-meta">
+                  <FiUser />
+                  <span>
+                    {activePrescription.doctorName} •{" "}
+                    {activePrescription.specialization}
+                  </span>
+                </p>
+
+                <p className="hero-meta">
+                  <FiMapPin />
+                  <span>{activePrescription.clinic}</span>
+                </p>
               </div>
             </div>
-          ))}
-        </div>
 
-        {/* Clinical Notes */}
-        <div className="doc-notes-card">
-    <div className="notes-header">
-        <FiActivity className="pulse-icon" /> 
-        <h4>Doctor's Clinical Notes</h4>
-    </div>
-    <div className="notes-content">
-        <p>{selectedPres.notes}</p>
-    </div>
-    {/* Optional: Agar tum recommendations ko separate badges mein dikhana chaho */}
-    <div className="lifestyle-tags">
-        <span className="tag">Daily Walk</span>
-        <span className="tag">Low Salt</span>
-    </div>
-</div>
-      </div>
+            <div className="hero-status-wrap">
+              <span className="status-pill active">
+                {activePrescription.status}
+              </span>
+            </div>
+          </div>
 
-      <div className="modal-footer-btns">
-        <button className="btn-reports" onClick={() => showToast("Fetching EHR Documents...")}>
-          <FiExternalLink /> Full EHR
-        </button>
-        <button className="btn-order" onClick={() => showToast("Syncing with Pharmacy...")}>
-          <FiShoppingBag /> Order Medicines
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+          <div className="hero-grid">
+            <div className="hero-info-card">
+              <span className="info-title">Symptoms</span>
+              <p>{activePrescription.symptoms}</p>
+            </div>
 
-            {/* Custom Toast */}
-            {toast && (
-                <div className="premium-toast">
-                    <FiCheckCircle className="toast-icon" />
-                    <span>{toast}</span>
-                </div>
+            <div className="hero-info-card">
+              <span className="info-title">Treatment plan</span>
+              <p>{activePrescription.treatmentPlan}</p>
+            </div>
+
+            <div className="hero-info-card">
+              <span className="info-title">Next follow-up</span>
+              <p>
+                {activePrescription.followUps.length > 0
+                  ? `${activePrescription.followUps[0].task} • ${activePrescription.followUps[0].date}`
+                  : "No follow-up scheduled"}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="list-section">
+          <div className="section-head">
+            <div>
+              <h3>Prescription History</h3>
+              <p>All your current and past doctor-approved prescriptions.</p>
+            </div>
+          </div>
+
+          <div className="prescription-grid">
+            {filteredPrescriptions.length > 0 ? (
+              filteredPrescriptions.map((item) => (
+                <article className="prescription-card" key={item.id}>
+                  <div className="card-head">
+                    <div className="card-head-left">
+                      <h4>{item.diagnosis}</h4>
+                      <p className="doctor-text">
+                        {item.doctorName} • {item.specialization}
+                      </p>
+                    </div>
+
+                    <span
+                      className={
+                        item.status === "Active"
+                          ? "status-pill active"
+                          : "status-pill past"
+                      }
+                    >
+                      {item.status}
+                    </span>
+                  </div>
+
+                  <div className="card-meta">
+                    <span>
+                      <FiCalendar />
+                      {item.date}
+                    </span>
+                    <span>
+                      <FiMapPin />
+                      {item.clinic}
+                    </span>
+                  </div>
+
+                  <div className="content-block">
+                    <span className="content-label">Symptoms</span>
+                    <p>{item.symptoms}</p>
+                  </div>
+
+                  <div className="content-block voice-summary">
+                    <span className="content-label with-icon">
+                      <FiMic />
+                      Voice Summary
+                    </span>
+                    <p>{item.voiceSummary}</p>
+                  </div>
+
+                  <div className="medicine-preview-list">
+                    {item.medicines.slice(0, 2).map((med, index) => (
+                      <div className="medicine-preview-item" key={index}>
+                        <strong>{med.name}</strong>
+                        <span>
+                          {med.dosage} • {med.timing}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="card-actions">
+                    <button
+                      type="button"
+                      className="action-btn"
+                      onClick={() => setSelectedPrescription(item)}
+                    >
+                      <FiEye />
+                      <span>View Details</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="action-btn"
+                      onClick={() =>
+                        showToast("Download feature can be connected here")
+                      }
+                    >
+                      <FiDownload />
+                      <span>Download</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="action-btn"
+                      onClick={() =>
+                        showToast("Share feature can be connected here")
+                      }
+                    >
+                      <FiShare2 />
+                      <span>Share</span>
+                    </button>
+                  </div>
+                </article>
+              ))
+            ) : (
+              <div className="empty-state">
+                <p>No prescriptions found for your search.</p>
+              </div>
             )}
+          </div>
+        </section>
+      </div>
+
+      {selectedPrescription && (
+        <div
+          className="modal-overlay"
+          onClick={() => setSelectedPrescription(null)}
+        >
+          <div
+            className="prescription-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div className="modal-header-left">
+                <h2>{selectedPrescription.diagnosis}</h2>
+                <p>
+                  {selectedPrescription.doctorName} •{" "}
+                  {selectedPrescription.specialization}
+                </p>
+                <p>{selectedPrescription.clinic}</p>
+              </div>
+
+              <button
+                type="button"
+                className="close-btn"
+                onClick={() => setSelectedPrescription(null)}
+              >
+                <FiX />
+              </button>
+            </div>
+
+            <div className="modal-scroll">
+              <div className="detail-section">
+                <span className="detail-label">Symptoms</span>
+                <p>{selectedPrescription.symptoms}</p>
+              </div>
+
+              <div className="detail-section voice-section">
+                <span className="detail-label with-icon">
+                  <FiMic />
+                  Voice Summary
+                </span>
+                <p>{selectedPrescription.voiceSummary}</p>
+              </div>
+
+              <div className="detail-section">
+                <span className="detail-label with-icon">
+                  <FiActivity />
+                  Treatment Plan
+                </span>
+                <p>{selectedPrescription.treatmentPlan}</p>
+              </div>
+
+              <div className="detail-section">
+                <span className="detail-label with-icon">
+                  <FiFileText />
+                  Patient Instructions
+                </span>
+                <p>{selectedPrescription.patientInstructions}</p>
+              </div>
+
+              <div className="detail-section">
+                <span className="detail-label">Medicines</span>
+
+                <div className="medicine-list">
+                  {selectedPrescription.medicines.map((med, index) => (
+                    <div className="medicine-card" key={index}>
+                      <div className="medicine-card-top">
+                        <div className="medicine-card-info">
+                          <h4>{med.name}</h4>
+                          <p>{med.dosage}</p>
+                        </div>
+
+                        <span className="duration-badge">{med.duration}</span>
+                      </div>
+
+                      <div className="medicine-card-body">
+                        <p>
+                          <strong>Timing:</strong> {med.timing}
+                        </p>
+                        <p>
+                          <strong>Notes:</strong> {med.info}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="detail-section">
+                <span className="detail-label with-icon">
+                  <FiClock />
+                  Follow-ups
+                </span>
+
+                {selectedPrescription.followUps.length > 0 ? (
+                  <div className="followup-list">
+                    {selectedPrescription.followUps.map((item, index) => (
+                      <div className="followup-card" key={index}>
+                        <div className="followup-card-left">
+                          <h5>{item.task}</h5>
+                          <p>{item.date}</p>
+                        </div>
+                        <span className="followup-status">{item.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No follow-up scheduled.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() =>
+                  showToast("Full record page can be connected here")
+                }
+              >
+                View Full Record
+              </button>
+
+              <button
+                type="button"
+                className="primary-btn"
+                onClick={() =>
+                  showToast("Medicine order integration can be connected here")
+                }
+              >
+                <FiShoppingBag />
+                <span>Order Medicines</span>
+              </button>
+            </div>
+          </div>
         </div>
-    );
+      )}
+
+      {toast && (
+        <div className="toast">
+          <FiCheckCircle />
+          <span>{toast}</span>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default Prescriptions;
