@@ -58,8 +58,19 @@ const DoctorSidebar = ({
   const displayRole =
     doctorProfile?.specializations?.[0] || currentUser?.role || "DOCTOR";
 
-  const profileImageUrl =
-    doctorProfile?.profilePictureUrl?.trim() || defaultDoctorAvatar;
+  const getSafeDoctorImage = (url) => {
+    if (!url || typeof url !== "string") return defaultDoctorAvatar;
+
+    if (url.includes("localhost:8080")) {
+      return defaultDoctorAvatar;
+    }
+
+    return url;
+  };
+
+  const profileImageUrl = getSafeDoctorImage(
+    doctorProfile?.profilePictureUrl?.trim()
+  );
 
   useEffect(() => {
     setAvatarSrc(profileImageUrl);
@@ -129,9 +140,8 @@ const DoctorSidebar = ({
       )}
 
       <aside
-        className={`doctor-sidebar ${isCollapsed ? "collapsed" : "expanded"} ${
-          isMobileOpen ? "mobile-active" : ""
-        }`}
+        className={`doctor-sidebar ${isCollapsed ? "collapsed" : "expanded"} ${isMobileOpen ? "mobile-active" : ""
+          }`}
       >
         <div className="sidebar-header">
           <div
@@ -222,7 +232,10 @@ const DoctorSidebar = ({
                   src={avatarSrc}
                   alt={displayName}
                   className="sidebar-dropdown-avatar"
-                  onError={() => setAvatarSrc(defaultDoctorAvatar)}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    setAvatarSrc(defaultDoctorAvatar);
+                  }}
                 />
                 <div className="sidebar-dropdown-user-text">
                   <span className="sidebar-dropdown-name">
@@ -269,7 +282,10 @@ const DoctorSidebar = ({
               src={avatarSrc}
               alt={displayName}
               className="user-avatar"
-              onError={() => setAvatarSrc(defaultDoctorAvatar)}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                setAvatarSrc(defaultDoctorAvatar);
+              }}
             />
 
             {(!isCollapsed || isMobileOpen) && (

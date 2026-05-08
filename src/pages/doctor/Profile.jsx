@@ -7,6 +7,7 @@ import {
   updateDoctorProfile,
   deleteDoctorDocument
 } from "../../services/doctorService";
+import defaultDoctorAvatar from "../../assets/images/avtar.png";
 /* =========================================================
    PROFILE COMPLETION CALCULATION
    ========================================================= */
@@ -197,6 +198,17 @@ const toArray = (value) => {
   }
   return [];
 };
+
+const getSafeDoctorImage = (url) => {
+  if (!url || typeof url !== "string") return defaultDoctorAvatar;
+
+  if (url.includes("localhost:8080")) {
+    return defaultDoctorAvatar;
+  }
+
+  return url;
+};
+
 const getDocumentUploadErrorMessage = (err) => {
   const backendMessage = normalizeErrorMessage(err);
 
@@ -402,7 +414,7 @@ const mapStoredUserToForm = (storedUser = {}) => {
         storedUser.registrationYear !== null
         ? String(storedUser.registrationYear)
         : "",
-    profilePictureUrl: storedUser.profilePictureUrl || "",
+    profilePictureUrl: getSafeDoctorImage(storedUser.profilePictureUrl),
     specializations: toArray(
       storedUser.specializations || storedUser.specialization
     ),
@@ -440,7 +452,7 @@ const mapApiResponseToForm = (apiData = {}, previousForm = null) => {
       apiData.registrationYear !== undefined && apiData.registrationYear !== null
         ? String(apiData.registrationYear)
         : "",
-    profilePictureUrl: apiData.profilePictureUrl || "",
+    profilePictureUrl: getSafeDoctorImage(apiData.profilePictureUrl),
     specializations: Array.isArray(apiData.specializations)
       ? apiData.specializations
       : [],
@@ -1426,9 +1438,7 @@ const DoctorProfile = () => {
      ========================================================= */
 
   const profilePreviewImage =
-    form.profilePic ||
-    form.profilePictureUrl ||
-    "https://via.placeholder.com/150";
+    form.profilePic || getSafeDoctorImage(form.profilePictureUrl);
 
   if (loadingProfile) {
     return (
@@ -1480,6 +1490,10 @@ const DoctorProfile = () => {
                     src={profilePreviewImage}
                     alt="Profile"
                     className="avatar-img"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = defaultDoctorAvatar;
+                    }}
                   />
                 ) : (
                   <span className="default-avatar">👨‍⚕️</span>
