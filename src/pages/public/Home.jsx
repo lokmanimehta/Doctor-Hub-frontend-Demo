@@ -47,7 +47,8 @@ const HomePage = () => {
   const [selectedBookingSlot, setSelectedBookingSlot] = useState(null);
   const [bookingLoading, setBookingLoading] = useState(false);
   const { clearProfile, selectedProfile } = useProfile();
-
+  const [publicHospitals, setPublicHospitals] = useState([]);
+  const [publicLabs, setPublicLabs] = useState([]);
 
   // --- Auth State Logic ---
   const getSafeDoctorImage = (url) => {
@@ -114,14 +115,18 @@ const HomePage = () => {
 
         const query = debouncedSearchText.trim();
 
-        const endpoint =
+        const doctorEndpoint =
           query.length >= 2
             ? `/public/doctors/search?q=${encodeURIComponent(query)}`
             : "/public/doctors";
 
-        const response = await api.get(endpoint);
+        const [doctorRes, hospitalRes, labRes] = await Promise.all([
+          api.get(doctorEndpoint),
+          api.get("/public/hospitals"),
+          api.get("/public/labs"),
+        ]);
 
-        const mappedDoctors = response.data.map((doctor) => ({
+        const mappedDoctors = (doctorRes.data || []).map((doctor) => ({
           id: doctor.doctorProfileId,
           userId: doctor.userId,
           name: doctor.fullName,
@@ -142,17 +147,20 @@ const HomePage = () => {
             doctor.city,
             doctor.area,
             doctor.clinicName,
-            ...(doctor.specializations || [])
+            ...(doctor.specializations || []),
           ].filter(Boolean),
-          languages: []
+          languages: [],
         }));
 
         setPublicDoctors(mappedDoctors);
+        setPublicHospitals(Array.isArray(hospitalRes.data) ? hospitalRes.data : []);
+        setPublicLabs(Array.isArray(labRes.data) ? labRes.data : []);
       } catch (error) {
-        console.error("Failed to search doctors:", error);
-        setDoctorError("Unable to load doctors right now.");
-        setSearchError("Unable to search doctors right now.");
+        console.error("Failed to search:", error);
+        setSearchError("Unable to search right now.");
         setPublicDoctors([]);
+        setPublicHospitals([]);
+        setPublicLabs([]);
       } finally {
         setSearchLoading(false);
         setDoctorLoading(false);
@@ -453,63 +461,61 @@ const HomePage = () => {
   };
 
   const searchResults = useMemo(() => {
-
-    if (!searchText) return [];
+    if (!searchText.trim()) return [];
 
     const query = searchText.toLowerCase();
 
     const doctorResults = publicDoctors
       .filter((doc) => {
-
         const searchableText = `
-      ${doc.name}
-      ${doc.specialty}
-      ${doc.city}
-      ${doc.location}
-      ${doc.hospitalName}
-      ${doc.tags.join(" ")}
-      ${doc.conditions.join(" ")}
-      ${doc.searchKeywords.join(" ")}
-      ${doc.languages.join(" ")}
-      ${doc.bio}
-    `.toLowerCase();
+        ${doc.name}
+        ${doc.specialty}
+        ${doc.city}
+        ${doc.location}
+        ${doc.hospitalName}
+        ${doc.tags.join(" ")}
+        ${doc.searchKeywords.join(" ")}
+        ${doc.bio}
+      `.toLowerCase();
 
-        return (
-          searchableText.includes(query) ||
-          doc.specialty.toLowerCase().includes(query) ||
-          query.includes(doc.specialty.toLowerCase()) ||
-          doc.specialty.toLowerCase().replace("ist", "y").includes(query)
-        );
-
+        return searchableText.includes(query);
       })
-      .map((doc) => ({
-        type: "doctor",
-        data: doc
-      }));
+      .map((doc) => ({ type: "doctor", data: doc }));
 
-    const specialtyResults = specialties
-      .filter((s) => s.name.toLowerCase().includes(query))
-      .map((s) => ({
-        type: "specialty",
-        data: s
-      }));
+    const hospitalResults = publicHospitals
+      .filter((hospital) => {
+        const searchableText = `
+        ${hospital.hospitalName}
+        ${hospital.city}
+        ${hospital.area}
+        ${hospital.address}
+        ${hospital.badge}
+        ${hospital.description}
+      `.toLowerCase();
 
-    const costResults = costPackages
-      .filter((c) =>
-        `${c.title} ${c.desc}`.toLowerCase().includes(query)
-      )
-      .map((c) => ({
-        type: "cost",
-        data: c
-      }));
+        return searchableText.includes(query);
+      })
+      .map((hospital) => ({ type: "hospital", data: hospital }));
 
-    return [
-      ...doctorResults,
-      ...specialtyResults,
-      ...costResults
-    ];
+    const labResults = publicLabs
+      .filter((lab) => {
+        const searchableText = `
+        ${lab.name}
+        ${lab.city}
+        ${lab.area}
+        ${lab.state}
+        ${lab.addressLine1}
+        ${lab.addressLine2}
+        ${(lab.services || []).join(" ")}
+      `.toLowerCase();
 
-  }, [searchText, specialties, costPackages, publicDoctors]);
+        return searchableText.includes(query);
+      })
+      .map((lab) => ({ type: "lab", data: lab }));
+
+    return [...doctorResults, ...hospitalResults, ...labResults];
+  }, [searchText, publicDoctors, publicHospitals, publicLabs]);
+
   return (
     <div className="home-wrapper">
       <div className="bg-blob blob-1"></div>
@@ -868,7 +874,7 @@ const HomePage = () => {
                 <span className="search-icon-hero">🔍</span>
                 <input
                   type="text"
-                  placeholder="Search doctors, clinics, hospitals..."
+                  placeholder="Search doctors, hospitals, labs, clinics..."
                   value={searchText}
                   onChange={(e) => {
                     setSearchText(e.target.value);
@@ -919,7 +925,7 @@ const HomePage = () => {
       {showSearchResults && searchText && (
         <section className="search-results">
           <h2 className="section-title">
-            Doctors Found: {searchResults.filter(i => i.type === "doctor").length}
+            Search Results: {searchResults.length}
           </h2>
           {searchLoading && (
             <div className="no-results-box" style={{ textAlign: "center", width: "100%", padding: "30px" }}>
@@ -936,28 +942,29 @@ const HomePage = () => {
           )}
           {/* Yahan 'doctor-grid-v3' class use karo consistency ke liye */}
           <div className="doctor-grid-v3">
-            {searchResults.filter(item => item.type === "doctor").length > 0 ? (
-              searchResults
-                .filter((item) => item.type === "doctor")
-                .map((item, index) => {
+            {searchResults.length > 0 ? (
+              searchResults.map((item, index) => {
+                if (item.type === "doctor") {
                   const doc = item.data;
+
                   return (
-                    /* Same structure as your Expert Healthcare Team section */
                     <div
-                      key={doc.id || index}
+                      key={`doctor-${doc.id || index}`}
                       className="premium-v3-card"
                       onClick={() => openDoctorModal(doc.id)}
                     >
-                      {/* TOP IMAGE */}
                       <div className="v3-card-top">
-                        <img src={getSafeDoctorImage(selectedDoctor?.profileImage)} alt={doc.name || "Doctor"} onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = defaultDoctorAvatar;
-                        }} />
+                        <img
+                          src={getSafeDoctorImage(doc.profileImage)}
+                          alt={doc.name || "Doctor"}
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = defaultDoctorAvatar;
+                          }}
+                        />
                         <div className="v3-rating">⭐ 4.9</div>
                       </div>
 
-                      {/* BODY */}
                       <div className="v3-card-body">
                         <h3>{doc.name || "Doctor"}</h3>
                         <p className="v3-spec">{doc.specialty}</p>
@@ -965,7 +972,6 @@ const HomePage = () => {
                         <p className="v3-exp">💼 {doc.experience || 10}+ yrs</p>
                         <p className="v3-fee">💰 ₹{doc.fees || 500}</p>
 
-                        {/* BUTTONS */}
                         <div className="v3-btn-group">
                           <button
                             className="v3-btn secondary"
@@ -990,14 +996,90 @@ const HomePage = () => {
                       </div>
                     </div>
                   );
-                })
+                }
+
+                if (item.type === "hospital") {
+                  const hospital = item.data;
+
+                  return (
+                    <div
+                      key={`hospital-${hospital.id || index}`}
+                      className="premium-v3-card"
+                      onClick={() => navigate("/all-services")}
+                    >
+                      <div className="v3-card-top">
+                        <img
+                          src={hospital.imageUrl}
+                          alt={hospital.hospitalName || "Hospital"}
+                        />
+                        <div className="v3-rating">🏥 Hospital</div>
+                      </div>
+
+                      <div className="v3-card-body">
+                        <h3>{hospital.hospitalName}</h3>
+                        <p className="v3-spec">{hospital.badge || "Premium Hospital"}</p>
+                        <p className="v3-loc">
+                          📍 {[hospital.area, hospital.city].filter(Boolean).join(", ") || "Location not updated"}
+                        </p>
+                        <p className="v3-exp">🛏️ {hospital.availableBeds || 0} beds available</p>
+
+                        <div className="v3-btn-group">
+                          <button className="v3-btn secondary">
+                            View Hospital
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (item.type === "lab") {
+                  const lab = item.data;
+
+                  return (
+                    <div
+                      key={`lab-${lab.id || index}`}
+                      className="premium-v3-card"
+                      onClick={() => navigate("/all-services")}
+                    >
+                      <div className="v3-card-top">
+                        <img
+                          src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=800"
+                          alt={lab.name || "Lab"}
+                        />
+                        <div className="v3-rating">🧪 Lab</div>
+                      </div>
+
+                      <div className="v3-card-body">
+                        <h3>{lab.name}</h3>
+                        <p className="v3-spec">
+                          {(lab.services || []).slice(0, 2).join(", ") || "Diagnostic Lab"}
+                        </p>
+                        <p className="v3-loc">
+                          📍 {[lab.area, lab.city].filter(Boolean).join(", ") || "Location not updated"}
+                        </p>
+                        <p className="v3-exp">✅ Verified diagnostic center</p>
+
+                        <div className="v3-btn-group">
+                          <button className="v3-btn secondary">
+                            View Lab
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return null;
+              })
             ) : (
-              <div className="no-results-box" style={{ textAlign: 'center', width: '100%', padding: '40px' }}>
-                <h3>No Doctors Found</h3>
-                <p>Try searching for a different specialty or name.</p>
+              <div className="no-results-box" style={{ textAlign: "center", width: "100%", padding: "40px" }}>
+                <h3>No Results Found</h3>
+                <p>Try searching for doctors, hospitals, labs, city, clinic, or service name.</p>
               </div>
             )}
           </div>
+
         </section>
       )}
       {!searchText && (
@@ -1063,7 +1145,7 @@ const HomePage = () => {
                   >
                     {/* TOP IMAGE */}
                     <div className="v3-card-top">
-                      <img src={getSafeDoctorImage(selectedDoctor?.profileImage)} alt={doc.name || "Doctor"} onError={(e) => {
+                     <img src={getSafeDoctorImage(doc.profileImage)} alt={doc.name || "Doctor"} onError={(e) => {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src = defaultDoctorAvatar;
                       }} />
