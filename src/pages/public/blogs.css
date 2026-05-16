@@ -1541,7 +1541,7 @@
   .blogs-modal-summary {
     font-size: 14.5px;
   }
-}
+
 .main-footer {
   padding: 46px 0 22px;
   margin-top: 56px;
@@ -1615,7 +1615,7 @@
   font-size: 12px;
   line-height: 1.6;
 }
-
+}
 
 @media (max-width: 420px) {
   .blogs-mobile-sidebar {
