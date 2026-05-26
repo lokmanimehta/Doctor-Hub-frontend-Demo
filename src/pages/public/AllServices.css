@@ -322,11 +322,11 @@ button:disabled {
   color: var(--text-muted);
 }
 
-.sidebar-footer {
+.sidebar-footer{
   display: grid;
   gap: 10px;
   padding-top: 18px;
-  padding-bottom: 40px;
+  padding-bottom: 40px!important;
   border-top: 1px solid var(--border);
 }
 

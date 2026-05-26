@@ -486,10 +486,10 @@
   border: 1px solid rgba(16, 185, 129, 0.12);
 }
 
-.sidebar-footer {
+.sidebar-footer{
   margin-top: auto;
   padding-top: 20px;
-  padding-bottom: 40px;
+  padding-bottom: 40px!important;
   border-top: 1px solid var(--about-border);
   display: flex;
   flex-direction: column;
