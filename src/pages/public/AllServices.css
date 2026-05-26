@@ -91,11 +91,12 @@ button:disabled {
 }
 
 .header-brand h1 {
-  font-size: 24px;
-  font-weight: 900;
+  font-size: 23px;
+  font-weight: 850;
   letter-spacing: -0.04em;
   color: #007664;
 }
+
 
 .header-brand h1 span {
   color: var(--text-dark);

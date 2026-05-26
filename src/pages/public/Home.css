@@ -404,15 +404,14 @@ a, a:hover, a:visited, a:active {
     height: 50px; /* Mobile par thoda chota */
   }
   .header-brand h1 {
-    font-size: 18px;
+    font-size: 20px;
   }
 }
 .header-nav { display: flex; gap: 25px; align-items: center; }
-.nav-item { font-weight: 600; color: var(--text-dark); cursor: pointer; font-size: 16px; transition: 0.3s; }
+.nav-item { font-weight: 850; color: var(--text-dark); cursor: pointer; font-size: 16px; transition: 0.3s; }
 .nav-item:hover { color: var(--primary); }
 
 /* Desktop Dropdown Menu */
-/* Desktop Dropdown Fix */
 .dropdown-menu-desktop, .dropdown-menu.alignment-fix {
   position: absolute;
   top: 100%; /* Header ke thik neeche */

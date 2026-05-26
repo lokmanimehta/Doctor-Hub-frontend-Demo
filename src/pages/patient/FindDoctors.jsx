@@ -277,7 +277,7 @@ export default function FindDoctors() {
               <button
                 className="secondary-btn"
                 onClick={() =>
-                  navigate(`/patient/doctorsprofile/${selected.id}`)
+                  navigate(`/doctors/${selected.id}`)
                 }
               >
                 Full Profile
@@ -324,9 +324,8 @@ export default function FindDoctors() {
                     return (
                       <button
                         key={d}
-                        className={`date-chip ${
-                          selectedDate === d ? "active" : ""
-                        }`}
+                        className={`date-chip ${selectedDate === d ? "active" : ""
+                          }`}
                         onClick={() => setSelectedDate(d)}
                       >
                         {date.toDateString().slice(0, 10)}
