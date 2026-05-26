@@ -489,6 +489,7 @@
 .sidebar-footer {
   margin-top: auto;
   padding-top: 20px;
+  padding-bottom: 25px;
   border-top: 1px solid var(--about-border);
   display: flex;
   flex-direction: column;
