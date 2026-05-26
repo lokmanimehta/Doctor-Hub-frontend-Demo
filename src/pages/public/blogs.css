@@ -518,6 +518,16 @@
   color: #dc2626 !important;
 }
 
+.blogs-sidebar-footer {
+  margin-top: auto; 
+  padding-top: 20px;
+  padding-bottom: 40px;  /* ADD THIS */
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .blogs-hero-section {
   padding: 78px 9% 72px;
   background:
