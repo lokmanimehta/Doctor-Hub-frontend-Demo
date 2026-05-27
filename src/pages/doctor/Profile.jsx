@@ -56,6 +56,7 @@ const calculateProfileCompletion = (form = {}, files = {}) => {
   };
 
 
+
   const hasValidClinicBasic =
     Array.isArray(form.clinics) &&
     form.clinics.some(
@@ -793,6 +794,14 @@ const DoctorProfile = () => {
           "error",
           normalizeErrorMessage(err) || "Failed to load profile"
         );
+        console.log("FULL ERROR:", err);
+
+  console.log("BACKEND RESPONSE:", err.response);
+
+  console.log(
+    "BACKEND MESSAGE:",
+    err?.response?.data?.message
+  );
       } finally {
         setLoadingProfile(false);
       }
@@ -1469,10 +1478,13 @@ const DoctorProfile = () => {
       }
     } catch (err) {
       showPopup("error", getDocumentUploadErrorMessage(err));
+      
     } finally {
       setSavingProfile(false);
     }
   };
+
+  
 
   /* =========================================================
      DERIVED VALUES
