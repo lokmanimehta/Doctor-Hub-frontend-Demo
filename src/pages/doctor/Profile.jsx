@@ -794,14 +794,7 @@ const DoctorProfile = () => {
           "error",
           normalizeErrorMessage(err) || "Failed to load profile"
         );
-        console.log("FULL ERROR:", err);
-
-  console.log("BACKEND RESPONSE:", err.response);
-
-  console.log(
-    "BACKEND MESSAGE:",
-    err?.response?.data?.message
-  );
+        
       } finally {
         setLoadingProfile(false);
       }
@@ -1477,11 +1470,29 @@ const DoctorProfile = () => {
         return;
       }
     } catch (err) {
-      showPopup("error", getDocumentUploadErrorMessage(err));
-      
-    } finally {
-      setSavingProfile(false);
-    }
+
+  console.log("FULL ERROR:", err);
+
+  console.log("BACKEND RESPONSE:", err.response);
+
+  console.log(
+    "BACKEND MESSAGE:",
+    err?.response?.data?.message
+  );
+
+  console.log(
+    "VALIDATION ERRORS:",
+    err?.response?.data
+  );
+
+  showPopup(
+    "error",
+    getDocumentUploadErrorMessage(err)
+  );
+
+} finally {
+  setSavingProfile(false);
+}
   };
 
   
