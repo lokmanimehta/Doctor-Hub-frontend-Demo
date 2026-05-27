@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import userlogin from "../../assets/images/userlogin.png";
@@ -34,12 +34,50 @@ const LoginPage = () => {
   const [resendTimer, setResendTimer] = useState(30);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [profiles, setProfiles] = useState([]);
+  const [resendActive, setResendActive] = useState(false);
   const { selectProfile } = useProfile();
   const showPopup = (message, type) => {
     setPopupMessage(message);
     setPopupType(type);
   };
 
+  useEffect(() => {
+
+    let interval;
+
+    if (resendActive && resendTimer > 0) {
+
+      interval = setInterval(() => {
+        setResendTimer(prev => prev - 1);
+      }, 1000);
+
+    }
+
+    if (resendTimer === 0) {
+      setResendDisabled(false);
+      setResendActive(false);
+    }
+
+    return () => clearInterval(interval);
+
+  }, [resendActive, resendTimer]);
+  useEffect(() => {
+
+    const handleEsc = (e) => {
+
+      if (e.key === "Escape") {
+        setShowProfileSelector(false);
+      }
+
+    };
+
+    window.addEventListener("keydown", handleEsc);
+
+    return () => {
+      window.removeEventListener("keydown", handleEsc);
+    };
+
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -102,8 +140,7 @@ const LoginPage = () => {
   };
 
   const handleProfileSelect = (profile) => {
-    console.log("Selected profile:", profile);
-    console.log("Selected profile full:", JSON.stringify(profile, null, 2));
+
 
     selectProfile(profile);
 
@@ -115,51 +152,42 @@ const LoginPage = () => {
   };
 
   const sendOtp = async () => {
-  if (resendDisabled) return;
+    if (resendDisabled) return;
 
-  const trimmedIdentifier = identifier.trim();
+    const trimmedIdentifier = identifier.trim();
 
-  if (!trimmedIdentifier) {
-    showPopup("⚠️ Please enter your email or phone first", "error");
-    return;
-  }
+    if (!trimmedIdentifier) {
+      showPopup("⚠️ Please enter your email or phone first", "error");
+      return;
+    }
 
-  let destination = "";
+    let destination = "";
 
-  if (trimmedIdentifier.includes("@")) {
-    destination = trimmedIdentifier.replace(/(.{2}).+(@.+)/, "$1****$2");
-  } else {
-    destination = trimmedIdentifier.replace(/.(?=.{2})/g, "*");
-  }
+    if (trimmedIdentifier.includes("@")) {
+      destination = trimmedIdentifier.replace(/(.{2}).+(@.+)/, "$1****$2");
+    } else {
+      destination = trimmedIdentifier.replace(/.(?=.{2})/g, "*");
+    }
 
-  try {
-    setResendDisabled(true);
+    try {
+      setResendDisabled(true);
 
-    await forgotPassword(trimmedIdentifier);
+      await forgotPassword(trimmedIdentifier);
 
-    setOtpDestination(destination);
-    setOtpSent(true);
-    setOtpIdentifier(trimmedIdentifier);
-    setResendTimer(30);
+      setOtpDestination(destination);
+      setOtpSent(true);
+      setOtpIdentifier(trimmedIdentifier);
+      setResendTimer(30);
 
-    showPopup(`🔐 OTP sent successfully to ${destination}`, "success");
+      showPopup(`🔐 OTP sent successfully to ${destination}`, "success");
 
-    const countdown = setInterval(() => {
-      setResendTimer((prev) => {
-        if (prev === 1) {
-          clearInterval(countdown);
-          setResendDisabled(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+      setResendActive(true);
 
-  } catch (err) {
-    setResendDisabled(false);
-    showPopup(`❌ ${err.message || "Failed to send OTP"}`, "error");
-  }
-};
+    } catch (err) {
+      setResendDisabled(false);
+      showPopup(`❌ ${err.message || "Failed to send OTP"}`, "error");
+    }
+  };
 
   const resetPasswordHandler = async () => {
     if (loadingReset) return;       // prevent multiple clicks
@@ -167,6 +195,16 @@ const LoginPage = () => {
 
     if (!otp || !newPassword || !confirmPassword) {
       showPopup("⚠️ Please fill all required fields", "error");
+      setLoadingReset(false);
+      return;
+    }
+    if (
+      !/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[@#$%^&+=!]).{8,}$/.test(newPassword)
+    ) {
+      showPopup(
+        "Password must contain uppercase, lowercase, number and special character",
+        "error"
+      );
       setLoadingReset(false);
       return;
     }
@@ -189,7 +227,7 @@ const LoginPage = () => {
 
       await resetPassword(payload)
 
-      showPopup("🎉 Password reset successful! You can login now.", "success");
+      showPopup(" Password reset successful! You can login now.", "success");
 
       // Reset state & navigate
       setShowForgotFlow(false);
@@ -439,8 +477,14 @@ const LoginPage = () => {
 
             )}
             {showProfileSelector && (
-              <div className="profile-modal-overlay">
-                <div className="profile-selector-popup">
+              <div
+                className="profile-modal-overlay"
+                onClick={() => setShowProfileSelector(false)}
+              >
+                <div
+                  className="profile-selector-popup"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <h3>Select Profile to Continue</h3>
 
                   {profiles.map((p) => (

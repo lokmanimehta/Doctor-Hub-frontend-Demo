@@ -20,7 +20,7 @@ export const calculateProfileCompletion = (form = {}, files = {}) => {
         Array.isArray(clinic?.availability) &&
         clinic.availability.some(
           (slot) =>
-            hasValue(slot?.day) &&
+           Array.isArray(slot?.days) && slot.days.length > 0 &&
             hasValue(slot?.startTime) &&
             hasValue(slot?.endTime)
         )
@@ -39,7 +39,7 @@ export const calculateProfileCompletion = (form = {}, files = {}) => {
         Array.isArray(vp?.availability) &&
         vp.availability.some(
           (slot) =>
-            hasValue(slot?.day) &&
+            Array.isArray(slot?.days) && slot.days.length > 0&&
             hasValue(slot?.startTime) &&
             hasValue(slot?.endTime)
         )

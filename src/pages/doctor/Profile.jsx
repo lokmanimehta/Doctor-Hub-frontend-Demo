@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+
 import "./Profile.css";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
@@ -10,15 +11,16 @@ import {
 import defaultDoctorAvatar from "../../assets/images/avtar.png";
 /* =========================================================
    PROFILE COMPLETION CALCULATION
-   ========================================================= */
-
-const calculateProfileCompletion = (form = {}, files = {}) => {
-  const hasValue = (value) => {
-    if (value === null || value === undefined) return false;
-    if (typeof value === "string") return value.trim().length > 0;
-    if (Array.isArray(value)) return value.length > 0;
-    return true;
-  };
+     ========================================================= */
+    const DAYS = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
   const TIME_OPTIONS = [
     "12:00 AM", "12:30 AM",
     "01:00 AM", "01:30 AM",
@@ -45,6 +47,15 @@ const calculateProfileCompletion = (form = {}, files = {}) => {
     "10:00 PM", "10:30 PM",
     "11:00 PM", "11:30 PM"
   ];
+const calculateProfileCompletion = (form = {}, files = {}) => {
+  const hasValue = (value) => {
+    if (value === null || value === undefined) return false;
+    if (typeof value === "string") return value.trim().length > 0;
+    if (Array.isArray(value)) return value.length > 0;
+    return true;
+  };
+  
+
   const hasValidClinicBasic =
     Array.isArray(form.clinics) &&
     form.clinics.some(
@@ -62,7 +73,7 @@ const calculateProfileCompletion = (form = {}, files = {}) => {
         Array.isArray(clinic?.availability) &&
         clinic.availability.some(
           (slot) =>
-            hasValue(slot?.day) &&
+            Array.isArray(slot?.days) && slot.days.length > 0 &&
             hasValue(slot?.startTime) &&
             hasValue(slot?.endTime)
         )
@@ -84,7 +95,7 @@ const calculateProfileCompletion = (form = {}, files = {}) => {
         Array.isArray(vp?.availability) &&
         vp.availability.some(
           (slot) =>
-            hasValue(slot?.day) &&
+            Array.isArray(slot?.days) && slot.days.length > 0 &&
             hasValue(slot?.startTime) &&
             hasValue(slot?.endTime)
         )
@@ -161,7 +172,7 @@ const EMPTY_CLINIC = {
   contactNumber: "",
   landmark: "",
   isPrimary: false,
-  availability: [{ day: "", startTime: "", endTime: "" }],
+  availability: [{ days: [], startTime: "", endTime: "" }],
 };
 
 const EMPTY_VISITING = {
@@ -175,7 +186,7 @@ const EMPTY_VISITING = {
   startDate: "",
   endDate: "",
   currentlyActive: true,
-  availability: [{ day: "", startTime: "", endTime: "" }],
+  availability: [{ days: [], startTime: "", endTime: "" }],
 };
 
 const EMPTY_FILES = {
@@ -308,7 +319,12 @@ const roundTimeToNearest15Min = (value) => {
 
 const isEndTimeAfterStartTime = (startTime, endTime) => {
   if (!startTime || !endTime) return true;
-  return startTime < endTime;
+  const convertToMinutes = (time) => {
+  const [h, m] = time.split(":").map(Number);
+  return h * 60 + m;
+};
+
+return convertToMinutes(endTime) > convertToMinutes(startTime);
 };
 
 const mapApiClinicToUi = (clinic = {}) => {
@@ -330,11 +346,11 @@ const mapApiClinicToUi = (clinic = {}) => {
       Array.isArray(clinic.availabilitySlots) && clinic.availabilitySlots.length > 0
         ? clinic.availabilitySlots.map((slot) => ({
           id: slot.id || null,
-          day: slot.dayOfWeek || "",
+          days: [slot.dayOfWeek],
           startTime: slot.startTime ? slot.startTime.substring(0, 5) : "",
           endTime: slot.endTime ? slot.endTime.substring(0, 5) : "",
         }))
-        : [{ day: "", startTime: "", endTime: "" }],
+        : [{ days: [], startTime: "", endTime: "" }],
   };
 };
 
@@ -384,11 +400,11 @@ const mapApiVisitingToUi = (vp = {}) => {
       Array.isArray(vp.availabilitySlots) && vp.availabilitySlots.length > 0
         ? vp.availabilitySlots.map((slot) => ({
           id: slot.id || null,
-          day: slot.dayOfWeek || "",
+          days: [slot.dayOfWeek],
           startTime: slot.startTime ? slot.startTime.substring(0, 5) : "",
           endTime: slot.endTime ? slot.endTime.substring(0, 5) : "",
         }))
-        : [{ day: "", startTime: "", endTime: "" }],
+        : [{ days: [], startTime: "", endTime: "" }],
   };
 };
 
@@ -516,23 +532,25 @@ const buildClinicPayload = (clinics = []) => {
       isPrimary: clinic.isPrimary === true,
       isActive: true,
       availabilitySlots: Array.isArray(clinic.availability)
-        ? clinic.availability
-          .filter(
-            (slot) =>
-              slot &&
-              slot.day?.trim() &&
-              slot.startTime?.trim() &&
-              slot.endTime?.trim()
-          )
-          .map((slot) => ({
-            dayOfWeek: slot.day.trim().toUpperCase(),
-            startTime: slot.startTime.length === 5 ? `${slot.startTime}:00` : slot.startTime,
-            endTime: slot.endTime.length === 5 ? `${slot.endTime}:00` : slot.endTime,
-            slotDurationMinutes: 15,
-            maxPatientsPerSlot: 4,
-            isActive: true,
-          }))
-        : [],
+  ? clinic.availability
+      .filter(
+        (slot) =>
+          slot &&
+          slot.days?.length > 0 &&
+          slot.startTime?.trim() &&
+          slot.endTime?.trim()
+      )
+      .flatMap((slot) =>
+        slot.days.map((day) => ({
+          dayOfWeek: normalizeDayForBackend(day),
+          startTime: normalizeTimeForBackend(slot.startTime),
+          endTime: normalizeTimeForBackend(slot.endTime),
+          slotDurationMinutes: 15,
+          maxPatientsPerSlot: 4,
+          isActive: true,
+        }))
+      )
+  : [],
     }));
 };
 
@@ -571,17 +589,19 @@ const buildVisitingPayload = (visitingPositions = []) => {
           .filter(
             (slot) =>
               slot &&
-              slot.day?.trim() &&
+              slot.days?.length > 0 &&
               slot.startTime?.trim() &&
               slot.endTime?.trim()
           )
-          .map((slot) => ({
-            dayOfWeek: normalizeDayForBackend(slot.day),
-            startTime: normalizeTimeForBackend(slot.startTime),
-            endTime: normalizeTimeForBackend(slot.endTime),
-            slotDurationMinutes: 30,
-            isActive: true,
-          }))
+          .flatMap((slot) =>
+            slot.days.map((day) => ({
+              dayOfWeek: normalizeDayForBackend(day),
+              startTime: normalizeTimeForBackend(slot.startTime),
+              endTime: normalizeTimeForBackend(slot.endTime),
+              slotDurationMinutes: 30,
+              isActive: true,
+            }))
+          )
         : [],
     }));
 
@@ -606,7 +626,9 @@ const DoctorProfile = () => {
   const [form, setForm] = useState(() => mapStoredUserToForm(storedUser));
 
   const [files, setFiles] = useState(EMPTY_FILES);
-
+  const [allStates, setAllStates] = useState([]);
+  const [citySuggestions, setCitySuggestions] = useState({});
+  const cityDebounceRef = useRef(null);
   const [popup, setPopup] = useState({
     show: false,
     type: "",
@@ -779,6 +801,25 @@ const DoctorProfile = () => {
     fetchDoctorProfile();
   }, []);
 
+  useEffect(() => {
+    api.get("/locations/states").then(res => setAllStates(res.data)).catch(() => { });
+  }, []);
+  const handleCitySearch = (value, key) => {
+    clearTimeout(cityDebounceRef.current);
+    if (value.length >= 1) {
+      cityDebounceRef.current = setTimeout(async () => {
+        try {
+          const res = await api.get(`/locations/cities?query=${value}`);
+          setCitySuggestions(prev => ({ ...prev, [key]: res.data }));
+        } catch {
+
+          // city search failed silently
+        }
+      }, 300);
+    } else {
+      setCitySuggestions(prev => ({ ...prev, [key]: [] }));
+    }
+  };
   /* =========================================================
      FORM BASIC HANDLERS
      ========================================================= */
@@ -936,7 +977,7 @@ const DoctorProfile = () => {
   const addAvailability = (clinicIndex) => {
     const newClinics = [...form.clinics];
     newClinics[clinicIndex].availability.push({
-      day: "",
+      days: [],
       startTime: "",
       endTime: "",
     });
@@ -984,7 +1025,7 @@ const DoctorProfile = () => {
 
     if (newClinics[clinicIndex].availability.length === 0) {
       newClinics[clinicIndex].availability.push({
-        day: "",
+        days: [],
         startTime: "",
         endTime: "",
       });
@@ -1036,7 +1077,7 @@ const DoctorProfile = () => {
   const addVisitingAvailability = (vpIndex) => {
     const newPositions = [...form.visitingPositions];
     newPositions[vpIndex].availability.push({
-      day: "",
+      days: [],
       startTime: "",
       endTime: "",
     });
@@ -1083,7 +1124,7 @@ const DoctorProfile = () => {
 
     if (newPositions[vpIndex].availability.length === 0) {
       newPositions[vpIndex].availability.push({
-        day: "",
+        days: [],
         startTime: "",
         endTime: "",
       });
@@ -1700,21 +1741,52 @@ const DoctorProfile = () => {
                   maxLength={10}
                 />
                 <label>City *</label>
-                <input
-                  type="text"
-                  name="city"
-                  value={clinic.city}
-                  onChange={(e) => handleClinicChange(index, e)}
-                  placeholder="Enter City"
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    type="text"
+                    name="city"
+                    value={clinic.city}
+                    autoComplete="off"
+                    placeholder="Type city name..."
+                    onChange={(e) => {
+                      handleClinicChange(index, e);
+                      handleCitySearch(e.target.value, `clinic_${index}`);
+                    }}
+                    onBlur={() => setTimeout(() => setCitySuggestions(prev => ({ ...prev, [`clinic_${index}`]: [] })), 200)}
+                  />
+                  {citySuggestions[`clinic_${index}`]?.length > 0 && (
+                    <div className="city-dropdown">
+                      {citySuggestions[`clinic_${index}`].map(city => (
+                        <div
+                          key={city.id}
+                          className="city-dropdown-item"
+                          onMouseDown={() => {
+                            handleClinicChange(index, { target: { name: "city", value: city.name } });
+                            if (city.state?.name) {
+                              handleClinicChange(index, { target: { name: "state", value: city.state.name } });
+                            }
+                            setCitySuggestions(prev => ({ ...prev, [`clinic_${index}`]: [] }));
+                          }}
+                        >
+                          {city.name}
+                          {city.state && <span className="city-dropdown-state">{city.state.name}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <label>State</label>
-                <input
-                  type="text"
+                <select
                   name="state"
                   value={clinic.state}
                   onChange={(e) => handleClinicChange(index, e)}
-                  placeholder="Enter State"
-                />
+                >
+                  <option value="">Select State</option>
+                  {allStates.map(s => (
+                    <option key={s.id} value={s.name}>{s.name}</option>
+                  ))}
+                </select>
 
                 <label>Pincode</label>
                 <input
@@ -1747,22 +1819,33 @@ const DoctorProfile = () => {
                 {clinic.availability.map((slot, i) => (
                   <div key={i} className="input-grid">
                     <div>
-                      <label>Day</label>
-                      <select
-                        name="day"
-                        value={slot.day}
-                        onChange={(e) => handleAvailabilityChange(index, i, e)}
-                      >
-                        <option value="">Select Day</option>
-                        <option value="Monday">Monday</option>
-                        <option value="Tuesday">Tuesday</option>
-                        <option value="Wednesday">Wednesday</option>
-                        <option value="Thursday">Thursday</option>
-                        <option value="Friday">Friday</option>
-                        <option value="Saturday">Saturday</option>
-                        <option value="Sunday">Sunday</option>
-                      </select>
-                    </div>
+  <label>Select Days</label>
+
+  <div className="days-checkbox-group">
+    {DAYS.map((day) => (
+      <label key={day} className="day-checkbox">
+        <input
+          type="checkbox"
+          checked={slot.days?.includes(day)}
+          onChange={(e) => {
+            const updatedDays = e.target.checked
+              ? [...(slot.days || []), day]
+              : (slot.days || []).filter((d) => d !== day);
+
+            handleAvailabilityChange(index, i, {
+              target: {
+                name: "days",
+                value: updatedDays,
+              },
+            });
+          }}
+        />
+
+        {day}
+      </label>
+    ))}
+  </div>
+</div>
 
                     <div className="time-field">
                       <label>Start Time</label>
@@ -1848,24 +1931,54 @@ const DoctorProfile = () => {
                   </div>
                   <div>
                     <label>City</label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={vp.city}
-                      onChange={(e) => handleVisitingChange(index, e)}
-                      placeholder="Enter City"
-                    />
+                    <div style={{ position: "relative" }}>
+                      <input
+                        type="text"
+                        name="city"
+                        value={vp.city}
+                        autoComplete="off"
+                        placeholder="Type city name..."
+                        onChange={(e) => {
+                          handleVisitingChange(index, e);
+                          handleCitySearch(e.target.value, `visiting_${index}`);
+                        }}
+                        onBlur={() => setTimeout(() => setCitySuggestions(prev => ({ ...prev, [`visiting_${index}`]: [] })), 200)}
+                      />
+                      {citySuggestions[`visiting_${index}`]?.length > 0 && (
+                        <div className="city-dropdown">
+                          {citySuggestions[`visiting_${index}`].map(city => (
+                            <div
+                              key={city.id}
+                              className="city-dropdown-item"
+                              onMouseDown={() => {
+                                handleVisitingChange(index, { target: { name: "city", value: city.name } });
+                                if (city.state?.name) {
+                                  handleVisitingChange(index, { target: { name: "state", value: city.state.name } });
+                                }
+                                setCitySuggestions(prev => ({ ...prev, [`visiting_${index}`]: [] }));
+                              }}
+                            >
+                              {city.name}
+                              {city.state && <span className="city-dropdown-state">{city.state.name}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div>
                     <label>State</label>
-                    <input
-                      type="text"
+                    <select
                       name="state"
                       value={vp.state}
                       onChange={(e) => handleVisitingChange(index, e)}
-                      placeholder="Enter State"
-                    />
+                    >
+                      <option value="">Select State</option>
+                      {allStates.map(s => (
+                        <option key={s.id} value={s.name}>{s.name}</option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label>Designation</label>
@@ -1965,24 +2078,33 @@ const DoctorProfile = () => {
                 {(vp.availability || []).map((slot, i) => (
                   <div key={i} className="input-grid">
                     <div>
-                      <label>Day</label>
-                      <select
-                        name="day"
-                        value={slot.day}
-                        onChange={(e) =>
-                          handleVisitingAvailabilityChange(index, i, e)
-                        }
-                      >
-                        <option value="">Select Day</option>
-                        <option value="Monday">Monday</option>
-                        <option value="Tuesday">Tuesday</option>
-                        <option value="Wednesday">Wednesday</option>
-                        <option value="Thursday">Thursday</option>
-                        <option value="Friday">Friday</option>
-                        <option value="Saturday">Saturday</option>
-                        <option value="Sunday">Sunday</option>
-                      </select>
-                    </div>
+  <label>Select Days</label>
+
+  <div className="days-checkbox-group">
+    {DAYS.map((day) => (
+      <label key={day} className="day-checkbox">
+        <input
+          type="checkbox"
+          checked={slot.days?.includes(day)}
+          onChange={(e) => {
+            const updatedDays = e.target.checked
+              ? [...(slot.days || []), day]
+              : (slot.days || []).filter((d) => d !== day);
+
+            handleVisitingAvailabilityChange(index, i, {
+              target: {
+                name: "days",
+                value: updatedDays,
+              },
+            });
+          }}
+        />
+
+        {day}
+      </label>
+    ))}
+  </div>
+</div>
 
                     <div className="time-field">
                       <label>Start Time</label>

@@ -18,6 +18,7 @@ const SignupPage = () => {
   const [otp, setOtp] = useState("");
   const [role, setRole] = useState("patient");
   const [loading, setLoading] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
   const [timer, setTimer] = useState(60);
   const [specInput, setSpecInput] = useState("");
   const [credInput, setCredInput] = useState("");
@@ -46,9 +47,9 @@ const SignupPage = () => {
   });
 
   const [masterData, setMasterData] = useState({
-  specializations: [],
-  degrees: []
-});
+    specializations: [],
+    degrees: []
+  });
 
   const [filteredSpecs, setFilteredSpecs] = useState([]);
   const [filteredCreds, setFilteredCreds] = useState([]);
@@ -63,61 +64,72 @@ const SignupPage = () => {
     }, 3000);
   };
   useEffect(() => {
-  const fetchDoctorMasterData = async () => {
-    try {
-      const [degreeResponse, specializationResponse] = await Promise.all([
-        api.get("/doctor/master/degrees"),
-        api.get("/doctor/master/specializations")
-      ]);
+    const fetchDoctorMasterData = async () => {
+      try {
+        const [degreeResponse, specializationResponse] = await Promise.all([
+          api.get("/doctor/master/degrees"),
+          api.get("/doctor/master/specializations")
+        ]);
 
-      setMasterData({
-        degrees: Array.isArray(degreeResponse.data)
-          ? degreeResponse.data.map((item) => item.name)
-          : [],
-        specializations: Array.isArray(specializationResponse.data)
-          ? specializationResponse.data.map((item) => item.name)
-          : []
-      });
-    } catch  {
-      showPopup("Failed to load doctor dropdown data", "error");
+        setMasterData({
+          degrees: Array.isArray(degreeResponse.data)
+            ? degreeResponse.data.map((item) => item.name)
+            : [],
+          specializations: Array.isArray(specializationResponse.data)
+            ? specializationResponse.data.map((item) => item.name)
+            : []
+        });
+      } catch {
+        showPopup("Failed to load doctor dropdown data", "error");
+      }
+    };
+
+    fetchDoctorMasterData();
+  }, []);
+
+  const handleInputChange = (e, type) => {
+    const value = e.target.value;
+
+    if (type === "specialization") {
+      setSpecInput(value);
+
+      const filtered = masterData.specializations.filter((item) =>
+        item.toLowerCase().includes(value.toLowerCase())
+      );
+
+      setFilteredSpecs(filtered);
+      setActiveField("specialization");
+    }
+
+    if (type === "credentials") {
+      setCredInput(value);
+
+      const filtered = masterData.degrees.filter((item) =>
+        item.toLowerCase().includes(value.toLowerCase())
+      );
+
+      setFilteredCreds(filtered);
+      setActiveField("credentials");
     }
   };
 
-  fetchDoctorMasterData();
-}, []);
+  useEffect(() => {
+    let interval;
 
-const handleInputChange = (e, type) => {
-  const value = e.target.value;
+    if (signupStep === "otp" && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
 
-  if (type === "specialization") {
-    setSpecInput(value);
+    return () => clearInterval(interval);
+  }, [signupStep, timer]);
 
-    const filtered = masterData.specializations.filter((item) =>
-      item.toLowerCase().includes(value.toLowerCase())
-    );
-
-    setFilteredSpecs(filtered);
-    setActiveField("specialization");
-  }
-
-  if (type === "credentials") {
-    setCredInput(value);
-
-    const filtered = masterData.degrees.filter((item) =>
-      item.toLowerCase().includes(value.toLowerCase())
-    );
-
-    setFilteredCreds(filtered);
-    setActiveField("credentials");
-  }
-};
-
-  
   const validateForm = () => {
     const { fullName, email, mobile, password, confirmPassword, credentials, specialization } = formData;
     if (fullName.trim().length < 3) { showPopup("Full Name must be at least 3 characters", "error"); return false; }
-    if (!/^\S+@\S+\.\S+$/.test(email)) { showPopup("Enter a valid email address", "error"); return false; }
-    if (!/^[6-9]\d{9}$/.test(mobile)) { showPopup("Mobile number must be 10 digits", "error"); return false; }
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) { showPopup("Enter a valid email address", "error"); return false; }
+    if (!/^[6-9]\d{9}$/.test(mobile.trim())) { showPopup("Mobile number must be 10 digits", "error"); return false; }
     if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[@#$%^&+=!]).{8,}$/.test(password)) {
       showPopup("Password must contain uppercase, lowercase, number and special character", "error");
       return false;
@@ -147,43 +159,48 @@ const handleInputChange = (e, type) => {
       setLoading(true);
 
       const payload = {
-        fullName: formData.fullName,
-        email: formData.email,
-        mobile: formData.mobile,
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+        mobile: formData.mobile.trim(),
         password: formData.password,
         role: role.toUpperCase(),
-        specialization: role === "doctor" ? formData.specialization : [],
-        credentials: role === "doctor" ? formData.credentials : [],
-        familyMembers: role === "patient"
-          ? familyMembers.map((member) => ({
-            fullName: member.fullName,
-            relation: member.relation,
-            gender: member.gender,
-            dateOfBirth: member.dateOfBirth,
-            bloodGroup: member.bloodGroup,
-            mobileNumber: member.mobileNumber
-          }))
-          : []
+        acceptedTerms: acceptedTerms,
+        specialization:
+          role === "doctor"
+            ? formData.specialization.map(item => item.trim())
+            : [],
+
+        credentials:
+          role === "doctor"
+            ? formData.credentials.map(item => item.trim())
+            : [],
+
+        familyMembers:
+          role === "patient"
+            ? familyMembers.map((member) => ({
+              fullName: member.fullName.trim(),
+              relation: member.relation.trim(),
+              gender: member.gender.trim(),
+              dateOfBirth: member.dateOfBirth,
+              bloodGroup: member.bloodGroup?.trim(),
+              mobileNumber: member.mobileNumber?.trim()
+            }))
+            : []
       };
 
       await signupUser(payload);
 
+      const maskedEmail = formData.email
+        .trim()
+        .replace(/(.{2}).+(@.+)/, "$1****$2");
+
       setEmailForOtp(formData.email);
 
-      showPopup("📧 OTP sent to your email", "success");
+      showPopup(`📧 OTP sent successfully to ${maskedEmail}`, "success");
 
       setSignupStep("otp");
       setTimer(60);
 
-      const interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev === 1) {
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
 
     } catch (err) {
       showPopup(err.message || "Signup failed", "error");
@@ -193,61 +210,65 @@ const handleInputChange = (e, type) => {
   };
 
 
-const verifyOtp = async () => {
-  const trimmedOtp = otp.trim();
+  const verifyOtp = async () => {
 
-  if (!trimmedOtp) {
-    showPopup("Please enter OTP", "error");
-    return;
-  }
+    if (otpLoading) return;
 
-  if (!/^[0-9]{6}$/.test(trimmedOtp)) {
-    showPopup("OTP must be exactly 6 digits", "error");
-    return;
-  }
+    const trimmedOtp = otp.trim();
 
-  try {
-    await api.post("/auth/verify-otp", {
-      identifier: emailForOtp.trim(),
-      otp: trimmedOtp
-    });
+    if (!trimmedOtp) {
+      showPopup("Please enter OTP", "error");
+      return;
+    }
 
-    showPopup("🎉 Account verified successfully!", "success");
+    if (!/^[0-9]{6}$/.test(trimmedOtp)) {
+      showPopup("OTP must be exactly 6 digits", "error");
+      return;
+    }
 
-    setTimeout(() => {
-      navigate("/login");
-    }, 2000);
+    try {
 
-  } catch (err) {
-    showPopup(err.message || "OTP verification failed", "error");
-  }
-};
+      setOtpLoading(true);
 
-const resendOtp = async () => {
-  if (timer > 0) return;
-
-  try {
-    await api.post("/auth/resend-otp", {
-      identifier: emailForOtp.trim()
-    });
-
-    showPopup("🔁 OTP sent again", "success");
-    setTimer(60);
-
-    const interval = setInterval(() => {
-      setTimer((prev) => {
-        if (prev === 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
+      await api.post("/auth/verify-otp", {
+        identifier: emailForOtp.trim(),
+        otp: trimmedOtp
       });
-    }, 1000);
 
-  } catch (err) {
-    showPopup(err.message || "Error occurred", "error");
-  }
-};
+      showPopup(" Account verified successfully!", "success");
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+
+    } catch (err) {
+      showPopup(err.message || "OTP verification failed", "error");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const resendOtp = async () => {
+    if (timer > 0) return;
+
+    try {
+      await api.post("/auth/resend-otp", {
+        identifier: emailForOtp.trim()
+      });
+
+      const maskedEmail = emailForOtp
+        .trim()
+        .replace(/(.{2}).+(@.+)/, "$1****$2");
+
+      showPopup(`🔁 OTP resent to ${maskedEmail}`, "success");
+      setTimer(60);
+
+
+
+    } catch (err) {
+      showPopup(err.message || "Error occurred", "error");
+    }
+  };
 
   return (
     <div className="auth-container">
@@ -266,7 +287,7 @@ const resendOtp = async () => {
         <div className="auth-visual">
           <div className="auth-visual-content">
             <img
-              src={role === "patient"  ? patientImg : doctorImg}
+              src={role === "patient" ? patientImg : doctorImg}
               alt="Healthcare"
               className="auth-image"
             />
@@ -639,7 +660,16 @@ const resendOtp = async () => {
                             showPopup("Family member mobile number must be a valid 10-digit Indian number", "error");
                             return;
                           }
+                          const exists = familyMembers.some(
+                            member =>
+                              member.fullName.trim().toLowerCase() === newMember.fullName.trim().toLowerCase() &&
+                              member.dateOfBirth === newMember.dateOfBirth
+                          );
 
+                          if (exists) {
+                            showPopup("Family member already added", "error");
+                            return;
+                          }
                           setFamilyMembers([
                             ...familyMembers,
                             { ...newMember, id: Date.now(), type: "FAMILY" }
@@ -683,7 +713,13 @@ const resendOtp = async () => {
             <div className="otp-section">
 
               <h3>Verify OTP</h3>
-              <p>Enter OTP sent to {emailForOtp}</p>
+              <p>
+                Enter OTP sent to {
+                  emailForOtp
+                    ?.trim()
+                    .replace(/(.{2}).+(@.+)/, "$1****$2")
+                }
+              </p>
 
               <div className="input-wrapper">
                 <input
@@ -701,8 +737,12 @@ const resendOtp = async () => {
                 />
               </div>
 
-              <button className="signup-btn" onClick={verifyOtp}>
-                Verify OTP
+              <button
+                className="signup-btn"
+                onClick={verifyOtp}
+                disabled={otpLoading}
+              >
+                {otpLoading ? "Verifying..." : "Verify OTP"}
               </button>
 
               <button
