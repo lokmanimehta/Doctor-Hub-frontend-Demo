@@ -1496,8 +1496,8 @@ const DoctorProfile = () => {
 
 
   /* =========================================================
-     UI
-     ========================================================= */
+    UI
+    ========================================================= */
 
   return (
     <div className="doctor-profile-page">
@@ -1700,14 +1700,7 @@ const DoctorProfile = () => {
 
             {form.clinics.map((clinic, index) => (
               <div key={index} className="multi-entry-block">
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "10px",
-                  }}
-                >
+                <div className="entry-header">
                   <p className="entry-tag">Clinic #{index + 1}</p>
                   <button
                     type="button"
@@ -1718,12 +1711,14 @@ const DoctorProfile = () => {
                   </button>
                 </div>
 
-                <label>Clinic Name</label>
-                <input
-                  name="clinicName"
-                  value={clinic.clinicName}
-                  onChange={(e) => handleClinicChange(index, e)}
-                />
+                <div className="form-field">
+                  <label>Clinic Name</label>
+                  <input
+                    name="clinicName"
+                    value={clinic.clinicName}
+                    onChange={(e) => handleClinicChange(index, e)}
+                  />
+                </div>
 
                 <label>Clinic Address</label>
                 <textarea
@@ -1741,7 +1736,7 @@ const DoctorProfile = () => {
                   maxLength={10}
                 />
                 <label>City *</label>
-                <div style={{ position: "relative" }}>
+                <div className="relative-field">
                   <input
                     type="text"
                     name="city"
@@ -1903,14 +1898,7 @@ const DoctorProfile = () => {
 
             {form.visitingPositions.map((vp, index) => (
               <div key={index} className="multi-entry-block">
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "10px",
-                  }}
-                >
+                <div className="entry-header">
                   <p className="entry-tag">Visiting Location #{index + 1}</p>
                   <button
                     type="button"
@@ -1933,7 +1921,7 @@ const DoctorProfile = () => {
                   </div>
                   <div>
                     <label>City</label>
-                    <div style={{ position: "relative" }}>
+                    <div className="relative-field">
                       <input
                         type="text"
                         name="city"
@@ -2102,7 +2090,7 @@ const DoctorProfile = () => {
                               }}
                             />
 
-                            {day}
+                            <span>{day}</span>
                           </label>
                         ))}
                       </div>

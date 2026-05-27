@@ -153,7 +153,6 @@ body {
 
 /* 2. NEUTRAL ACTION BUTTONS (Edit, Upload, Cancel) */
 .edit-profile-btn,
-.custom-file-upload,
 .cancel-btn {
   padding: 12px 16px;
   font-weight: 600;
@@ -161,7 +160,6 @@ body {
 }
 
 .edit-profile-btn:hover,
-.custom-file-upload:hover,
 .cancel-btn:hover {
   background: #f8fafc !important;
   border-color: #cbd5df;
@@ -1538,33 +1536,7 @@ body {
     min-width: 0;
   }
 }
-.custom-file-upload {
-  width: 180px;
-  min-width: 180px;
-  height: 44px;
 
-  padding: 0 16px;
-  font-size: 13px;
-  font-weight: 600;
-
-  border-radius: 12px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  background: #ffffff !important;
-  border: 1px solid #d8dee6;
-
-  color: #111827;
-
-  transition: all 0.18s ease;
-}
-
-.custom-file-upload:hover {
-  background: #f8fafc !important;
-  border-color: #cbd5df;
-}
 
 .city-dropdown {
   position: absolute;
@@ -1612,69 +1584,7 @@ body {
   }
 }
 
-/* =========================================================
-   PROFILE PHOTO PROFESSIONAL FIX
-   ========================================================= */
 
-.photo-upload-container {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-
-  flex-wrap: wrap;
-}
-
-.photo-input-group {
-  display: flex;
-  flex-direction: column;
-
-  justify-content: center;
-
-  gap: 10px;
-
-  min-width: 220px;
-}
-
-.custom-file-upload {
-  position: relative;
-
-  width: 180px;
-  height: 46px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0 18px;
-
-  border-radius: 12px;
-
-  background: #ffffff !important;
-  border: 1px solid #d8dee6;
-
-  font-size: 13px;
-  font-weight: 600;
-  color: #111827;
-
-  cursor: pointer;
-
-  overflow: hidden;
-
-  transition: all 0.18s ease;
-}
-
-.custom-file-upload:hover {
-  background: #f8fafc !important;
-  border-color: #cbd5df;
-}
-
-.photo-input-group input[type="file"] {
-  margin: 0;
-  width: 100%;
-
-  position: relative;
-  z-index: 1;
-}
 /* =========================================================
    AVAILABILITY DAYS FINAL PROFESSIONAL FIX
    ========================================================= */
@@ -1863,4 +1773,311 @@ body {
     width: 100%;
     min-width: 0;
   }
+}
+/* =========================================================
+   PREMIUM PROFILE PHOTO SECTION
+   ========================================================= */
+
+.photo-upload-container {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  flex-wrap: wrap;
+}
+
+.photo-preview {
+  width: 140px;
+  height: 140px;
+
+  border-radius: 32px;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(145deg, #f8fafc, #eef4f7);
+
+  border: 1px solid #dbe4ee;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 12px 35px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.default-avatar {
+  font-size: 56px;
+}
+
+.photo-input-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* =========================================================
+   REAL PREMIUM CHOOSE PHOTO BUTTON
+   ========================================================= */
+
+.custom-file-upload {
+  position: relative;
+
+  width: 190px;
+  height: 52px;
+
+  border: none;
+  border-radius: 16px;
+
+  background:
+    linear-gradient(135deg, #14b8a6, #0f766e);
+
+  color: #ffffff;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  letter-spacing: 0.3px;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  transition: all 0.22s ease;
+
+  box-shadow:
+    0 12px 28px rgba(20, 184, 166, 0.30);
+}
+
+.custom-file-upload:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 18px 36px rgba(20, 184, 166, 0.38);
+}
+
+.custom-file-upload:active {
+  transform: scale(0.98);
+}
+
+.custom-file-upload::before {
+  content: "📷";
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.custom-file-upload input[type="file"] {
+  display: none;
+}
+
+/* =========================================================
+   PREMIUM DAYS SECTION
+   ========================================================= */
+
+.days-checkbox-group {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(160px, 1fr));
+
+  gap: 16px;
+
+  margin-top: 16px;
+}
+
+.day-checkbox {
+  position: relative;
+
+  min-height: 64px;
+
+  border-radius: 20px;
+
+  border: 1px solid #e2e8f0;
+
+  background: #ffffff;
+
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 0 18px;
+
+  cursor: pointer;
+
+  transition: all 0.22s ease;
+
+  font-size: 15px;
+  font-weight: 600;
+  color: #334155;
+
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.day-checkbox:hover {
+  transform: translateY(-3px);
+
+  border-color: #14b8a6;
+
+  background: #fcfffe;
+
+  box-shadow:
+    0 14px 30px rgba(20, 184, 166, 0.14);
+}
+
+/* HIDE ugly browser checkbox */
+.day-checkbox input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  
+
+  width: 24px;
+  height: 24px;
+
+  border-radius: 8px;
+
+  border: 2px solid #cbd5e1;
+
+  background: #ffffff;
+
+  position: relative;
+
+  transition: all 0.2s ease;
+
+  flex-shrink: 0;
+
+  cursor: pointer;
+}
+
+.day-checkbox input[type="checkbox"]:checked {
+  background: #14b8a6;
+  border-color: #14b8a6;
+}
+
+.day-checkbox input[type="checkbox"]:checked::after {
+  content: "✓";
+
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -52%);
+
+  color: white;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* FULL CARD ACTIVE */
+.day-checkbox:has(input:checked) {
+  border-color: #14b8a6;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(20,184,166,0.10),
+      rgba(20,184,166,0.03)
+    );
+
+  box-shadow:
+    0 16px 34px rgba(20, 184, 166, 0.16);
+}
+
+/* =========================================================
+   AVAILABILITY ROW PREMIUM
+   ========================================================= */
+
+.availability-row {
+  display: grid;
+
+  grid-template-columns:
+    minmax(360px, 1.8fr)
+    minmax(170px, 0.8fr)
+    minmax(170px, 0.8fr)
+    auto;
+
+  gap: 22px;
+
+  align-items: end;
+
+  margin-bottom: 28px;
+}
+
+.time-field input {
+  height: 52px;
+  border-radius: 14px;
+}
+
+.availability-remove-wrap {
+  display: flex;
+  align-items: flex-end;
+}
+
+.availability-remove-wrap .remove-btn {
+  min-width: 120px;
+  height: 52px;
+
+  border-radius: 14px;
+}
+
+/* =========================================================
+   MOBILE RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .availability-row {
+    grid-template-columns: 1fr;
+  }
+
+  .availability-remove-wrap .remove-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .days-checkbox-group {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .day-checkbox {
+    min-height: 56px;
+    font-size: 14px;
+  }
+
+  .custom-file-upload {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .days-checkbox-group {
+    grid-template-columns: 1fr;
+  }
+
+  .photo-upload-container {
+    gap: 20px;
+  }
+}
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.relative-field {
+  position: relative;
 }
