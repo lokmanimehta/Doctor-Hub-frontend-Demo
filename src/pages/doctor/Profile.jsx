@@ -804,22 +804,35 @@ const DoctorProfile = () => {
   useEffect(() => {
     api.get("/locations/states").then(res => setAllStates(res.data)).catch(() => { });
   }, []);
-  const handleCitySearch = (value, key) => {
-    clearTimeout(cityDebounceRef.current);
-    if (value.length >= 1) {
-      cityDebounceRef.current = setTimeout(async () => {
-        try {
-          const res = await api.get(`/locations/cities?query=${value}`);
-          setCitySuggestions(prev => ({ ...prev, [key]: res.data }));
-        } catch {
 
-          // city search failed silently
-        }
-      }, 300);
-    } else {
-      setCitySuggestions(prev => ({ ...prev, [key]: [] }));
-    }
-  };
+
+  const handleCitySearch = (value, key) => {
+  clearTimeout(cityDebounceRef.current);
+
+  if (value.length >= 1) {
+    cityDebounceRef.current = setTimeout(async () => {
+      try {
+        const res = await api.get(`/locations/cities?query=${value}`);
+
+        console.log("CITY RESPONSE => ", res.data);
+
+        setCitySuggestions(prev => ({
+          ...prev,
+          [key]: res.data
+        }));
+
+      } catch (err) {
+        console.log("CITY SEARCH ERROR", err);
+      }
+    }, 300);
+  } else {
+    setCitySuggestions(prev => ({
+      ...prev,
+      [key]: []
+    }));
+  }
+};
+
   /* =========================================================
      FORM BASIC HANDLERS
      ========================================================= */
