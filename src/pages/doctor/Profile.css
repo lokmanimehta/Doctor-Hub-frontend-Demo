@@ -1551,7 +1551,7 @@ body {
   z-index: 100;
   max-height: 200px;
   overflow-y: auto;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
   margin-top: 4px;
 }
 
@@ -1588,34 +1588,33 @@ body {
 }
 
 /* =========================================================
-   PREMIUM PROFILE PHOTO SECTION
+   CLEAN MINIMAL PROFILE PHOTO SECTION
    ========================================================= */
 .photo-upload-section {
   background: #ffffff;
-  border-radius: 24px;
-  padding: 24px;
-  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
 }
 
 .photo-upload-container {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 24px;
   flex-wrap: wrap;
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .photo-preview {
-  width: 130px;
-  height: 130px;
-  border-radius: 28px;
+  width: 120px;
+  height: 120px;
+  border-radius: 16px;
   overflow: hidden;
-  background: linear-gradient(145deg, #f8fafc, #eef4f7);
+  background: #f8fafc;
   border: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
 }
 
 .avatar-img {
@@ -1625,7 +1624,8 @@ body {
 }
 
 .default-avatar {
-  font-size: 52px;
+  font-size: 48px;
+  color: #cbd5e1;
 }
 
 .photo-input-group {
@@ -1634,45 +1634,44 @@ body {
   justify-content: center;
 }
 
-/* PREMIUM CHOOSE PHOTO BUTTON */
+/* HIGH-END MINIMAL CHOOSE PHOTO BUTTON */
 .custom-file-upload {
   position: relative;
-  width: 175px;
-  height: 48px;
-  border: none;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #02b19b, #0e8376);
-  color: #ffffff;
+  width: 150px;
+  height: 42px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #334155;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
+  font-size: 13.5px;
+  font-weight: 500;
   cursor: pointer;
   overflow: hidden;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 8px 20px rgba(2, 177, 155, 0.25);
-  -webkit-user-select: none; /* Safari & iOS Support Fixed */
+  transition: all 0.15s ease;
+  -webkit-user-select: none;
   user-select: none;
 }
 
 .custom-file-upload:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(2, 177, 155, 0.35);
-  background: linear-gradient(135deg, #03c2aa, #0f9182);
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #1e293b;
 }
 
 .custom-file-upload:active {
-  transform: translateY(0);
-  box-shadow: 0 4px 12px rgba(2, 177, 155, 0.2);
+  background: #f1f5f9;
+  transform: scale(0.98);
 }
 
 .custom-file-upload::before {
   content: "📷";
-  font-size: 15px;
+  font-size: 14px;
   display: inline-block;
+  opacity: 0.8;
 }
 
 .custom-file-upload input[type="file"] {
@@ -1680,11 +1679,11 @@ body {
 }
 
 /* =========================================================
-   PREMIUM AVAILABILITY DAYS SECTION (FIXED ALIGNMENT)
+   PREMIUM MINIMAL AVAILABILITY DAYS SECTION
    ========================================================= */
 .days-checkbox-group {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 12px;
   margin-top: 12px;
   width: 100%;
@@ -1692,8 +1691,8 @@ body {
 
 .day-checkbox {
   position: relative;
-  min-height: 54px;
-  border-radius: 16px;
+  min-height: 48px;
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
   background: #ffffff;
   display: flex;
@@ -1702,28 +1701,25 @@ body {
   gap: 12px;
   padding: 0 16px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
-  -webkit-user-select: none; /* Safari & iOS Support Fixed */
+  transition: all 0.15s ease;
+  -webkit-user-select: none;
   user-select: none;
 }
 
 .day-checkbox:hover {
-  transform: translateY(-2px);
-  border-color: #02b19b;
-  background: #fafdff;
-  box-shadow: 0 10px 20px rgba(2, 177, 155, 0.08);
+  border-color: #cbd5e1;
+  background: #f8fafc;
 }
 
-/* CUSTOM HIGH-END CHECKBOX ICON */
+/* STRUCTURAL FLAT CHECKBOX ICON */
 .day-checkbox input[type="checkbox"] {
   -webkit-appearance: none;
   appearance: none;
   margin: 0;
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  border: 2px solid #cbd5e1;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid #cbd5e1;
   background: #ffffff;
   position: relative;
   transition: all 0.15s ease;
@@ -1735,14 +1731,14 @@ body {
 }
 
 .day-checkbox input[type="checkbox"]:checked {
-  background: #02b19b;
-  border-color: #02b19b;
+  background: #0ea5e9;
+  border-color: #0ea5e9;
 }
 
 .day-checkbox input[type="checkbox"]:checked::after {
   content: "✓";
   color: #ffffff;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   position: absolute;
   top: 50%;
@@ -1752,24 +1748,23 @@ body {
 
 /* TEXT SPAN STYLES */
 .day-checkbox span {
-  font-size: 14px;
-  font-weight: 600;
-  color: #334155;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #475569;
   margin: 0;
   line-height: 1;
   white-space: nowrap;
   transition: color 0.15s ease;
 }
 
-/* CHOSEN COMPONENT ACTIVE STATE CARD */
+/* CLEAN ULTRA-MINIMAL ACTIVE STATE CARD */
 .day-checkbox:has(input:checked) {
-  border-color: #02b19b;
-  background: linear-gradient(135deg, rgba(2, 177, 155, 0.08), rgba(2, 177, 155, 0.02));
-  box-shadow: 0 12px 24px rgba(2, 177, 155, 0.12);
+  border-color: #0ea5e9;
+  background: #f0f9ff;
 }
 
 .day-checkbox:has(input:checked) span {
-  color: #0d6e63;
+  color: #0369a1;
 }
 
 /* =========================================================
@@ -1778,20 +1773,20 @@ body {
 .availability-row {
   display: grid;
   grid-template-columns: minmax(340px, 1.8fr) minmax(150px, 0.8fr) minmax(150px, 0.8fr) auto;
-  gap: 20px;
+  gap: 16px;
   align-items: end;
-  margin-bottom: 24px;
-  background: #f8fafc;
-  padding: 20px;
-  border-radius: 20px;
-  border: 1px solid #f1f5f9;
+  margin-bottom: 20px;
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
 }
 
 .sub-label-header {
-  font-size: 14px;
-  font-weight: 600;
-  color: #475569;
-  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 6px;
 }
 
 .time-field {
@@ -1801,18 +1796,18 @@ body {
 }
 
 .time-field input.time-input {
-  height: 48px;
-  border-radius: 12px;
+  height: 42px;
+  border-radius: 10px;
   border: 1px solid #cbd5e1;
-  padding: 0 14px;
-  font-size: 14px;
+  padding: 0 12px;
+  font-size: 13.5px;
   outline: none;
   background: #ffffff;
   transition: border-color 0.15s ease;
 }
 
 .time-field input.time-input:focus {
-  border-color: #02b19b;
+  border-color: #0ea5e9;
 }
 
 .availability-remove-wrap {
@@ -1821,10 +1816,11 @@ body {
 }
 
 .availability-remove-wrap .remove-btn {
-  min-width: 110px;
-  height: 48px;
-  border-radius: 12px;
+  min-width: 100px;
+  height: 42px;
+  border-radius: 10px;
   font-weight: 500;
+  font-size: 13.5px;
 }
 
 /* =========================================================
@@ -1833,8 +1829,8 @@ body {
 @media (max-width: 1024px) {
   .availability-row {
     grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 16px;
+    gap: 14px;
+    padding: 14px;
   }
   
   .availability-remove-wrap {
@@ -1848,7 +1844,7 @@ body {
 
 @media (max-width: 640px) {
   .photo-upload-container {
-    gap: 20px;
+    gap: 16px;
     justify-content: center;
     text-align: center;
   }
@@ -1863,13 +1859,13 @@ body {
 
   .days-checkbox-group {
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 8px;
   }
 
   .day-checkbox {
-    min-height: 50px;
+    min-height: 44px;
     padding: 0 12px;
-    gap: 10px;
+    gap: 8px;
   }
 
   .day-checkbox span {
