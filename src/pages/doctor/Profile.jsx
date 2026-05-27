@@ -794,7 +794,7 @@ const DoctorProfile = () => {
           "error",
           normalizeErrorMessage(err) || "Failed to load profile"
         );
-        
+
       } finally {
         setLoadingProfile(false);
       }
@@ -841,7 +841,13 @@ const DoctorProfile = () => {
       .map((item) => item.trim())
       .filter(Boolean);
   };
-
+  useEffect(() => {
+    return () => {
+      if (form.profilePic?.startsWith("blob:")) {
+        URL.revokeObjectURL(form.profilePic);
+      }
+    };
+  }, [form.profilePic]);
   /* =========================================================
      PROFILE IMAGE HANDLERS
      ========================================================= */
@@ -850,14 +856,13 @@ const DoctorProfile = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setForm((prev) => ({
-        ...prev,
-        profilePic: reader.result,
-      }));
-    };
-    reader.readAsDataURL(file);
+    const previewUrl = URL.createObjectURL(file);
+
+    setForm((prev) => ({
+      ...prev,
+      profilePic: previewUrl,
+    }));
+
 
     try {
       setUploadingProfileImage(true);
@@ -879,11 +884,16 @@ const DoctorProfile = () => {
 
       setForm((prev) => ({
         ...prev,
+        profilePic: fileUrl,
         profilePictureUrl: fileUrl,
       }));
 
       showPopup("success", "Profile image uploaded successfully");
     } catch (err) {
+      setForm((prev) => ({
+        ...prev,
+        profilePic: prev.profilePictureUrl || null,
+      }));
       showPopup(
         "error",
         normalizeErrorMessage(err) ||
@@ -1277,6 +1287,11 @@ const DoctorProfile = () => {
      ========================================================= */
 
   const handleSubmit = async (e) => {
+    const safeProfilePictureUrl =
+      typeof form.profilePictureUrl === "string" &&
+        form.profilePictureUrl.length <= 500
+        ? form.profilePictureUrl
+        : null;
     e.preventDefault();
     const selectedPrimaryClinics = form.clinics.filter(
       (clinic) => clinic.isPrimary === true
@@ -1382,13 +1397,15 @@ const DoctorProfile = () => {
       registrationNumber: form.registrationNumber.trim() || null,
       registrationYear:
         form.registrationYear !== "" ? Number(form.registrationYear) : null,
-      profilePictureUrl: form.profilePictureUrl || null,
+      profilePictureUrl: safeProfilePictureUrl || null,
       specializations: parsedSpecializations,
       degrees: parsedDegrees,
       clinics: buildClinicPayload(form.clinics),
       visitingPositions: buildVisitingPayload(form.visitingPositions),
-    };
 
+    };
+    console.log("PROFILE URL:", form.profilePictureUrl);
+    console.log("PROFILE URL LENGTH:", form.profilePictureUrl?.length);
 
     try {
       setSavingProfile(true);
@@ -1471,31 +1488,31 @@ const DoctorProfile = () => {
       }
     } catch (err) {
 
-  console.log("FULL ERROR:", err);
+      console.log("FULL ERROR:", err);
 
-  console.log("BACKEND RESPONSE:", err.response);
+      console.log("BACKEND RESPONSE:", err.response);
 
-  console.log(
-    "BACKEND MESSAGE:",
-    err?.response?.data?.message
-  );
+      console.log(
+        "BACKEND MESSAGE:",
+        err?.response?.data?.message
+      );
 
-  console.log(
-    "VALIDATION ERRORS:",
-    err?.response?.data
-  );
+      console.log(
+        "VALIDATION ERRORS:",
+        err?.response?.data
+      );
 
-  showPopup(
-    "error",
-    getDocumentUploadErrorMessage(err)
-  );
+      showPopup(
+        "error",
+        getDocumentUploadErrorMessage(err)
+      );
 
-} finally {
-  setSavingProfile(false);
-}
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
-  
+
 
   /* =========================================================
      DERIVED VALUES
