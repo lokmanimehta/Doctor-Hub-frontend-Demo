@@ -253,11 +253,7 @@ body {
   background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
 }
 
-.photo-upload-container {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
+
 
 .photo-preview,
 .view-avatar {
@@ -1605,8 +1601,82 @@ body {
   color: #94a3b8;
   margin-left: 8px;
 }
+
+@media (max-width: 640px) {
+  .photo-input-group {
+    width: 100%;
+  }
+
+  .custom-file-upload {
+    width: 100%;
+  }
+}
+
 /* =========================================================
-   DAYS CHECKBOX PREMIUM UI
+   PROFILE PHOTO PROFESSIONAL FIX
+   ========================================================= */
+
+.photo-upload-container {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+
+  flex-wrap: wrap;
+}
+
+.photo-input-group {
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+
+  gap: 10px;
+
+  min-width: 220px;
+}
+
+.custom-file-upload {
+  position: relative;
+
+  width: 180px;
+  height: 46px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 18px;
+
+  border-radius: 12px;
+
+  background: #ffffff !important;
+  border: 1px solid #d8dee6;
+
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  transition: all 0.18s ease;
+}
+
+.custom-file-upload:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5df;
+}
+
+.photo-input-group input[type="file"] {
+  margin: 0;
+  width: 100%;
+
+  position: relative;
+  z-index: 1;
+}
+/* =========================================================
+   AVAILABILITY DAYS FINAL PROFESSIONAL FIX
    ========================================================= */
 
 .days-checkbox-group {
@@ -1614,11 +1684,12 @@ body {
 
   grid-template-columns: repeat(
     auto-fit,
-    minmax(140px, 1fr)
+    minmax(180px, 1fr)
   );
 
   gap: 14px;
-  margin-top: 12px;
+
+  margin-top: 14px;
 }
 
 .day-checkbox {
@@ -1626,25 +1697,52 @@ body {
 
   display: flex;
   align-items: center;
+
   gap: 12px;
 
-  min-height: 52px;
-  padding: 0 16px;
+  min-height: 56px;
+
+  padding: 0 18px;
 
   border: 1px solid #e5e7eb;
   border-radius: 14px;
 
   background: #ffffff;
 
-  font-size: 14px;
-  font-weight: 600;
-  color: #1e293b;
-
   cursor: pointer;
 
   transition: all 0.18s ease;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
 }
 
+/* REMOVE weird browser spacing */
+.day-checkbox input[type="checkbox"] {
+  margin: 0;
+
+  width: 18px;
+  height: 18px;
+
+  flex-shrink: 0;
+
+  accent-color: #111827;
+
+  position: relative;
+  top: 0;
+}
+
+/* text perfectly center */
+.day-checkbox span,
+.day-checkbox p,
+.day-checkbox label {
+  margin: 0;
+  line-height: 1;
+}
+.day-checkbox.active {
+  border-color: #111827;
+}
 /* hover */
 .day-checkbox:hover {
   border-color: #cbd5e1;
@@ -1656,29 +1754,93 @@ body {
 /* checked */
 .day-checkbox:has(input:checked) {
   border-color: #111827;
+
   background: #f8fafc;
 
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+/* =========================================================
+   AVAILABILITY ROW FINAL PROFESSIONAL LAYOUT
+   ========================================================= */
+
+.availability-row {
+  display: grid;
+
+  grid-template-columns:
+    minmax(320px, 1.6fr)
+    minmax(140px, 0.7fr)
+    minmax(140px, 0.7fr)
+    auto;
+
+  gap: 18px;
+
+  align-items: end;
+
+  margin-bottom: 18px;
 }
 
-/* checkbox */
-.day-checkbox input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-
-  margin: 0;
-
-  accent-color: #111827;
-
-  cursor: pointer;
-
-  flex-shrink: 0;
+.availability-remove-wrap {
+  display: flex;
+  align-items: flex-end;
 }
 
-/* mobile */
+.availability-remove-wrap .remove-btn {
+  width: auto;
+  min-width: 110px;
+  height: 46px;
+}
+
+/* Better spacing */
+.availability-row .time-field {
+  min-width: 0;
+}
+
+/* Days section cleaner */
+.availability-row .days-checkbox-group {
+  margin-top: 10px;
+}
+
+/* =========================================================
+   PHOTO BUTTON FINAL POLISH
+   ========================================================= */
+
+.photo-input-group {
+  min-width: unset;
+}
+
+.photo-input-group .custom-file-upload {
+  width: 160px;
+  min-width: 160px;
+  height: 44px;
+}
+
+/* =========================================================
+   MOBILE FIXES
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .availability-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .availability-remove-wrap {
+    width: 100%;
+  }
+
+  .availability-remove-wrap .remove-btn {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE DAYS FIX
+   ========================================================= */
+
 @media (max-width: 640px) {
   .days-checkbox-group {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
 
   .day-checkbox {
@@ -1688,25 +1850,17 @@ body {
   }
 }
 
-@media (max-width: 640px) {
-  .photo-input-group {
-    width: 100%;
+@media (max-width: 420px) {
+  .days-checkbox-group {
+    grid-template-columns: 1fr;
   }
 
-  .custom-file-upload {
-    width: 100%;
+  .photo-upload-container {
+    gap: 18px;
   }
-}
-.city-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  z-index: 99999;
-  max-height: 220px;
-  overflow-y: auto;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+
+  .photo-input-group .custom-file-upload {
+    width: 100%;
+    min-width: 0;
+  }
 }
