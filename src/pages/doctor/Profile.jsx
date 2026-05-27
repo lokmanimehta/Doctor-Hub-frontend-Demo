@@ -327,6 +327,39 @@ const isEndTimeAfterStartTime = (startTime, endTime) => {
 
   return convertToMinutes(endTime) > convertToMinutes(startTime);
 };
+const hasOverlappingSlots = (availability = []) => {
+  const convertToMinutes = (time) => {
+    const [h, m] = time.split(":").map(Number);
+    return h * 60 + m;
+  };
+
+  for (let i = 0; i < availability.length; i++) {
+    for (let j = i + 1; j < availability.length; j++) {
+      const slotA = availability[i];
+      const slotB = availability[j];
+
+      const commonDays = slotA.days.filter((day) =>
+        slotB.days.includes(day)
+      );
+
+      if (commonDays.length === 0) continue;
+
+      const aStart = convertToMinutes(slotA.startTime);
+      const aEnd = convertToMinutes(slotA.endTime);
+
+      const bStart = convertToMinutes(slotB.startTime);
+      const bEnd = convertToMinutes(slotB.endTime);
+
+      const overlaps = aStart < bEnd && bStart < aEnd;
+
+      if (overlaps) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+};
 
 const mapApiClinicToUi = (clinic = {}) => {
   return {
@@ -1345,6 +1378,16 @@ const DoctorProfile = () => {
           showPopup("error", "Visiting pincode must be exactly 6 digits");
           return;
         }
+      }
+    }
+
+    for (const clinic of form.clinics) {
+      if (hasOverlappingSlots(clinic.availability)) {
+        showPopup(
+          "error",
+          "Clinic availability slots cannot overlap"
+        );
+        return;
       }
     }
     for (const vp of form.visitingPositions || []) {
