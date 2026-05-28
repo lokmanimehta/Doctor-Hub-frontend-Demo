@@ -636,22 +636,6 @@ a, a:hover, a:visited, a:active {
 .pkg-book-btn { width: 100%; padding: 15px; border-radius: 18px; border: 2px solid var(--primary); background: white; color: var(--primary); font-weight: 800; cursor: pointer; transition: 0.3s; }
 
 /* Modal */
-.modal-overlay {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-
-background: rgba(0,0,0,0.45);
-
-display: flex;
-align-items: center;
-justify-content: center;
-
-z-index: 999;
-padding: 20px;
-}
 .profile-modal-card { 
 background: white;
 width: 100%;
@@ -1171,27 +1155,300 @@ transform: translateY(0);
   z-index: 10000;
 }
 
-.cost-modal-card {
-  background: var(--white); border-radius: 20px; padding: 25px 30px;
-  max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-  position: relative; animation: popupFade 0.3s ease-out;align-items:center; justify-content:center;
-}
 
 @keyframes popupFade {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
 
-.modal-close-x {
-  position: absolute; top: 15px; right: 15px; background: #fee2e2;
-  color: #dc2626; border:none; font-size:20px; font-weight:700; cursor:pointer;
-  width:35px; height:35px; border-radius:50%;
+/* =========================================================
+   PREMIUM COST MODAL
+   ========================================================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(15, 23, 42, 0.68);
+  -webkit-backdrop-filter: blur(10px); /* Add this line first */
+  backdrop-filter: blur(6px);
+
+  animation: fadeIn 0.25s ease;
 }
 
-.modal-header {
-  display: flex; flex-direction: column; align-items: center; gap:10px;
-  margin-bottom:15px; text-align:center;
+.cost-modal-card {
+  width: min(920px, 100%);
+  max-height: 92vh;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  background: #ffffff;
+
+  border-radius: 28px;
+
+  position: relative;
+
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.18),
+    0 8px 24px rgba(15, 23, 42, 0.08);
+
+  animation: modalPop 0.28s ease;
 }
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.modal-header {
+  position: relative;
+  padding: 0;
+  background: transparent;
+}
+
+.modal-header h2 {
+  padding: 28px 28px 10px;
+  margin: 0;
+
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1.1;
+
+  color: #0f172a;
+}
+
+.modal-header .pkg-badge {
+  position: absolute;
+  top: 18px;
+  right: 80px;
+  z-index: 5;
+}
+
+/* =========================================================
+   IMAGE FIX
+   ========================================================= */
+
+.cost-modal-card .cost-image-box {
+  width: 100%;
+  height: 320px;
+
+  overflow: hidden;
+
+  border-radius: 28px 28px 0 0;
+
+  background: #f1f5f9;
+}
+
+.cost-modal-card .cost-image-box img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  display: block;
+}
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+.cost-modal-card .pkg-desc-text {
+  padding: 0 28px;
+  margin-top: 6px;
+
+  font-size: 16px;
+  line-height: 1.8;
+  color: #475569;
+}
+
+.cost-modal-card .pkg-mini-features {
+  padding: 10px 28px 0;
+  margin: 0;
+}
+
+.cost-modal-card .pkg-mini-features li {
+  margin-bottom: 12px;
+  color: #334155;
+  font-size: 15px;
+}
+
+.cost-modal-card .cost-info-footer {
+  padding: 24px 28px 0;
+}
+
+.cost-modal-card .cost-price-tag {
+  font-size: 42px;
+  font-weight: 800;
+  color: #0f766e;
+}
+
+.cost-modal-card .emi-tag {
+  margin-top: 8px;
+  font-size: 18px;
+  color: #475569;
+}
+
+/* =========================================================
+   BUTTON
+   ========================================================= */
+
+.know-more-btn {
+  width: calc(100% - 56px);
+  margin: 28px;
+  height: 56px;
+
+  border: none;
+  border-radius: 16px;
+
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: all 0.22s ease;
+}
+
+.know-more-btn:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 14px 28px rgba(20, 184, 166, 0.22),
+    0 8px 16px rgba(15, 118, 110, 0.12);
+}
+
+/* =========================================================
+   CLOSE BUTTON
+   ========================================================= */
+
+.modal-close-x {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 10;
+
+  width: 46px;
+  height: 46px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.95);
+
+  color: #0f172a;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 26px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.12);
+
+  transition: all 0.2s ease;
+}
+
+.modal-close-x:hover {
+  transform: rotate(90deg);
+  background: #ffffff;
+}
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+.cost-modal-card::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cost-modal-card::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 20px;
+}
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* =========================================================
+   MOBILE RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .cost-modal-card {
+    border-radius: 22px;
+    max-height: 94vh;
+  }
+
+  .cost-modal-card .cost-image-box {
+    height: 220px;
+    border-radius: 22px 22px 0 0;
+  }
+
+  .modal-header h2 {
+    font-size: 28px;
+    padding: 22px 20px 8px;
+  }
+
+  .cost-modal-card .pkg-desc-text,
+  .cost-modal-card .pkg-mini-features,
+  .cost-modal-card .cost-info-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .cost-modal-card .cost-price-tag {
+    font-size: 32px;
+  }
+
+  .know-more-btn {
+    width: calc(100% - 40px);
+    margin: 20px;
+  }
+
+  .modal-header .pkg-badge {
+    top: 14px;
+    right: 64px;
+  }
+}
+
+
 
 .cost-icon-circle-large {
   width:70px; height:70px; border-radius:50%; background: var(--primary);
@@ -1501,13 +1758,7 @@ transform: translateY(0);
     }
   
 }
-.cost-image-box {
-  width: 100%;
-  height: 160px;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 12px;
-}
+
 
 .cost-image-box img {
   width: 100%;

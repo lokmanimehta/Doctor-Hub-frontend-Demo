@@ -1469,8 +1469,7 @@ const DoctorProfile = () => {
       visitingPositions: buildVisitingPayload(form.visitingPositions),
 
     };
-    console.log("PROFILE URL:", form.profilePictureUrl);
-    console.log("PROFILE URL LENGTH:", form.profilePictureUrl?.length);
+    
 
     try {
       setSavingProfile(true);
@@ -1552,21 +1551,6 @@ const DoctorProfile = () => {
         return;
       }
     } catch (err) {
-
-      console.log("FULL ERROR:", err);
-
-      console.log("BACKEND RESPONSE:", err.response);
-
-      console.log(
-        "BACKEND MESSAGE:",
-        err?.response?.data?.message
-      );
-
-      console.log(
-        "VALIDATION ERRORS:",
-        err?.response?.data
-      );
-
       showPopup(
         "error",
         getDocumentUploadErrorMessage(err)
@@ -1576,9 +1560,6 @@ const DoctorProfile = () => {
       setSavingProfile(false);
     }
   };
-
-
-
   /* =========================================================
      DERIVED VALUES
      ========================================================= */
