@@ -362,6 +362,34 @@ const hasOverlappingSlots = (availability = []) => {
 };
 
 const mapApiClinicToUi = (clinic = {}) => {
+  const groupedAvailability = {};
+
+  if (Array.isArray(clinic.availabilitySlots)) {
+    clinic.availabilitySlots.forEach((slot) => {
+      const startTime = slot.startTime ? slot.startTime.substring(0, 5) : "";
+      const endTime = slot.endTime ? slot.endTime.substring(0, 5) : "";
+
+      const key = `${startTime}_${endTime}`;
+
+      if (!groupedAvailability[key]) {
+        groupedAvailability[key] = {
+          days: [],
+          startTime,
+          endTime,
+        };
+      }
+
+      const day = slot.dayOfWeek
+        ? slot.dayOfWeek.charAt(0).toUpperCase() +
+          slot.dayOfWeek.slice(1).toLowerCase()
+        : "";
+
+      if (day && !groupedAvailability[key].days.includes(day)) {
+        groupedAvailability[key].days.push(day);
+      }
+    });
+  }
+
   return {
     id: clinic.id || null,
     clinicName: clinic.clinicName || "",
@@ -377,17 +405,11 @@ const mapApiClinicToUi = (clinic = {}) => {
     landmark: clinic.landmark || "",
     isPrimary: clinic.isPrimary || false,
     availability:
-      Array.isArray(clinic.availabilitySlots) && clinic.availabilitySlots.length > 0
-        ? clinic.availabilitySlots.map((slot) => ({
-          id: slot.id || null,
-          days: [slot.dayOfWeek],
-          startTime: slot.startTime ? slot.startTime.substring(0, 5) : "",
-          endTime: slot.endTime ? slot.endTime.substring(0, 5) : "",
-        }))
+      Object.values(groupedAvailability).length > 0
+        ? Object.values(groupedAvailability)
         : [{ days: [], startTime: "", endTime: "" }],
   };
 };
-
 
 const isPreviewImage = (contentType = "", fileUrl = "") => {
   const normalized = (contentType || "").toLowerCase();

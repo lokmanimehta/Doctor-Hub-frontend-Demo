@@ -1888,3 +1888,156 @@ body {
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   PREMIUM PROFILE PHOTO BUTTON
+   ========================================================= */
+
+.photo-upload-container {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  flex-wrap: wrap;
+}
+
+.custom-file-upload {
+  height: 44px;
+  min-width: 148px;
+  padding: 0 18px !important;
+  border-radius: 14px !important;
+  border: 1px solid #dbe3ec !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  font-size: 14px !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.01em;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.custom-file-upload:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.custom-file-upload:active {
+  transform: translateY(0);
+}
+
+.custom-file-upload input[type="file"] {
+  display: none !important;
+}
+
+/* =========================================================
+   PREMIUM DAY CHECKBOX CARDS
+   ========================================================= */
+
+.days-checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.day-checkbox {
+  position: relative;
+  min-height: 46px;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #334155 !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+}
+
+.day-checkbox:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.day-checkbox input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px;
+  margin: 0 !important;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.18s ease;
+}
+
+.day-checkbox input[type="checkbox"]:checked {
+  background: #14b8a6;
+  border-color: #14b8a6;
+  box-shadow: 0 6px 14px rgba(20, 184, 166, 0.22);
+}
+
+.day-checkbox input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.day-checkbox:has(input[type="checkbox"]:checked) {
+  background: linear-gradient(180deg, rgba(20, 184, 166, 0.08), rgba(20, 184, 166, 0.035));
+  border-color: #5eead4;
+  color: #0f172a !important;
+}
+
+.day-checkbox span {
+  line-height: 1;
+}
+
+/* =========================================================
+   MOBILE RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .photo-upload-container {
+    gap: 18px;
+  }
+
+  .days-checkbox-group {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .day-checkbox {
+    min-height: 44px;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .photo-upload-container {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .custom-file-upload {
+    width: 100%;
+  }
+
+  .days-checkbox-group {
+    grid-template-columns: 1fr;
+  }
+}
