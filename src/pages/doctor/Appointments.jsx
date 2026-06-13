@@ -8,10 +8,20 @@ import {
   getAllDoctorAppointments,
   cancelPatientAppointment,
   markAppointmentNoShow,
-  markAppointmentCompleted
+  markAppointmentCompleted,
+  acceptDoctorAppointmentRequest,
+  rejectDoctorAppointmentRequest
 } from "../../services/doctorService";
 
-const STATUS_OPTIONS = ["ALL", "SCHEDULED", "COMPLETED", "CANCELLED", "NO_SHOW"];
+const STATUS_OPTIONS = [
+  "ALL",
+  "REQUESTED",
+  "SCHEDULED",
+  "REJECTED",
+  "COMPLETED",
+  "CANCELLED",
+  "NO_SHOW"
+];
 const PAGE_SIZE = 10;
 
 const formatDate = (timestamp) => {
@@ -275,9 +285,9 @@ const Appointments = () => {
       prev.map((item) =>
         item.id === appointmentId
           ? {
-              ...item,
-              status: nextStatus
-            }
+            ...item,
+            status: nextStatus
+          }
           : item
       )
     );
@@ -286,9 +296,9 @@ const Appointments = () => {
       setSelectedAppointment((prev) =>
         prev
           ? {
-              ...prev,
-              status: nextStatus
-            }
+            ...prev,
+            status: nextStatus
+          }
           : null
       );
     }
@@ -299,6 +309,62 @@ const Appointments = () => {
     await markAppointmentNoShow(appointmentId);
     applyLocalStatusUpdate(appointmentId, "NO_SHOW");
     await handleNotificationActionSuccess({ showToastOnNew: true });
+  };
+
+  const runAcceptAction = async (appointmentId) => {
+    setActionLoadingId(appointmentId);
+
+    const response = await acceptDoctorAppointmentRequest(appointmentId, {
+      note: "Appointment accepted by doctor."
+    });
+
+    setAppointments((prev) =>
+      prev.map((item) =>
+        item.id === appointmentId
+          ? {
+            ...item,
+            status: response?.status || "SCHEDULED"
+          }
+          : item
+      )
+    );
+
+    await handleNotificationActionSuccess({ showToastOnNew: true });
+    await fetchAppointments();
+
+    openFeedbackModal({
+      title: "Appointment accepted",
+      message: response?.message || "Appointment accepted successfully.",
+      tone: "success"
+    });
+  };
+
+  const runRejectAction = async (appointmentId) => {
+    setActionLoadingId(appointmentId);
+
+    const response = await rejectDoctorAppointmentRequest(appointmentId, {
+      note: "Appointment rejected by doctor."
+    });
+
+    setAppointments((prev) =>
+      prev.map((item) =>
+        item.id === appointmentId
+          ? {
+            ...item,
+            status: response?.status || "REJECTED"
+          }
+          : item
+      )
+    );
+
+    await handleNotificationActionSuccess({ showToastOnNew: true });
+    await fetchAppointments();
+
+    openFeedbackModal({
+      title: "Appointment rejected",
+      message: response?.message || "Appointment rejected successfully.",
+      tone: "success"
+    });
   };
 
   const runCancelAction = async (appointmentId) => {
@@ -320,6 +386,14 @@ const Appointments = () => {
         await runCancelAction(confirmModal.appointmentId);
       }
 
+      if (confirmModal.type === "ACCEPT") {
+        await runAcceptAction(confirmModal.appointmentId);
+      }
+
+      if (confirmModal.type === "REJECT") {
+        await runRejectAction(confirmModal.appointmentId);
+      }
+
       closeConfirmModal();
     } catch (err) {
       closeConfirmModal();
@@ -336,6 +410,25 @@ const Appointments = () => {
     }
   };
 
+  const openAcceptConfirmModal = (appointmentId) => {
+    openConfirmModal({
+      type: "ACCEPT",
+      appointmentId,
+      title: "Accept Appointment",
+      message: "Are you sure you want to accept this appointment request?",
+      confirmText: "Accept"
+    });
+  };
+
+  const openRejectConfirmModal = (appointmentId) => {
+    openConfirmModal({
+      type: "REJECT",
+      appointmentId,
+      title: "Reject Appointment",
+      message: "Are you sure you want to reject this appointment request?",
+      confirmText: "Reject"
+    });
+  };
   const handleCompleteAppointmentSubmit = async (payload) => {
     if (!completeModalAppointment?.id) return;
 
@@ -390,7 +483,9 @@ const Appointments = () => {
   const statusCounts = useMemo(() => {
     const base = {
       ALL: listMeta.totalElements,
+      REQUESTED: 0,
       SCHEDULED: 0,
+      REJECTED: 0,
       COMPLETED: 0,
       CANCELLED: 0,
       NO_SHOW: 0
@@ -605,6 +700,28 @@ const Appointments = () => {
                             >
                               View
                             </button>
+
+                            {appointment.status === "REQUESTED" && (
+                              <>
+                                <button
+                                  type="button"
+                                  className="appointment-action-btn success"
+                                  disabled={actionLoadingId === appointment.id}
+                                  onClick={() => openAcceptConfirmModal(appointment.id)}
+                                >
+                                  Accept
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="appointment-action-btn danger"
+                                  disabled={actionLoadingId === appointment.id}
+                                  onClick={() => openRejectConfirmModal(appointment.id)}
+                                >
+                                  Reject
+                                </button>
+                              </>
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -616,9 +733,8 @@ const Appointments = () => {
                   {appointments.map((appointment) => (
                     <div
                       key={appointment.id}
-                      className={`appointment-card-mobile ${
-                        highlightAppointmentId === appointment.id ? "appointment-card-highlight" : ""
-                      }`}
+                      className={`appointment-card-mobile ${highlightAppointmentId === appointment.id ? "appointment-card-highlight" : ""
+                        }`}
                     >
                       <div className="card-top">
                         <div className="card-user-info">
@@ -662,6 +778,28 @@ const Appointments = () => {
                         >
                           View Details
                         </button>
+
+                        {appointment.status === "REQUESTED" && (
+                          <>
+                            <button
+                              type="button"
+                              className="m-btn accept"
+                              disabled={actionLoadingId === appointment.id}
+                              onClick={() => openAcceptConfirmModal(appointment.id)}
+                            >
+                              Accept
+                            </button>
+
+                            <button
+                              type="button"
+                              className="m-btn reject"
+                              disabled={actionLoadingId === appointment.id}
+                              onClick={() => openRejectConfirmModal(appointment.id)}
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}

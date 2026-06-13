@@ -1,8 +1,9 @@
 /* src/components/layout/PatientLayout.css */
+
 .patient-layout {
   display: flex;
   min-height: 100vh;
-  background: #f8fafc; /* Light background for contrast */
+  background: #f8fafc;
   width: 100%;
 }
 
@@ -10,38 +11,48 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s ease;
+  transition: margin-left 0.28s ease;
   min-height: 100vh;
+  min-width: 0;
 }
 
-/* Desktop Margins: Sidebar ki width ke hisab se space */
+/* Desktop: sidebar width ke according main content shift */
 @media (min-width: 1025px) {
   .expanded-margin {
     margin-left: 260px;
   }
 
   .collapsed-margin {
-    margin-left: 80px;
+    margin-left: 88px;
   }
 }
 
-/* CONTENT FIX: Yahi wo code hai jo content ko header se niche dhakelega */
+/* Header fixed hai, isliye content ko header ke neeche space chahiye */
 .patient-content {
   padding: 24px;
-  margin-top: 64px; /* Header height (64px) ke barabar space */
+  margin-top: 72px;
   flex: 1;
   width: 100%;
   box-sizing: border-box;
+  min-width: 0;
 }
 
-/* Mobile View adjustments */
+/* Tablet / mobile */
 @media (max-width: 1024px) {
   .patient-main {
     margin-left: 0 !important;
   }
-  
+
   .patient-content {
     padding: 16px;
-    margin-top: 64px; /* Mobile par bhi header 64px ka hai */
+    margin-top: 68px;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .patient-content {
+    padding: 14px;
+    margin-top: 64px;
   }
 }

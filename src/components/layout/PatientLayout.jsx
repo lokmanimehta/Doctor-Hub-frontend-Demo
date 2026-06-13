@@ -4,7 +4,6 @@ import { Outlet } from "react-router-dom";
 import PatientSidebar from "../../pages/patient/PatientSidebar";
 import PatientHeader from "../../pages/patient/PatientHeader";
 import "./PatientLayout.css";
-import Footer from "./Footer";
 import "../../assets/css/theme.css";
 
 const PatientLayout = () => {

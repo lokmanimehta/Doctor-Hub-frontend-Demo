@@ -758,3 +758,39 @@
     padding-left: 0;
   }
 }
+.requirement-met-text {
+  color: #0f766e;
+  font-weight: 700;
+}
+
+.requirement-pending-text {
+  color: #b45309;
+  font-weight: 700;
+}
+.profile-actions-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.secondary-action-btn {
+  width: 100%;
+  border: 1px solid #0f766e;
+  background: #ffffff;
+  color: #0f766e;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.secondary-action-btn:hover {
+  background: #ecfdf5;
+}
+
+.secondary-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

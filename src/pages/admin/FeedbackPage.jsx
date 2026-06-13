@@ -1,303 +1,589 @@
-import React, { useState, useMemo } from 'react';
-import './FeedbackPage.css';
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  getAdminFeedbackById,
+  getAdminFeedbacks,
+  updateAdminFeedbackStatus
+} from "../../services/adminService";
+import "./FeedbackPage.css";
+
+const STATUS_OPTIONS = [
+  { value: "ALL", label: "All Status" },
+  { value: "NEW", label: "New" },
+  { value: "REVIEWED", label: "Reviewed" },
+  { value: "IN_PROGRESS", label: "In Progress" },
+  { value: "RESOLVED", label: "Resolved" },
+  { value: "CLOSED", label: "Closed" }
+];
+
+const TYPE_OPTIONS = [
+  { value: "ALL", label: "All Types" },
+  { value: "APPOINTMENT", label: "Appointment" },
+  { value: "CONSULTATION", label: "Consultation" },
+  { value: "LAB_REPORTS", label: "Lab Reports" },
+  { value: "APP_EXPERIENCE", label: "App Experience" },
+  { value: "DOCTOR_EXPERIENCE", label: "Doctor Experience" },
+  { value: "HOSPITAL_SERVICE", label: "Hospital Service" },
+  { value: "PAYMENT_BILLING", label: "Payment & Billing" },
+  { value: "TECHNICAL_ISSUE", label: "Technical Issue" },
+  { value: "OTHER", label: "Other" }
+];
+
+const UPDATE_STATUS_OPTIONS = STATUS_OPTIONS.filter(
+  (status) => status.value !== "ALL"
+);
+
+const getLabel = (options, value) => {
+  return options.find((item) => item.value === value)?.label || value || "-";
+};
+
+const formatDateTime = (timestamp) => {
+  if (!timestamp) {
+    return "-";
+  }
+
+  return new Date(timestamp).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+};
+
+const getStars = (rating) => {
+  if (!rating) {
+    return "No rating";
+  }
+
+  return `${"★".repeat(rating)}${"☆".repeat(5 - rating)} (${rating}/5)`;
+};
 
 const FeedbackPage = () => {
-    // Initial Data with timestamps for sorting (Newest first)
-    const initialData = [
-        { id: 'P998877', type: 'Lab / Reports', rating: 3, message: 'Payment failed twice.', date: '27 Mar 2026', time: '1:25 PM', status: 'Pending', contact: 'Yes' },
-        { id: 'P123456', type: 'Doctor Consultation', rating: 3, message: 'Doctor was not very attentive and seemed rushed during the consultation. Did not listen properly to my concerns.', date: '25 Mar 2026', time: '10:15 AM', status: 'Pending', contact: 'Yes' },
-        { id: 'P789012', type: 'Lab / Reports', rating: 5, message: 'Very prompt and professional service. Reports delivered on time.', date: '25 Mar 2026', time: '2:45 PM', status: 'Reviewed', contact: 'No' },
-        { id: 'P345678', type: 'App Experience', rating: 1, message: 'App keeps crashing frequently when trying to book an appointment.', date: '24 Mar 2026', time: '5:00 PM', status: 'Actioned', contact: 'Yes' },
-        { id: 'P901234', type: 'Doctor Consultation', rating: 2, message: 'Rude behavior by doctor. Was not helpful at all.', date: '23 Mar 2026', time: '11:36 AM', status: 'Pending', contact: 'Yes' },
-        { id: 'P445566', type: 'App Experience', rating: 4, message: 'Interface is clean but payment failed twice.', date: '22 Mar 2026', time: '9:20 AM', status: 'Reviewed', contact: 'Yes' },
-        { id: 'P112233', type: 'Doctor Consultation', rating: 3, message: 'Reports delivered late.', date: '23 Mar 2026', time: '9:20 AM', status: 'Pending', contact: 'Yes' },
-        { id: 'P223344', type: 'Lab / Reports', rating: 5, message: 'Excellent facility and clean environment.', date: '21 Mar 2026', time: '04:10 PM', status: 'Actioned', contact: 'No' },
-        { id: 'P556677', type: 'Doctor Consultation', rating: 4, message: 'Very knowledgeable doctor.', date: '20 Mar 2026', time: '11:00 AM', status: 'Reviewed', contact: 'Yes' },
-        { id: 'P889900', type: 'App Experience', rating: 2, message: 'Not intuitive for elderly users.', date: '19 Mar 2026', time: '02:30 PM', status: 'Pending', contact: 'Yes' },
-        { id: 'P111213', type: 'Doctor Consultation', rating: 5, message: 'Great experience overall.', date: '18 Mar 2026', time: '09:00 AM', status: 'Actioned', contact: 'No' },
-    ];
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [selectedFeedback, setSelectedFeedback] = useState(null);
 
-    const [allData, setAllData] = useState(initialData);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filters, setFilters] = useState({ type: 'All', status: 'All', rating: 'All', date: '' });
-    const [selectedFeedback, setSelectedFeedback] = useState(initialData[0]);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [adminNote, setAdminNote] = useState('Escalate to doctor support team. Need clarification from clinic.');
-    
-    // Pagination state
-    const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 10;
+  const [filters, setFilters] = useState({
+    status: "ALL",
+    type: "ALL"
+  });
 
-    // Filter Logic
-  const filteredData = useMemo(() => {
-        return allData.filter(item => {
-            const matchesSearch = item.message.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                                item.id.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesType = filters.type === 'All' || item.type === filters.type;
-            const matchesStatus = filters.status === 'All' || item.status === filters.status;
-            const matchesRating = filters.rating === 'All' || item.rating.toString() === filters.rating;
-            
-            // Working Calendar Logic: Compares input date (YYYY-MM-DD) with item date
-            const matchesDate = !filters.date || item.date === filters.date;
+  const [pagination, setPagination] = useState({
+    page: 0,
+    size: 10,
+    totalElements: 0,
+    totalPages: 0
+  });
 
-            return matchesSearch && matchesType && matchesStatus && matchesRating && matchesDate;
-        });
-    }, [allData, searchTerm, filters]);
+  const [statusForm, setStatusForm] = useState({
+    status: "REVIEWED",
+    adminNote: ""
+  });
 
-    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-    const currentRows = filteredData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
-    const handleSearch = (e) => {
-        setSearchTerm(e.target.value);
-        setCurrentPage(1);
+  const [loading, setLoading] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const stats = useMemo(() => {
+    const total = pagination.totalElements || feedbacks.length;
+    const newCount = feedbacks.filter((item) => item.status === "NEW").length;
+    const resolvedCount = feedbacks.filter(
+      (item) => item.status === "RESOLVED" || item.status === "CLOSED"
+    ).length;
+    const ratedItems = feedbacks.filter((item) => item.rating);
+    const averageRating =
+      ratedItems.length === 0
+        ? "-"
+        : (
+            ratedItems.reduce((sum, item) => sum + Number(item.rating || 0), 0) /
+            ratedItems.length
+          ).toFixed(1);
+
+    return {
+      total,
+      newCount,
+      resolvedCount,
+      averageRating
     };
-    
+  }, [feedbacks, pagination.totalElements]);
 
-   const resetFilters = () => {
-        setFilters({ type: 'All', status: 'All', rating: 'All', date: '' });
-        setSearchTerm('');
-        setCurrentPage(1);
+  const loadFeedbacks = async ({
+    nextPage = pagination.page,
+    nextStatus = filters.status,
+    nextType = filters.type
+  } = {}) => {
+    try {
+      setLoading(true);
+      setErrorMessage("");
+
+      const data = await getAdminFeedbacks({
+        status: nextStatus,
+        type: nextType,
+        page: nextPage,
+        size: pagination.size
+      });
+
+      setFeedbacks(data?.feedbacks || []);
+      setPagination({
+        page: data?.page ?? nextPage,
+        size: data?.size ?? pagination.size,
+        totalElements: data?.totalElements ?? 0,
+        totalPages: data?.totalPages ?? 0
+      });
+    } catch (error) {
+      setErrorMessage(error.message || "Failed to load feedback.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadFeedbacks({ nextPage: 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleFilterChange = async (e) => {
+    const { name, value } = e.target;
+
+    const nextFilters = {
+      ...filters,
+      [name]: value
     };
 
-    const handleFilterChange = (e, key) => {
-        setFilters({ ...filters, [key]: e.target.value });
-        setCurrentPage(1);
-    };
+    setFilters(nextFilters);
+    setSelectedFeedback(null);
+    setSuccessMessage("");
 
-    const updateStatus = (newStatus) => {
-        const updated = allData.map(item => 
-            item.id === selectedFeedback.id ? { ...item, status: newStatus } : item
-        );
-        setAllData(updated);
-        setSelectedFeedback({ ...selectedFeedback, status: newStatus });
-    };
+    await loadFeedbacks({
+      nextPage: 0,
+      nextStatus: nextFilters.status,
+      nextType: nextFilters.type
+    });
+  };
 
-    const handleSaveNote = () => {
-        alert("Note saved successfully for " + selectedFeedback.id);
-    };
+  const handleViewDetails = async (feedbackId) => {
+    try {
+      setDetailLoading(true);
+      setErrorMessage("");
+      setSuccessMessage("");
 
-    const renderStars = (rating) => {
-        if (rating === 0) return <span className="no-rating">Not Rated</span>;
-        return (
-            <div className="stars">
-                {[...Array(5)].map((_, i) => (
-                    <span key={i} className={i < rating ? "star-icon filled" : "star-icon"}>★</span>
-                ))}
-            </div>
-        );
-    };
+      const data = await getAdminFeedbackById(feedbackId);
+      setSelectedFeedback(data);
+      setStatusForm({
+        status: data?.status || "REVIEWED",
+        adminNote: data?.adminNote || ""
+      });
+    } catch (error) {
+      setErrorMessage(error.message || "Failed to load feedback details.");
+    } finally {
+      setDetailLoading(false);
+    }
+  };
 
-    return (
-        <div className="feedback-wrapper">
-            {/* Left Section: Stats, Filters, Table */}
-            <div className="feedback-list-section">
-                <header className="page-header">
-                    <div className="title-area">
-                        <h1>Feedback Management</h1>
-                        <p>Manage patient feedback, review & take action</p>
-                    </div>
-                    <div className="header-search">
-                        <input 
-                            type="text" 
-                            placeholder="Search by Patient ID or Message..." 
-                            value={searchTerm}
-                            onChange={handleSearch}
-                        />
-                        <span className="search-symbol">🔍</span>
-                    </div>
-                </header>
+  const handleStatusFormChange = (e) => {
+    const { name, value } = e.target;
 
-                <div className="stats-container">
-                    <div className="card-stat">
-                        <span className="label">Total Feedback</span>
-                        <div className="val">{allData.length}</div>
-                    </div>
-                    <div className="card-stat pending-border">
-                        <span className="label text-pending">● Pending</span>
-                        <div className="val">{allData.filter(i => i.status === 'Pending').length}</div>
-                    </div>
-                    <div className="card-stat reviewed-border">
-                        <span className="label text-reviewed">● Reviewed</span>
-                        <div className="val">{allData.filter(i => i.status === 'Reviewed').length}</div>
-                    </div>
-                    <div className="card-stat actioned-border">
-                        <span className="label text-actioned">● Actioned</span>
-                        <div className="val">{allData.filter(i => i.status === 'Actioned').length}</div>
-                    </div>
-                </div>
+    setStatusForm((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-                <div className="action-bar">
-                    <div className="filters">
-                        <select value={filters.type} onChange={(e) => handleFilterChange(e, 'type')}>
-                            <option value="All">All Types</option>
-                            <option value="Doctor Consultation">Doctor Consultation</option>
-                            <option value="Lab / Reports">Lab / Reports</option>
-                            <option value="App Experience">App Experience</option>
-                        </select>
-                        <select value={filters.status} onChange={(e) => handleFilterChange(e, 'status')}>
-                            <option value="All">All Status</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Reviewed">Reviewed</option>
-                            <option value="Actioned">Actioned</option>
-                        </select>
-                        <select value={filters.rating} onChange={(e) => handleFilterChange(e, 'rating')}>
-                            <option value="All">All Ratings</option>
-                            <option value="5">⭐ 5 Stars</option>
-                            <option value="4">⭐ 4 Stars</option>
-                            <option value="3">⭐ 3 Stars</option>
-                            <option value="2">⭐ 2 Stars</option>
-                            <option value="1">⭐ 1 Star</option>
-                        </select>
-                        <input 
-                            type="date" 
-                            className="date-filter-input" 
-                            value={filters.date} 
-                            onChange={(e) => handleFilterChange(e, 'date')} 
-                        />
-                        
-                        <button className="btn-reset" onClick={resetFilters}>Reset</button>
-                    </div>
-                </div>
+  const handleUpdateStatus = async (e) => {
+    e.preventDefault();
 
-                <div className="table-container">
-                    <table className="main-table">
-                        <thead>
-                            <tr>
-                                <th><input type="checkbox" /></th>
-                                <th>TYPE</th>
-                                <th>RATING</th>
-                                <th>MESSAGE PREVIEW</th>
-                                <th>DATE & TIME</th>
-                                <th>CONTACT</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {currentRows.length > 0 ? currentRows.map((item) => (
-                                <tr 
-                                    key={item.id} 
-                                    className={selectedFeedback?.id === item.id ? 'row-active' : ''}
-                                    onClick={() => {
-                                        setSelectedFeedback(item);
-                                        setIsSidebarOpen(true);
-                                    }}
-                                >
-                                    <td><input type="checkbox" /></td>
-                                    <td className="type-col">
-                                        {item.type}
-                                    </td>
-                                    <td>{renderStars(item.rating)}</td>
-                                    <td className="msg-cell">{item.message}</td>
-                                    <td className="date-cell">{item.date}, <br/><span>{item.time}</span></td>
-                                    
-                                    <td>
-                                        <span className={`tag-contact ${item.contact === 'Yes' ? 'is-yes' : 'is-no'}`}>
-                                            {item.contact === 'Yes' ? '✓ Yes' : '✕ No'}
-                                        </span>
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan="7" style={{textAlign: 'center', padding: '40px', color: '#64748b'}}>No feedback found matching your filters.</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+    if (!selectedFeedback?.id) {
+      setErrorMessage("Please select feedback first.");
+      return;
+    }
 
-                <footer className="table-footer">
-                    <div className="rows-select">
-                        Rows per page: <strong>10</strong>
-                    </div>
-                    <div className="pagination-btns">
-                        <button 
-                            disabled={currentPage === 1} 
-                            onClick={() => setCurrentPage(prev => prev - 1)}
-                        >⟨</button>
-                        
-                        {[...Array(totalPages)].map((_, i) => (
-                            <button 
-                                key={i + 1} 
-                                className={currentPage === i + 1 ? "active" : ""}
-                                onClick={() => setCurrentPage(i + 1)}
-                            >
-                                {i + 1}
-                            </button>
-                        ))}
-                        
-                        <button 
-                            disabled={currentPage === totalPages || totalPages === 0} 
-                            onClick={() => setCurrentPage(prev => prev + 1)}
-                        >⟩</button>
-                    </div>
-                </footer>
-            </div>
+    try {
+      setUpdating(true);
+      setErrorMessage("");
+      setSuccessMessage("");
 
-            {/* Right Section: Fixed Feedback Detail */}
-            <div className={`feedback-detail-sidebar ${!isSidebarOpen ? 'hidden' : ''}`}>
-                <div className="sidebar-inner">
-                    <div className="side-head">
-                        <h3>Feedback Detail</h3>
-                        <button className="side-close" onClick={() => setIsSidebarOpen(false)}>✕</button>
-                    </div>
+      const updated = await updateAdminFeedbackStatus(selectedFeedback.id, {
+        status: statusForm.status,
+        adminNote: statusForm.adminNote.trim() || null
+      });
 
-                    {selectedFeedback && (
-                        <div className="side-body">
-                            <div className="item-title">
-                                <h4>{selectedFeedback.type}</h4>
-                                <span className={`badge ${selectedFeedback.status.toLowerCase()}`}>● {selectedFeedback.status}</span>
-                            </div>
-                            
-                            <div className="stars-row">
-                                {renderStars(selectedFeedback.rating)}
-                            </div>
-                            <p className="sub-text">Submitted on: {selectedFeedback.date}, {selectedFeedback.time}</p>
+      setSelectedFeedback(updated);
+      setSuccessMessage("Feedback status updated successfully.");
 
-                            <div className="msg-quote">
-                                "{selectedFeedback.message}"
-                            </div>
+      await loadFeedbacks({
+        nextPage: pagination.page,
+        nextStatus: filters.status,
+        nextType: filters.type
+      });
+    } catch (error) {
+      setErrorMessage(error.message || "Failed to update feedback status.");
+    } finally {
+      setUpdating(false);
+    }
+  };
 
-                            <div className="patient-id-info">
-                                <p><strong>Patient ID:</strong> <span>{selectedFeedback.id}</span></p>
-                                <p><strong>Contact Allowed:</strong> <span className={selectedFeedback.contact === 'Yes' ? 'text-actioned' : 'text-pending'}>
-                                    {selectedFeedback.contact === 'Yes' ? '✓ YES' : '✕ NO'}
-                                </span></p>
-                            </div>
+  const handlePageChange = async (nextPage) => {
+    if (nextPage < 0 || nextPage >= pagination.totalPages) {
+      return;
+    }
 
-                            <div className="admin-box">
-                                <h5>Admin Actions</h5>
-                                <div className="input-group">
-                                    <label>Update Status</label>
-                                    <select 
-                                        value={selectedFeedback.status} 
-                                        onChange={(e) => updateStatus(e.target.value)}
-                                    >
-                                        <option value="Pending">Pending</option>
-                                        <option value="Reviewed">Reviewed</option>
-                                        <option value="Actioned">Actioned</option>
-                                    </select>
-                                </div>
-                                <div className="btn-row">
-                                    <button className="btn-blue-fill" onClick={() => updateStatus('Reviewed')}>Mark Reviewed</button>
-                                    <button className="btn-outline-green" onClick={() => updateStatus('Actioned')}>✓ Actioned</button>
-                                </div>
-                                <button className="btn-block-outline" onClick={() => updateStatus('Pending')}>Reopen Case</button>
+    await loadFeedbacks({ nextPage });
+  };
 
-                                <div className="input-group" style={{marginTop: '20px'}}>
-                                    <label>Internal Note (Admin Only)</label>
-                                    <textarea 
-                                        value={adminNote}
-                                        onChange={(e) => setAdminNote(e.target.value)}
-                                        placeholder="Add private notes here..."
-                                    />
-                                </div>
-                                <button className="btn-save" onClick={handleSaveNote}>Save Admin Note</button>
-                                <p className="last-up">Last updated: Today, {selectedFeedback.time}</p>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
+  return (
+    <div className="admin-feedback-page">
+      <div className="admin-feedback-header">
+        <div>
+          <p className="admin-feedback-eyebrow">Admin Panel</p>
+          <h1>Patient Feedback</h1>
+          <p>
+            Review patient feedback, monitor ratings, and track admin action
+            status from one place.
+          </p>
         </div>
-    );
+      </div>
+
+      <div className="admin-feedback-stats">
+        <div className="admin-feedback-stat-card">
+          <span>Total Feedback</span>
+          <strong>{stats.total}</strong>
+        </div>
+        <div className="admin-feedback-stat-card">
+          <span>New On This Page</span>
+          <strong>{stats.newCount}</strong>
+        </div>
+        <div className="admin-feedback-stat-card">
+          <span>Resolved On This Page</span>
+          <strong>{stats.resolvedCount}</strong>
+        </div>
+        <div className="admin-feedback-stat-card">
+          <span>Avg. Rating On This Page</span>
+          <strong>{stats.averageRating}</strong>
+        </div>
+      </div>
+
+      {errorMessage && (
+        <div className="admin-feedback-alert admin-feedback-alert--error">
+          {errorMessage}
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="admin-feedback-alert admin-feedback-alert--success">
+          {successMessage}
+        </div>
+      )}
+
+      <div className="admin-feedback-layout">
+        <section className="admin-feedback-list-card">
+          <div className="admin-feedback-toolbar">
+            <div>
+              <h2>Feedback List</h2>
+              <p>{pagination.totalElements} feedback record(s)</p>
+            </div>
+
+            <div className="admin-feedback-filters">
+              <select
+                name="status"
+                value={filters.status}
+                onChange={handleFilterChange}
+              >
+                {STATUS_OPTIONS.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                name="type"
+                value={filters.type}
+                onChange={handleFilterChange}
+              >
+                {TYPE_OPTIONS.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="admin-feedback-empty">Loading feedback...</div>
+          ) : feedbacks.length === 0 ? (
+            <div className="admin-feedback-empty">
+              <strong>No feedback found.</strong>
+              <span>Try changing filters or check again later.</span>
+            </div>
+          ) : (
+            <>
+              <div className="admin-feedback-table-wrap">
+                <table className="admin-feedback-table">
+                  <thead>
+                    <tr>
+                      <th>Feedback</th>
+                      <th>Patient</th>
+                      <th>Type</th>
+                      <th>Rating</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {feedbacks.map((item) => (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="admin-feedback-main-cell">
+                            <strong>{item.feedbackNumber}</strong>
+                            <span>{item.message}</span>
+                          </div>
+                        </td>
+
+                        <td>
+                          <div className="admin-feedback-patient-cell">
+                            <strong>{item.patientName || "-"}</strong>
+                            <span>{item.patientEmail || "-"}</span>
+                          </div>
+                        </td>
+
+                        <td>{getLabel(TYPE_OPTIONS, item.type)}</td>
+
+                        <td>
+                          <span className="admin-feedback-rating">
+                            {item.rating ? `${item.rating}/5` : "-"}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span
+                            className={`admin-feedback-status admin-feedback-status--${item.status?.toLowerCase()}`}
+                          >
+                            {getLabel(STATUS_OPTIONS, item.status)}
+                          </span>
+                        </td>
+
+                        <td>{formatDateTime(item.createdAt)}</td>
+
+                        <td>
+                          <button
+                            type="button"
+                            className="admin-feedback-view-btn"
+                            onClick={() => handleViewDetails(item.id)}
+                          >
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="admin-feedback-mobile-list">
+                {feedbacks.map((item) => (
+                  <article key={item.id} className="admin-feedback-mobile-card">
+                    <div className="admin-feedback-mobile-top">
+                      <strong>{item.feedbackNumber}</strong>
+                      <span
+                        className={`admin-feedback-status admin-feedback-status--${item.status?.toLowerCase()}`}
+                      >
+                        {getLabel(STATUS_OPTIONS, item.status)}
+                      </span>
+                    </div>
+
+                    <p>{item.message}</p>
+
+                    <div className="admin-feedback-mobile-meta">
+                      <span>{item.patientName || "-"}</span>
+                      <span>{getLabel(TYPE_OPTIONS, item.type)}</span>
+                      <span>{item.rating ? `${item.rating}/5` : "No rating"}</span>
+                      <span>{formatDateTime(item.createdAt)}</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="admin-feedback-view-btn"
+                      onClick={() => handleViewDetails(item.id)}
+                    >
+                      View Details
+                    </button>
+                  </article>
+                ))}
+              </div>
+
+              <div className="admin-feedback-pagination">
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={pagination.page <= 0}
+                >
+                  Previous
+                </button>
+
+                <span>
+                  Page {pagination.totalPages === 0 ? 0 : pagination.page + 1} of{" "}
+                  {pagination.totalPages}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={pagination.page + 1 >= pagination.totalPages}
+                >
+                  Next
+                </button>
+              </div>
+            </>
+          )}
+        </section>
+
+        <aside className="admin-feedback-detail-card">
+          <div className="admin-feedback-detail-heading">
+            <h2>Feedback Details</h2>
+            <p>Select feedback to review full details.</p>
+          </div>
+
+          {detailLoading ? (
+            <div className="admin-feedback-empty">Loading details...</div>
+          ) : !selectedFeedback ? (
+            <div className="admin-feedback-empty">
+              <strong>No feedback selected.</strong>
+              <span>Click View from the feedback list.</span>
+            </div>
+          ) : (
+            <div className="admin-feedback-detail">
+              <div className="admin-feedback-detail-top">
+                <div>
+                  <strong>{selectedFeedback.feedbackNumber}</strong>
+                  <span>{formatDateTime(selectedFeedback.createdAt)}</span>
+                </div>
+
+                <span
+                  className={`admin-feedback-status admin-feedback-status--${selectedFeedback.status?.toLowerCase()}`}
+                >
+                  {getLabel(STATUS_OPTIONS, selectedFeedback.status)}
+                </span>
+              </div>
+
+              <div className="admin-feedback-detail-section">
+                <h3>Patient</h3>
+                <div className="admin-feedback-info-grid">
+                  <div>
+                    <span>Name</span>
+                    <strong>{selectedFeedback.patientName || "-"}</strong>
+                  </div>
+                  <div>
+                    <span>Email</span>
+                    <strong>{selectedFeedback.patientEmail || "-"}</strong>
+                  </div>
+                  <div>
+                    <span>Mobile</span>
+                    <strong>{selectedFeedback.patientMobile || "-"}</strong>
+                  </div>
+                  <div>
+                    <span>Location</span>
+                    <strong>
+                      {[selectedFeedback.patientCity, selectedFeedback.patientState]
+                        .filter(Boolean)
+                        .join(", ") || "-"}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-feedback-detail-section">
+                <h3>Feedback</h3>
+                <div className="admin-feedback-info-grid">
+                  <div>
+                    <span>Type</span>
+                    <strong>{getLabel(TYPE_OPTIONS, selectedFeedback.type)}</strong>
+                  </div>
+                  <div>
+                    <span>Rating</span>
+                    <strong>{getStars(selectedFeedback.rating)}</strong>
+                  </div>
+                  <div>
+                    <span>Allow Contact</span>
+                    <strong>{selectedFeedback.allowContact ? "Yes" : "No"}</strong>
+                  </div>
+                  <div>
+                    <span>Related Page</span>
+                    <strong>{selectedFeedback.relatedPage || "-"}</strong>
+                  </div>
+                </div>
+
+                <div className="admin-feedback-message-box">
+                  {selectedFeedback.message}
+                </div>
+              </div>
+
+              <div className="admin-feedback-detail-section">
+                <h3>Timeline</h3>
+                <div className="admin-feedback-info-grid">
+                  <div>
+                    <span>Reviewed At</span>
+                    <strong>{formatDateTime(selectedFeedback.reviewedAt)}</strong>
+                  </div>
+                  <div>
+                    <span>Resolved At</span>
+                    <strong>{formatDateTime(selectedFeedback.resolvedAt)}</strong>
+                  </div>
+                  <div>
+                    <span>Closed At</span>
+                    <strong>{formatDateTime(selectedFeedback.closedAt)}</strong>
+                  </div>
+                  <div>
+                    <span>Updated At</span>
+                    <strong>{formatDateTime(selectedFeedback.updatedAt)}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <form
+                className="admin-feedback-status-form"
+                onSubmit={handleUpdateStatus}
+              >
+                <h3>Admin Action</h3>
+
+                <label>
+                  Status
+                  <select
+                    name="status"
+                    value={statusForm.status}
+                    onChange={handleStatusFormChange}
+                  >
+                    {UPDATE_STATUS_OPTIONS.map((status) => (
+                      <option key={status.value} value={status.value}>
+                        {status.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label>
+                  Admin Note
+                  <textarea
+                    name="adminNote"
+                    value={statusForm.adminNote}
+                    onChange={handleStatusFormChange}
+                    placeholder="Write internal admin note..."
+                  />
+                </label>
+
+                <button type="submit" disabled={updating}>
+                  {updating ? "Updating..." : "Update Status"}
+                </button>
+              </form>
+            </div>
+          )}
+        </aside>
+      </div>
+    </div>
+  );
 };
 
 export default FeedbackPage;

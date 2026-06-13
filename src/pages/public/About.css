@@ -1352,3 +1352,22 @@
     font-size: 9.5px !important;
   }
 }
+/* =========================================
+   ABOUT PAGE MOBILE HEADER PROFILE FIX
+========================================= */
+
+@media screen and (max-width: 980px) {
+  .about-page .about-desktop-profile {
+    display: none !important;
+  }
+
+  .about-page .about-header .about-header-actions {
+    gap: 0 !important;
+  }
+
+  .about-page .about-hamburger {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+}

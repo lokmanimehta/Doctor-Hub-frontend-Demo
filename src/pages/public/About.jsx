@@ -184,9 +184,8 @@ const AboutUs = () => {
         {currentUser && (
           <div className="sidebar-user-container">
             <div
-              className={`sidebar-profile-card ${
-                sidebarProfileOpen ? "expanded" : ""
-              }`}
+              className={`sidebar-profile-card ${sidebarProfileOpen ? "expanded" : ""
+                }`}
               onClick={() => setSidebarProfileOpen(!sidebarProfileOpen)}
             >
               <div className="sidebar-avatar">{getUserInitial()}</div>
@@ -341,7 +340,7 @@ const AboutUs = () => {
               </button>
             </>
           ) : (
-            <div className="profile-wrapper" ref={dropdownRef}>
+            <div className="profile-wrapper about-desktop-profile" ref={dropdownRef}>
               <div
                 className="profile-icon"
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}

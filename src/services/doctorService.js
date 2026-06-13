@@ -422,3 +422,24 @@ export const cancelPatientLabOrder = async (labOrderId) => {
   const response = await api.patch(`/doctor/patients/lab-orders/${labOrderId}/cancel`);
   return response.data;
 };
+export const submitDoctorProfileForReview = async () => {
+  const response = await api.patch("/doctor/profile/submit-for-review");
+  return response.data;
+};
+export const acceptDoctorAppointmentRequest = async (appointmentId, payload = {}) => {
+  const response = await api.patch(
+    `/doctor/patients/appointments/${appointmentId}/accept`,
+    payload
+  );
+
+  return response.data;
+};
+
+export const rejectDoctorAppointmentRequest = async (appointmentId, payload = {}) => {
+  const response = await api.patch(
+    `/doctor/patients/appointments/${appointmentId}/reject`,
+    payload
+  );
+
+  return response.data;
+};

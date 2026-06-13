@@ -1,498 +1,1308 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "./Prescriptions.css";
+import jsPDF from "jspdf";
 import {
-  FiSearch,
-  FiEye,
-  FiDownload,
-  FiShare2,
-  FiX,
+  FiAlertCircle,
   FiCalendar,
-  FiMapPin,
-  FiMic,
-  FiClock,
-  FiFileText,
-  FiShoppingBag,
   FiCheckCircle,
-  FiUser,
-  FiActivity
+  FiClipboard,
+  FiEye,
+  FiFileText,
+  FiMapPin,
+  FiPackage,
+  FiRefreshCw,
+  FiSearch,
+  FiX
 } from "react-icons/fi";
+import {
+  getPatientPrescriptionById,
+  getPatientPrescriptions
+} from "../../services/patientService";
+import { useProfile } from "../../context/useProfile";
 
-const prescriptionData = [
-  {
-    id: 1,
-    doctorName: "Dr. Aisha Khan",
-    specialization: "Cardiologist",
-    clinic: "City Heart Hospital",
-    date: "24 Feb 2026",
-    status: "Active",
-    diagnosis: "Chronic Hypertension",
-    symptoms:
-      "Mild chest tightness, occasional headache, elevated blood pressure readings.",
-    voiceSummary:
-      "Patient reports mild chest tightness and elevated blood pressure. Continue anti-hypertensive management and lifestyle control.",
-    treatmentPlan:
-      "Continue blood pressure medicines regularly, monitor BP daily, reduce salt intake, and maintain a 30-minute walk routine.",
-    patientInstructions:
-      "Check blood pressure every morning, avoid excessive salt, and do not skip medicines without consulting your doctor.",
-    medicines: [
-      {
-        name: "Telmisartan 40mg",
-        dosage: "1-0-0",
-        duration: "30 Days",
-        timing: "Before breakfast",
-        info: "Take at the same time daily. Continue unless doctor advises otherwise."
-      },
-      {
-        name: "Amlodipine 5mg",
-        dosage: "0-0-1",
-        duration: "30 Days",
-        timing: "After dinner",
-        info: "May cause mild swelling in some patients. Inform doctor if swelling increases."
-      }
-    ],
-    followUps: [
-      { task: "BP Checkup", date: "02 Mar 2026", status: "Upcoming" },
-      { task: "Diet Review", date: "10 Mar 2026", status: "Pending" }
-    ]
-  },
-  {
-    id: 2,
-    doctorName: "Dr. Sameer Verma",
-    specialization: "General Physician",
-    clinic: "Apex Family Care",
-    date: "10 Jan 2026",
-    status: "Past",
-    diagnosis: "Severe Viral Flu",
-    symptoms: "High fever, throat pain, weakness, body ache.",
-    voiceSummary:
-      "High fever for two days with weakness and throat irritation. Symptomatic treatment and rest advised.",
-    treatmentPlan:
-      "Bed rest, oral hydration, fever management, warm fluids, and observation of fever pattern for 3 to 5 days.",
-    patientInstructions:
-      "Drink warm fluids, take proper rest, and return for review if fever continues beyond 3 days.",
-    medicines: [
-      {
-        name: "Paracetamol 650mg",
-        dosage: "1-1-1",
-        duration: "5 Days",
-        timing: "After meal",
-        info: "Do not exceed advised dose. Use only as prescribed."
-      },
-      {
-        name: "Vitamin C 500mg",
-        dosage: "1-0-0",
-        duration: "10 Days",
-        timing: "After breakfast",
-        info: "Supportive supplement for recovery."
-      }
-    ],
-    followUps: [
-      { task: "Recovery Check", date: "15 Jan 2026", status: "Completed" }
-    ]
-  },
-  {
-    id: 3,
-    doctorName: "Dr. Raj Patel",
-    specialization: "Orthopedic",
-    clinic: "Ortho Spine Center",
-    date: "15 Dec 2025",
-    status: "Past",
-    diagnosis: "Mechanical Lower Back Pain",
-    symptoms: "Lower back pain during movement, stiffness after long sitting.",
-    voiceSummary:
-      "Mechanical lower back pain with posture-related stiffness. Pain relief and activity modification advised.",
-    treatmentPlan:
-      "Pain control, posture correction, stretching exercises, and avoiding heavy weight lifting for at least one week.",
-    patientInstructions:
-      "Avoid bending suddenly, do stretching exercises, and consult again if pain spreads to the leg.",
-    medicines: [
-      {
-        name: "Etoshine 90mg",
-        dosage: "0-0-1",
-        duration: "7 Days",
-        timing: "After dinner",
-        info: "Take only after food and avoid self-extending the course."
-      },
-      {
-        name: "Pantocid 40mg",
-        dosage: "1-0-0",
-        duration: "7 Days",
-        timing: "30 min before breakfast",
-        info: "Helps reduce stomach irritation with pain medicine."
-      }
-    ],
-    followUps: [
-      { task: "Physiotherapy Review", date: "20 Dec 2025", status: "Missed" }
-    ]
-  }
+const FILTERS = [
+  { label: "All", value: "ALL" },
+  { label: "Active", value: "ACTIVE" },
+  { label: "Past", value: "PAST" }
 ];
 
-const Prescriptions = () => {
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("All");
-  const [selectedPrescription, setSelectedPrescription] = useState(null);
-  const [toast, setToast] = useState("");
-
-  const showToast = (message) => {
-    setToast(message);
-    setTimeout(() => setToast(""), 2500);
-  };
-
-  const filteredPrescriptions = useMemo(() => {
-    return prescriptionData.filter((item) => {
-      const query = search.toLowerCase();
-
-      const matchesSearch =
-        item.doctorName.toLowerCase().includes(query) ||
-        item.diagnosis.toLowerCase().includes(query) ||
-        item.clinic.toLowerCase().includes(query) ||
-        item.specialization.toLowerCase().includes(query);
-
-      const matchesFilter = filter === "All" || item.status === filter;
-
-      return matchesSearch && matchesFilter;
-    });
-  }, [search, filter]);
-
-  const activePrescription =
-    prescriptionData.find((item) => item.status === "Active") || prescriptionData[0];
+const getProfileId = (profile) => {
+  if (!profile) {
+    return null;
+  }
 
   return (
-    <div className="prescriptions-page">
-      <div className="prescriptions-shell">
-        <header className="page-header">
-          <div className="page-header-text">
-            <h1>My Prescriptions</h1>
-            <p>
-              View your doctor-approved prescriptions, medicines, treatment plan,
-              and follow-up instructions in one place.
-            </p>
-          </div>
-        </header>
+    profile.id ||
+    profile.profileId ||
+    profile.patientProfileId ||
+    profile.memberId ||
+    null
+  );
+};
 
-        <section className="toolbar-card">
-          <div className="search-box">
-            <FiSearch className="search-icon" />
+const getProfileType = (profile) => {
+  if (!profile) {
+    return null;
+  }
+
+  const type =
+    profile.profileType ||
+    profile.type ||
+    profile.patientProfileType ||
+    profile.relation ||
+    null;
+
+  return type ? String(type).trim().toUpperCase() : null;
+};
+
+const getProfileName = (profile) => {
+  if (!profile) {
+    return "All profiles";
+  }
+
+  return (
+    profile.fullName ||
+    profile.name ||
+    profile.memberName ||
+    profile.patientName ||
+    profile.profileName ||
+    "Selected profile"
+  );
+};
+
+const normalizeStatus = (status) => {
+  if (!status) {
+    return "";
+  }
+
+  return String(status).trim().toUpperCase();
+};
+
+const safeText = (value, fallback = "Not available") => {
+  if (value === null || value === undefined) {
+    return fallback;
+  }
+
+  const text = String(value).trim();
+  return text ? text : fallback;
+};
+
+const formatDate = (value) => {
+  if (!value) {
+    return "Not scheduled";
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Not scheduled";
+  }
+
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+};
+
+const getMedicineName = (medicine) => {
+  return safeText(medicine?.name || medicine?.medicineName, "Medicine");
+};
+
+const getMedicineInstruction = (medicine) => {
+  return safeText(
+    medicine?.instruction || medicine?.timing || medicine?.info,
+    "No instruction added"
+  );
+};
+
+const buildCopyText = (prescription) => {
+  const medicines = Array.isArray(prescription?.medicines)
+    ? prescription.medicines
+    : [];
+
+  const followUps = Array.isArray(prescription?.followUps)
+    ? prescription.followUps
+    : [];
+
+  const medicineLines =
+    medicines.length > 0
+      ? medicines
+          .map((medicine, index) => {
+            return [
+              `${index + 1}. ${getMedicineName(medicine)}`,
+              `   Dosage: ${safeText(medicine.dosage, "Not added")}`,
+              `   Duration: ${safeText(medicine.duration, "Not added")}`,
+              `   Instruction: ${getMedicineInstruction(medicine)}`
+            ].join("\n");
+          })
+          .join("\n\n")
+      : "No medicines added.";
+
+  const followUpLines =
+    followUps.length > 0
+      ? followUps
+          .map((followUp, index) => {
+            return `${index + 1}. ${safeText(
+              followUp.task,
+              "Follow-up consultation"
+            )} - ${formatDate(followUp.date || followUp.followUpDate)} - ${safeText(
+              followUp.status,
+              "Scheduled"
+            )}`;
+          })
+          .join("\n")
+      : "No follow-up scheduled.";
+
+  return [
+    "DOCTORHUB PRESCRIPTION SUMMARY",
+    "================================",
+    "",
+    `Prescription ID: ${safeText(prescription?.prescriptionId || prescription?.id)}`,
+    `Date: ${formatDate(prescription?.date || prescription?.prescriptionDate)}`,
+    `Status: ${safeText(prescription?.status)}`,
+    "",
+    "DOCTOR DETAILS",
+    "--------------",
+    `Doctor: ${safeText(prescription?.doctorName)}`,
+    `Specialization: ${safeText(prescription?.specialization, "General Physician")}`,
+    `Clinic: ${safeText(prescription?.clinicName || prescription?.clinic)}`,
+    `Location: ${safeText(prescription?.location)}`,
+    "",
+    "DIAGNOSIS",
+    "---------",
+    safeText(prescription?.diagnosis),
+    "",
+    "SYMPTOMS",
+    "--------",
+    safeText(prescription?.symptoms, "No symptoms added."),
+    "",
+    "TREATMENT PLAN",
+    "--------------",
+    safeText(prescription?.treatmentPlan, "No treatment plan added."),
+    "",
+    "PATIENT INSTRUCTIONS",
+    "--------------------",
+    safeText(
+      prescription?.patientInstructions || prescription?.clinicalNotes,
+      "No patient instructions added."
+    ),
+    "",
+    "MEDICINES",
+    "---------",
+    medicineLines,
+    "",
+    "FOLLOW-UP",
+    "---------",
+    followUpLines,
+    "",
+    "Generated from DoctorHub."
+  ].join("\n");
+};
+
+const copyTextToClipboard = async (text) => {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  textarea.style.top = "-9999px";
+
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+
+  const copied = document.execCommand("copy");
+  document.body.removeChild(textarea);
+
+  if (!copied) {
+    throw new Error("Copy failed");
+  }
+};
+
+const sanitizePdfFileName = (value, fallback = "prescription") => {
+  const cleaned = safeText(value, fallback)
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  return cleaned || fallback;
+};
+
+const ensurePdfSpace = (doc, y, requiredHeight = 24) => {
+  if (y + requiredHeight > 278) {
+    doc.addPage();
+    return 18;
+  }
+
+  return y;
+};
+
+const addPdfWrappedText = (
+  doc,
+  text,
+  x,
+  y,
+  maxWidth,
+  {
+    fontSize = 10,
+    lineHeight = 5.3,
+    fontStyle = "normal",
+    color = [16, 32, 51]
+  } = {}
+) => {
+  doc.setFont("helvetica", fontStyle);
+  doc.setFontSize(fontSize);
+  doc.setTextColor(color[0], color[1], color[2]);
+
+  const lines = doc.splitTextToSize(safeText(text, ""), maxWidth);
+
+  lines.forEach((line) => {
+    y = ensurePdfSpace(doc, y, 10);
+    doc.text(line, x, y);
+    y += lineHeight;
+  });
+
+  return y;
+};
+
+const addPdfSection = (doc, title, content, y) => {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const left = 16;
+  const boxWidth = pageWidth - 32;
+  const bodyLines = doc.splitTextToSize(
+    safeText(content, "Not available"),
+    boxWidth - 10
+  );
+  const boxHeight = Math.max(28, 14 + bodyLines.length * 5.4 + 8);
+
+  y = ensurePdfSpace(doc, y, boxHeight + 6);
+
+  doc.setDrawColor(222, 231, 240);
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(left, y, boxWidth, boxHeight, 3, 3, "FD");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(15, 118, 110);
+  doc.text(title.toUpperCase(), left + 5, y + 8);
+
+  let textY = y + 16;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(16, 32, 51);
+
+  bodyLines.forEach((line) => {
+    doc.text(line, left + 5, textY);
+    textY += 5.4;
+  });
+
+  return y + boxHeight + 8;
+};
+
+const addPdfMedicineRow = (doc, medicine, index, y) => {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const left = 16;
+  const boxWidth = pageWidth - 32;
+  const instructionLines = doc.splitTextToSize(
+    getMedicineInstruction(medicine),
+    boxWidth - 72
+  );
+  const boxHeight = Math.max(25, 16 + instructionLines.length * 5.2);
+
+  y = ensurePdfSpace(doc, y, boxHeight + 6);
+
+  doc.setDrawColor(222, 231, 240);
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(left, y, boxWidth, boxHeight, 3, 3, "FD");
+
+  doc.setFillColor(233, 248, 245);
+  doc.circle(left + 8, y + 10, 4.5, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(15, 118, 110);
+  doc.text(String(index + 1), left + 6.8, y + 12);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(16, 32, 51);
+  doc.text(getMedicineName(medicine), left + 18, y + 8);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(82, 98, 122);
+
+  let instructionY = y + 15;
+
+  instructionLines.forEach((line) => {
+    doc.text(line, left + 18, instructionY);
+    instructionY += 5.2;
+  });
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(16, 32, 51);
+  doc.text(safeText(medicine.dosage, "Dosage"), pageWidth - 55, y + 9);
+  doc.text(safeText(medicine.duration, "Duration"), pageWidth - 55, y + 17);
+
+  return y + boxHeight + 7;
+};
+
+const addPdfFooter = (doc) => {
+  const totalPages = doc.internal.getNumberOfPages();
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  for (let page = 1; page <= totalPages; page += 1) {
+    doc.setPage(page);
+
+    doc.setDrawColor(222, 231, 240);
+    doc.line(16, 284, pageWidth - 16, 284);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(123, 135, 152);
+    doc.text("This is a patient copy generated from DoctorHub.", 16, 290);
+    doc.text(`Page ${page} of ${totalPages}`, pageWidth - 34, 290);
+  }
+};
+
+const downloadPrescriptionPdf = (prescription, activeProfileName) => {
+  const doc = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "a4"
+  });
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const left = 16;
+  let y = 18;
+
+  const medicines = Array.isArray(prescription?.medicines)
+    ? prescription.medicines
+    : [];
+
+  const followUps = Array.isArray(prescription?.followUps)
+    ? prescription.followUps
+    : [];
+
+  doc.setFillColor(15, 118, 110);
+  doc.rect(0, 0, pageWidth, 34, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.setTextColor(255, 255, 255);
+  doc.text("DoctorHub Prescription", left, 15);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text("Patient copy generated from DoctorHub", left, 23);
+
+  y = 46;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(16, 32, 51);
+  doc.text(safeText(prescription?.diagnosis, "Prescription"), left, y);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(82, 98, 122);
+
+  const doctorLine = `${safeText(prescription?.doctorName)} - ${safeText(
+    prescription?.specialization,
+    "General Physician"
+  )}`;
+  doc.text(doctorLine, left, y + 7);
+
+  const statusText = safeText(prescription?.status, "Active");
+
+  doc.setFillColor(220, 252, 231);
+  doc.roundedRect(pageWidth - 48, y - 8, 32, 10, 5, 5, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(22, 101, 52);
+  doc.text(statusText, pageWidth - 40, y - 1.5);
+
+  y += 18;
+
+  doc.setDrawColor(222, 231, 240);
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(left, y, pageWidth - 32, 42, 3, 3, "FD");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(16, 32, 51);
+  doc.text("Prescription Details", left + 5, y + 8);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(82, 98, 122);
+
+  doc.text(
+    `Prescription ID: ${safeText(prescription?.prescriptionId || prescription?.id)}`,
+    left + 5,
+    y + 17
+  );
+
+  doc.text(
+    `Date: ${formatDate(prescription?.date || prescription?.prescriptionDate)}`,
+    left + 5,
+    y + 25
+  );
+
+  doc.text(
+    `Patient: ${safeText(activeProfileName, "Selected patient")}`,
+    left + 5,
+    y + 33
+  );
+
+  const clinicLines = doc.splitTextToSize(
+    `Clinic: ${safeText(prescription?.clinicName || prescription?.clinic)}`,
+    78
+  );
+
+  const locationLines = doc.splitTextToSize(
+    `Location: ${safeText(prescription?.location)}`,
+    78
+  );
+
+  clinicLines.slice(0, 2).forEach((line, index) => {
+    doc.text(line, pageWidth / 2, y + 17 + index * 6);
+  });
+
+  locationLines.slice(0, 2).forEach((line, index) => {
+    doc.text(line, pageWidth / 2, y + 30 + index * 6);
+  });
+
+  y += 52;
+
+  y = addPdfSection(
+    doc,
+    "Symptoms",
+    safeText(prescription?.symptoms, "No symptoms added."),
+    y
+  );
+
+  y = addPdfSection(
+    doc,
+    "Treatment Plan",
+    safeText(prescription?.treatmentPlan, "No treatment plan added."),
+    y
+  );
+
+  y = addPdfSection(
+    doc,
+    "Patient Instructions",
+    safeText(
+      prescription?.patientInstructions || prescription?.clinicalNotes,
+      "No patient instructions added."
+    ),
+    y
+  );
+
+  y = ensurePdfSpace(doc, y, 18);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(16, 32, 51);
+  doc.text("Medicines", left, y);
+  y += 9;
+
+  if (medicines.length === 0) {
+    y = addPdfWrappedText(doc, "No medicines added.", left, y, pageWidth - 32);
+    y += 5;
+  } else {
+    medicines.forEach((medicine, index) => {
+      y = addPdfMedicineRow(doc, medicine, index, y);
+    });
+  }
+
+  y = ensurePdfSpace(doc, y, 18);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(16, 32, 51);
+  doc.text("Follow-up", left, y);
+  y += 9;
+
+  if (followUps.length === 0) {
+    y = addPdfWrappedText(
+      doc,
+      "No follow-up scheduled.",
+      left,
+      y,
+      pageWidth - 32
+    );
+  } else {
+    followUps.forEach((followUp) => {
+      y = ensurePdfSpace(doc, y, 25);
+
+      doc.setDrawColor(222, 231, 240);
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(left, y, pageWidth - 32, 21, 3, 3, "FD");
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(16, 32, 51);
+      doc.text(
+        safeText(followUp.task, "Follow-up consultation"),
+        left + 5,
+        y + 8
+      );
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(82, 98, 122);
+      doc.text(
+        formatDate(followUp.date || followUp.followUpDate),
+        left + 5,
+        y + 15
+      );
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(15, 118, 110);
+      doc.text(
+        safeText(followUp.status, "Scheduled"),
+        pageWidth - 45,
+        y + 12
+      );
+
+      y += 27;
+    });
+  }
+
+  addPdfFooter(doc);
+
+  const fileName = `prescription-${safeText(
+    prescription?.prescriptionId || prescription?.id,
+    Date.now()
+  )}-${sanitizePdfFileName(prescription?.diagnosis)}.pdf`;
+
+  doc.save(fileName);
+};
+
+const Prescriptions = () => {
+  const profileContext = useProfile();
+  const selectedProfile = profileContext?.selectedProfile || null;
+
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [summary, setSummary] = useState({
+    totalCount: 0,
+    activeCount: 0,
+    pastCount: 0
+  });
+
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("ALL");
+
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [detailsLoadingId, setDetailsLoadingId] = useState(null);
+
+  const [error, setError] = useState("");
+  const [toast, setToast] = useState("");
+  const [selectedPrescription, setSelectedPrescription] = useState(null);
+
+  const profileId = useMemo(() => getProfileId(selectedProfile), [selectedProfile]);
+  const profileType = useMemo(() => getProfileType(selectedProfile), [selectedProfile]);
+  const profileName = useMemo(
+    () => getProfileName(selectedProfile),
+    [selectedProfile]
+  );
+
+  const showToast = useCallback((message) => {
+    setToast(message);
+
+    window.setTimeout(() => {
+      setToast("");
+    }, 2600);
+  }, []);
+
+  const loadPrescriptions = useCallback(
+    async ({ silent = false } = {}) => {
+      try {
+        if (silent) {
+          setRefreshing(true);
+        } else {
+          setLoading(true);
+        }
+
+        setError("");
+
+        const data = await getPatientPrescriptions({
+          profileId,
+          profileType
+        });
+
+        const list = Array.isArray(data?.prescriptions)
+          ? data.prescriptions
+          : [];
+
+        setPrescriptions(list);
+
+        setSummary({
+          totalCount: data?.totalCount ?? list.length,
+          activeCount:
+            data?.activeCount ??
+            list.filter((item) => normalizeStatus(item.status) === "ACTIVE")
+              .length,
+          pastCount:
+            data?.pastCount ??
+            list.filter((item) => normalizeStatus(item.status) === "PAST")
+              .length
+        });
+      } catch (err) {
+        const message =
+          err?.response?.data?.message ||
+          err?.message ||
+          "Unable to load prescriptions. Please try again.";
+
+        setPrescriptions([]);
+        setSummary({
+          totalCount: 0,
+          activeCount: 0,
+          pastCount: 0
+        });
+        setError(message);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [profileId, profileType]
+  );
+
+  useEffect(() => {
+    loadPrescriptions();
+  }, [loadPrescriptions]);
+
+  const filteredPrescriptions = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    return prescriptions.filter((prescription) => {
+      const status = normalizeStatus(prescription.status);
+      const statusMatched = filter === "ALL" || status === filter;
+
+      if (!statusMatched) {
+        return false;
+      }
+
+      if (!query) {
+        return true;
+      }
+
+      const medicines = Array.isArray(prescription.medicines)
+        ? prescription.medicines
+        : [];
+
+      const medicineMatched = medicines.some((medicine) => {
+        return [
+          medicine.name,
+          medicine.medicineName,
+          medicine.dosage,
+          medicine.duration,
+          medicine.instruction,
+          medicine.timing,
+          medicine.info
+        ]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(query));
+      });
+
+      const normalFields = [
+        prescription.doctorName,
+        prescription.specialization,
+        prescription.clinic,
+        prescription.clinicName,
+        prescription.location,
+        prescription.diagnosis,
+        prescription.symptoms,
+        prescription.treatmentPlan,
+        prescription.clinicalNotes,
+        prescription.patientInstructions,
+        prescription.date
+      ];
+
+      return (
+        medicineMatched ||
+        normalFields
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(query))
+      );
+    });
+  }, [filter, prescriptions, search]);
+
+  const latestPrescription = useMemo(() => {
+    return (
+      prescriptions.find((item) => normalizeStatus(item.status) === "ACTIVE") ||
+      prescriptions[0] ||
+      null
+    );
+  }, [prescriptions]);
+
+  const hasSearchOrFilter = search.trim() || filter !== "ALL";
+
+  const handleRefresh = () => {
+    loadPrescriptions({ silent: true });
+  };
+
+  const handleViewDetails = async (prescription) => {
+    const prescriptionId = prescription.prescriptionId || prescription.id;
+
+    setSelectedPrescription(prescription);
+
+    if (!prescriptionId) {
+      return;
+    }
+
+    try {
+      setDetailsLoadingId(prescriptionId);
+
+      const details = await getPatientPrescriptionById(prescriptionId);
+      setSelectedPrescription(details);
+    } catch {
+      showToast("Latest details could not be loaded. Showing available data.");
+    } finally {
+      setDetailsLoadingId(null);
+    }
+  };
+
+  const handleCopySummary = async (prescription) => {
+    try {
+      await copyTextToClipboard(buildCopyText(prescription));
+      showToast("Prescription summary copied.");
+    } catch {
+      showToast("Unable to copy prescription summary.");
+    }
+  };
+
+  const handlePdfClick = (prescription) => {
+    try {
+      downloadPrescriptionPdf(prescription, profileName);
+      showToast("PDF downloaded.");
+    } catch {
+      showToast("Unable to download PDF.");
+    }
+  };
+
+  const resetFilters = () => {
+    setSearch("");
+    setFilter("ALL");
+  };
+
+  return (
+    <div className="rxp-page">
+      <div className="rxp-shell">
+        <section className="rxp-title-card">
+          <div className="rxp-title-left">
+            <span className="rxp-kicker">Medical vault</span>
+            <h1>Prescriptions</h1>
+            <p>
+              Doctor-created prescriptions, medicines, treatment advice and
+              follow-up details in one place.
+            </p>
+
+            <div className="rxp-profile-row">
+              <span className="rxp-profile-chip">{profileName}</span>
+              {profileType && <span className="rxp-soft-chip">{profileType}</span>}
+              {profileId && (
+                <span className="rxp-soft-chip">Profile ID: {profileId}</span>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="rxp-refresh-btn"
+            onClick={handleRefresh}
+            disabled={loading || refreshing}
+          >
+            <FiRefreshCw className={refreshing ? "rxp-spin" : ""} />
+            <span>{refreshing ? "Refreshing" : "Refresh"}</span>
+          </button>
+        </section>
+
+        <section className="rxp-stats-grid">
+          <article className="rxp-stat-card">
+            <span>Total prescriptions</span>
+            <strong>{summary.totalCount}</strong>
+          </article>
+
+          <article className="rxp-stat-card">
+            <span>Active</span>
+            <strong>{summary.activeCount}</strong>
+          </article>
+
+          <article className="rxp-stat-card">
+            <span>Past</span>
+            <strong>{summary.pastCount}</strong>
+          </article>
+        </section>
+
+        <section className="rxp-toolbar">
+          <div className="rxp-search-box">
+            <FiSearch />
             <input
               type="text"
-              placeholder="Search by doctor, diagnosis, clinic"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by diagnosis, doctor, clinic or medicine"
+              onChange={(event) => setSearch(event.target.value)}
             />
           </div>
 
-          <div className="filter-tabs">
-            {["All", "Active", "Past"].map((tab) => (
+          <div className="rxp-filter-row">
+            {FILTERS.map((item) => (
               <button
-                key={tab}
+                key={item.value}
                 type="button"
-                className={filter === tab ? "filter-tab active" : "filter-tab"}
-                onClick={() => setFilter(tab)}
+                className={
+                  filter === item.value
+                    ? "rxp-filter-btn rxp-filter-active"
+                    : "rxp-filter-btn"
+                }
+                onClick={() => setFilter(item.value)}
               >
-                {tab}
+                {item.label}
               </button>
             ))}
           </div>
         </section>
 
-        <section className="hero-card">
-          <div className="hero-top">
-            <div className="hero-left">
-              <span className="hero-label">Current treatment</span>
-              <h2>{activePrescription.diagnosis}</h2>
+        {loading ? (
+          <section className="rxp-state-card">
+            <div className="rxp-loader" />
+            <h2>Loading prescriptions</h2>
+            <p>Please wait while we fetch prescription records.</p>
+          </section>
+        ) : error ? (
+          <section className="rxp-state-card rxp-error-card">
+            <FiAlertCircle />
+            <h2>Unable to load prescriptions</h2>
+            <p>{error}</p>
+            <button type="button" onClick={() => loadPrescriptions()}>
+              Try again
+            </button>
+          </section>
+        ) : (
+          <>
+            {latestPrescription && (
+              <section className="rxp-latest-card">
+                <div>
+                  <span className="rxp-kicker">Latest prescription</span>
+                  <h2>{safeText(latestPrescription.diagnosis, "Prescription")}</h2>
+                  <p>
+                    {safeText(latestPrescription.doctorName)} •{" "}
+                    {safeText(
+                      latestPrescription.specialization,
+                      "General Physician"
+                    )}
+                  </p>
+                </div>
 
-              <div className="hero-doctor-details">
-                <p className="hero-meta">
-                  <FiUser />
-                  <span>
-                    {activePrescription.doctorName} •{" "}
-                    {activePrescription.specialization}
-                  </span>
-                </p>
+                <button
+                  type="button"
+                  className="rxp-outline-btn"
+                  onClick={() => handleViewDetails(latestPrescription)}
+                >
+                  <FiEye />
+                  <span>View latest</span>
+                </button>
+              </section>
+            )}
 
-                <p className="hero-meta">
-                  <FiMapPin />
-                  <span>{activePrescription.clinic}</span>
+            <section className="rxp-list-head">
+              <div>
+                <h2>Prescription history</h2>
+                <p>
+                  Showing {filteredPrescriptions.length} of{" "}
+                  {prescriptions.length} prescriptions.
                 </p>
               </div>
-            </div>
 
-            <div className="hero-status-wrap">
-              <span className="status-pill active">
-                {activePrescription.status}
-              </span>
-            </div>
-          </div>
+              {hasSearchOrFilter && (
+                <button
+                  type="button"
+                  className="rxp-clear-btn"
+                  onClick={resetFilters}
+                >
+                  Clear filters
+                </button>
+              )}
+            </section>
 
-          <div className="hero-grid">
-            <div className="hero-info-card">
-              <span className="info-title">Symptoms</span>
-              <p>{activePrescription.symptoms}</p>
-            </div>
+            {filteredPrescriptions.length === 0 ? (
+              <section className="rxp-state-card">
+                <FiFileText />
+                <h2>No prescriptions found</h2>
+                <p>
+                  {hasSearchOrFilter
+                    ? "Try changing your search or selected filter."
+                    : "No prescription has been added for this profile yet."}
+                </p>
+              </section>
+            ) : (
+              <section className="rxp-card-grid">
+                {filteredPrescriptions.map((prescription) => {
+                  const prescriptionId =
+                    prescription.prescriptionId || prescription.id;
 
-            <div className="hero-info-card">
-              <span className="info-title">Treatment plan</span>
-              <p>{activePrescription.treatmentPlan}</p>
-            </div>
+                  const status = normalizeStatus(prescription.status);
 
-            <div className="hero-info-card">
-              <span className="info-title">Next follow-up</span>
-              <p>
-                {activePrescription.followUps.length > 0
-                  ? `${activePrescription.followUps[0].task} • ${activePrescription.followUps[0].date}`
-                  : "No follow-up scheduled"}
-              </p>
-            </div>
-          </div>
-        </section>
+                  const medicines = Array.isArray(prescription.medicines)
+                    ? prescription.medicines
+                    : [];
 
-        <section className="list-section">
-          <div className="section-head">
-            <div>
-              <h3>Prescription History</h3>
-              <p>All your current and past doctor-approved prescriptions.</p>
-            </div>
-          </div>
+                  return (
+                    <article className="rxp-prescription-card" key={prescriptionId}>
+                      <div className="rxp-card-header">
+                        <div>
+                          <h3>
+                            {safeText(prescription.diagnosis, "Prescription")}
+                          </h3>
+                          <p>
+                            {safeText(prescription.doctorName)} •{" "}
+                            {safeText(
+                              prescription.specialization,
+                              "General Physician"
+                            )}
+                          </p>
+                        </div>
 
-          <div className="prescription-grid">
-            {filteredPrescriptions.length > 0 ? (
-              filteredPrescriptions.map((item) => (
-                <article className="prescription-card" key={item.id}>
-                  <div className="card-head">
-                    <div className="card-head-left">
-                      <h4>{item.diagnosis}</h4>
-                      <p className="doctor-text">
-                        {item.doctorName} • {item.specialization}
-                      </p>
-                    </div>
-
-                    <span
-                      className={
-                        item.status === "Active"
-                          ? "status-pill active"
-                          : "status-pill past"
-                      }
-                    >
-                      {item.status}
-                    </span>
-                  </div>
-
-                  <div className="card-meta">
-                    <span>
-                      <FiCalendar />
-                      {item.date}
-                    </span>
-                    <span>
-                      <FiMapPin />
-                      {item.clinic}
-                    </span>
-                  </div>
-
-                  <div className="content-block">
-                    <span className="content-label">Symptoms</span>
-                    <p>{item.symptoms}</p>
-                  </div>
-
-                  <div className="content-block voice-summary">
-                    <span className="content-label with-icon">
-                      <FiMic />
-                      Voice Summary
-                    </span>
-                    <p>{item.voiceSummary}</p>
-                  </div>
-
-                  <div className="medicine-preview-list">
-                    {item.medicines.slice(0, 2).map((med, index) => (
-                      <div className="medicine-preview-item" key={index}>
-                        <strong>{med.name}</strong>
-                        <span>
-                          {med.dosage} • {med.timing}
+                        <span
+                          className={
+                            status === "ACTIVE"
+                              ? "rxp-status rxp-status-active"
+                              : "rxp-status rxp-status-past"
+                          }
+                        >
+                          {safeText(prescription.status)}
                         </span>
                       </div>
-                    ))}
-                  </div>
 
-                  <div className="card-actions">
-                    <button
-                      type="button"
-                      className="action-btn"
-                      onClick={() => setSelectedPrescription(item)}
-                    >
-                      <FiEye />
-                      <span>View Details</span>
-                    </button>
+                      <div className="rxp-meta-row">
+                        <span>
+                          <FiCalendar />
+                          {formatDate(
+                            prescription.date || prescription.prescriptionDate
+                          )}
+                        </span>
 
-                    <button
-                      type="button"
-                      className="action-btn"
-                      onClick={() =>
-                        showToast("Download feature can be connected here")
-                      }
-                    >
-                      <FiDownload />
-                      <span>Download</span>
-                    </button>
+                        <span>
+                          <FiMapPin />
+                          {safeText(
+                            prescription.clinicName || prescription.clinic
+                          )}
+                        </span>
+                      </div>
 
-                    <button
-                      type="button"
-                      className="action-btn"
-                      onClick={() =>
-                        showToast("Share feature can be connected here")
-                      }
-                    >
-                      <FiShare2 />
-                      <span>Share</span>
-                    </button>
-                  </div>
-                </article>
-              ))
-            ) : (
-              <div className="empty-state">
-                <p>No prescriptions found for your search.</p>
-              </div>
+                      <div className="rxp-info-box">
+                        <span>Symptoms</span>
+                        <p>
+                          {safeText(
+                            prescription.symptoms,
+                            "No symptoms added."
+                          )}
+                        </p>
+                      </div>
+
+                      <div className="rxp-medicine-block">
+                        <div className="rxp-medicine-title">
+                          <FiPackage />
+                          <span>
+                            {medicines.length} medicine
+                            {medicines.length === 1 ? "" : "s"}
+                          </span>
+                        </div>
+
+                        {medicines.length > 0 ? (
+                          medicines.slice(0, 2).map((medicine, index) => (
+                            <div
+                              className="rxp-medicine-preview"
+                              key={medicine.id || index}
+                            >
+                              <strong>{getMedicineName(medicine)}</strong>
+                              <span>
+                                {safeText(medicine.dosage, "Dosage")} •{" "}
+                                {safeText(medicine.duration, "Duration")}
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="rxp-empty-small">
+                            No medicines added.
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="rxp-action-row">
+                        <button
+                          type="button"
+                          className="rxp-primary-btn"
+                          onClick={() => handleViewDetails(prescription)}
+                        >
+                          <FiEye />
+                          <span>
+                            {detailsLoadingId === prescriptionId
+                              ? "Opening..."
+                              : "View details"}
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className="rxp-secondary-btn"
+                          onClick={() => handleCopySummary(prescription)}
+                        >
+                          <FiClipboard />
+                          <span>Copy</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className="rxp-secondary-btn"
+                          onClick={() => handlePdfClick(prescription)}
+                        >
+                          <FiFileText />
+                          <span>PDF</span>
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </section>
             )}
-          </div>
-        </section>
+          </>
+        )}
       </div>
 
       {selectedPrescription && (
         <div
-          className="modal-overlay"
+          className="rxp-modal-backdrop"
           onClick={() => setSelectedPrescription(null)}
         >
-          <div
-            className="prescription-modal"
-            onClick={(e) => e.stopPropagation()}
+          <section
+            className="rxp-modal"
+            onClick={(event) => event.stopPropagation()}
           >
-            <div className="modal-header">
-              <div className="modal-header-left">
-                <h2>{selectedPrescription.diagnosis}</h2>
+            <header className="rxp-modal-header">
+              <div>
+                <span className="rxp-kicker">Prescription details</span>
+                <h2>{safeText(selectedPrescription.diagnosis, "Prescription")}</h2>
                 <p>
-                  {selectedPrescription.doctorName} •{" "}
-                  {selectedPrescription.specialization}
+                  {safeText(selectedPrescription.doctorName)} •{" "}
+                  {safeText(
+                    selectedPrescription.specialization,
+                    "General Physician"
+                  )}
                 </p>
-                <p>{selectedPrescription.clinic}</p>
               </div>
 
               <button
                 type="button"
-                className="close-btn"
+                className="rxp-modal-close"
+                aria-label="Close prescription details"
                 onClick={() => setSelectedPrescription(null)}
               >
                 <FiX />
               </button>
-            </div>
+            </header>
 
-            <div className="modal-scroll">
-              <div className="detail-section">
-                <span className="detail-label">Symptoms</span>
-                <p>{selectedPrescription.symptoms}</p>
-              </div>
+            <div className="rxp-modal-body">
+              <div className="rxp-detail-grid">
+                <div>
+                  <span>Date</span>
+                  <strong>
+                    {formatDate(
+                      selectedPrescription.date ||
+                        selectedPrescription.prescriptionDate
+                    )}
+                  </strong>
+                </div>
 
-              <div className="detail-section voice-section">
-                <span className="detail-label with-icon">
-                  <FiMic />
-                  Voice Summary
-                </span>
-                <p>{selectedPrescription.voiceSummary}</p>
-              </div>
+                <div>
+                  <span>Status</span>
+                  <strong>{safeText(selectedPrescription.status)}</strong>
+                </div>
 
-              <div className="detail-section">
-                <span className="detail-label with-icon">
-                  <FiActivity />
-                  Treatment Plan
-                </span>
-                <p>{selectedPrescription.treatmentPlan}</p>
-              </div>
+                <div>
+                  <span>Clinic</span>
+                  <strong>
+                    {safeText(
+                      selectedPrescription.clinicName ||
+                        selectedPrescription.clinic
+                    )}
+                  </strong>
+                </div>
 
-              <div className="detail-section">
-                <span className="detail-label with-icon">
-                  <FiFileText />
-                  Patient Instructions
-                </span>
-                <p>{selectedPrescription.patientInstructions}</p>
-              </div>
-
-              <div className="detail-section">
-                <span className="detail-label">Medicines</span>
-
-                <div className="medicine-list">
-                  {selectedPrescription.medicines.map((med, index) => (
-                    <div className="medicine-card" key={index}>
-                      <div className="medicine-card-top">
-                        <div className="medicine-card-info">
-                          <h4>{med.name}</h4>
-                          <p>{med.dosage}</p>
-                        </div>
-
-                        <span className="duration-badge">{med.duration}</span>
-                      </div>
-
-                      <div className="medicine-card-body">
-                        <p>
-                          <strong>Timing:</strong> {med.timing}
-                        </p>
-                        <p>
-                          <strong>Notes:</strong> {med.info}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                <div>
+                  <span>Medicines</span>
+                  <strong>
+                    {Array.isArray(selectedPrescription.medicines)
+                      ? selectedPrescription.medicines.length
+                      : 0}
+                  </strong>
                 </div>
               </div>
 
-              <div className="detail-section">
-                <span className="detail-label with-icon">
-                  <FiClock />
-                  Follow-ups
-                </span>
+              <section className="rxp-modal-section">
+                <h3>Symptoms</h3>
+                <p>
+                  {safeText(
+                    selectedPrescription.symptoms,
+                    "No symptoms added."
+                  )}
+                </p>
+              </section>
 
-                {selectedPrescription.followUps.length > 0 ? (
-                  <div className="followup-list">
-                    {selectedPrescription.followUps.map((item, index) => (
-                      <div className="followup-card" key={index}>
-                        <div className="followup-card-left">
-                          <h5>{item.task}</h5>
-                          <p>{item.date}</p>
+              <section className="rxp-modal-section">
+                <h3>Treatment plan</h3>
+                <p>
+                  {safeText(
+                    selectedPrescription.treatmentPlan,
+                    "No treatment plan added."
+                  )}
+                </p>
+              </section>
+
+              <section className="rxp-modal-section">
+                <h3>Patient instructions</h3>
+                <p>
+                  {safeText(
+                    selectedPrescription.patientInstructions ||
+                      selectedPrescription.clinicalNotes,
+                    "No patient instructions added."
+                  )}
+                </p>
+              </section>
+
+              <section className="rxp-modal-section">
+                <h3>Medicines</h3>
+
+                {Array.isArray(selectedPrescription.medicines) &&
+                selectedPrescription.medicines.length > 0 ? (
+                  <div className="rxp-medicine-list">
+                    {selectedPrescription.medicines.map((medicine, index) => (
+                      <div
+                        className="rxp-medicine-row"
+                        key={medicine.id || index}
+                      >
+                        <span className="rxp-medicine-number">{index + 1}</span>
+
+                        <div className="rxp-medicine-main">
+                          <strong>{getMedicineName(medicine)}</strong>
+                          <p>{getMedicineInstruction(medicine)}</p>
                         </div>
-                        <span className="followup-status">{item.status}</span>
+
+                        <div className="rxp-medicine-tags">
+                          <span>{safeText(medicine.dosage, "Dosage")}</span>
+                          <span>{safeText(medicine.duration, "Duration")}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No medicines added.</p>
+                )}
+              </section>
+
+              <section className="rxp-modal-section">
+                <h3>Follow-up</h3>
+
+                {Array.isArray(selectedPrescription.followUps) &&
+                selectedPrescription.followUps.length > 0 ? (
+                  <div className="rxp-followup-list">
+                    {selectedPrescription.followUps.map((followUp, index) => (
+                      <div className="rxp-followup-row" key={index}>
+                        <div>
+                          <strong>
+                            {safeText(
+                              followUp.task,
+                              "Follow-up consultation"
+                            )}
+                          </strong>
+                          <span>
+                            {formatDate(
+                              followUp.date || followUp.followUpDate
+                            )}
+                          </span>
+                        </div>
+
+                        <em>{safeText(followUp.status, "Scheduled")}</em>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <p>No follow-up scheduled.</p>
                 )}
+              </section>
+
+              <div className="rxp-record-row">
+                <span>
+                  Prescription ID:{" "}
+                  {selectedPrescription.prescriptionId ||
+                    selectedPrescription.id}
+                </span>
+
+                {selectedPrescription.doctorPatientVisitId && (
+                  <span>Visit ID: {selectedPrescription.doctorPatientVisitId}</span>
+                )}
+
+                {selectedPrescription.patientPublicAppointmentId && (
+                  <span>
+                    Appointment ID:{" "}
+                    {selectedPrescription.patientPublicAppointmentId}
+                  </span>
+                )}
               </div>
             </div>
 
-            <div className="modal-footer">
+            <footer className="rxp-modal-footer">
               <button
                 type="button"
-                className="secondary-btn"
-                onClick={() =>
-                  showToast("Full record page can be connected here")
-                }
+                className="rxp-secondary-btn"
+                onClick={() => handleCopySummary(selectedPrescription)}
               >
-                View Full Record
+                <FiClipboard />
+                <span>Copy summary</span>
               </button>
 
               <button
                 type="button"
-                className="primary-btn"
-                onClick={() =>
-                  showToast("Medicine order integration can be connected here")
-                }
+                className="rxp-secondary-btn"
+                onClick={() => handlePdfClick(selectedPrescription)}
               >
-                <FiShoppingBag />
-                <span>Order Medicines</span>
+                <FiFileText />
+                <span>Download PDF</span>
               </button>
-            </div>
-          </div>
+
+              <button
+                type="button"
+                className="rxp-primary-btn"
+                onClick={() => setSelectedPrescription(null)}
+              >
+                Done
+              </button>
+            </footer>
+          </section>
         </div>
       )}
 
       {toast && (
-        <div className="toast">
+        <div className="rxp-toast">
           <FiCheckCircle />
           <span>{toast}</span>
         </div>

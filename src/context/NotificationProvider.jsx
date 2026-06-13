@@ -1,13 +1,28 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
+
 import { NotificationContext } from "./NotificationContext";
 import { AuthContext } from "./AuthContext";
+
 import {
   getDoctorNotifications,
   getDoctorUnreadNotificationCount
 } from "../services/doctorService";
 
+import {
+  getPatientNotifications,
+  getPatientUnreadNotificationCount,
+  markAllPatientNotificationsAsRead
+} from "../services/patientService";
+
 const NOTIFICATION_PAGE_SIZE = 20;
-const UNREAD_COUNT_REFRESH_MS = 30000;
+const UNREAD_COUNT_REFRESH_MS = 10000;
 const TOAST_HIDE_MS = 4000;
 
 const EMPTY_TOAST = {
@@ -29,43 +44,131 @@ export const NotificationProvider = ({ children }) => {
   const isInitialLoadDoneRef = useRef(false);
   const toastTimerRef = useRef(null);
 
-  const canUseDoctorNotifications =
+  // IMPORTANT: manually cleared count should not come back immediately from polling
+  const forceClearedUnreadRef = useRef(false);
+
+  const currentRole = currentUser?.role || "";
+
+  const canUseNotifications =
     !authLoading &&
     isAuthenticated &&
-    currentUser &&
-    currentUser.role === "DOCTOR";
+    Boolean(currentUser) &&
+    (currentRole === "DOCTOR" || currentRole === "PATIENT");
+
+  const notificationHomeRoute =
+    currentRole === "DOCTOR"
+      ? "/doctor/notifications"
+      : "/patient/notifications";
+
+  const resetNotificationState = useCallback(() => {
+    setUnreadCountState(0);
+    setNotificationsErrorState("");
+    setToastState(EMPTY_TOAST);
+
+    lastKnownUnreadCountRef.current = 0;
+    lastToastNotificationIdRef.current = null;
+    isInitialLoadDoneRef.current = false;
+    forceClearedUnreadRef.current = false;
+
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = null;
+    }
+  }, []);
+
+  const clearUnreadCountLocally = useCallback(() => {
+    forceClearedUnreadRef.current = true;
+    setUnreadCountState(0);
+    lastKnownUnreadCountRef.current = 0;
+  }, []);
+
+  const markAllPatientNotificationsReadAndClear = useCallback(async () => {
+    forceClearedUnreadRef.current = true;
+    setUnreadCountState(0);
+    lastKnownUnreadCountRef.current = 0;
+
+    if (currentRole !== "PATIENT") {
+      return;
+    }
+
+    try {
+      await markAllPatientNotificationsAsRead();
+      setUnreadCountState(0);
+      lastKnownUnreadCountRef.current = 0;
+    } catch (error) {
+      console.error("Unable to mark patient notifications as read:", error);
+    }
+  }, [currentRole]);
+
+  const fetchUnreadApi = useCallback(async () => {
+    if (currentRole === "DOCTOR") {
+      return getDoctorUnreadNotificationCount();
+    }
+
+    if (currentRole === "PATIENT") {
+      return getPatientUnreadNotificationCount();
+    }
+
+    return { unreadCount: 0 };
+  }, [currentRole]);
+
+  const fetchLatestApi = useCallback(
+    async (params = {}) => {
+      if (currentRole === "DOCTOR") {
+        return getDoctorNotifications(params);
+      }
+
+      if (currentRole === "PATIENT") {
+        return getPatientNotifications(params);
+      }
+
+      return { content: [] };
+    },
+    [currentRole]
+  );
 
   const hideToast = useCallback(() => {
     setToastState(EMPTY_TOAST);
   }, []);
 
-  const showToast = useCallback((latestNotification) => {
-    if (!latestNotification?.id) return;
+  const showToast = useCallback(
+    (latestNotification) => {
+      if (!latestNotification?.id) return;
 
-    setToastState({
-      visible: true,
-      title: latestNotification.title || "Doctor update",
-      message: latestNotification.message || "You have a new notification.",
-      targetRoute: latestNotification.targetRoute || "/doctor/notifications"
-    });
+      setToastState({
+        visible: true,
+        title:
+          latestNotification.title ||
+          (currentRole === "DOCTOR" ? "Doctor update" : "Patient update"),
+        message: latestNotification.message || "You have a new notification.",
+        targetRoute: latestNotification.targetRoute || notificationHomeRoute
+      });
 
-    if (toastTimerRef.current) {
-      clearTimeout(toastTimerRef.current);
-    }
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
 
-    toastTimerRef.current = setTimeout(() => {
-      setToastState(EMPTY_TOAST);
-    }, TOAST_HIDE_MS);
-  }, []);
+      toastTimerRef.current = setTimeout(() => {
+        setToastState(EMPTY_TOAST);
+      }, TOAST_HIDE_MS);
+    },
+    [currentRole, notificationHomeRoute]
+  );
 
   const fetchUnreadCount = useCallback(async () => {
-    if (!canUseDoctorNotifications) {
+    if (!canUseNotifications) {
       return 0;
     }
 
     try {
-      const response = await getDoctorUnreadNotificationCount();
+      const response = await fetchUnreadApi();
       const nextUnreadCount = Number(response?.unreadCount ?? 0);
+
+      if (forceClearedUnreadRef.current && currentRole === "PATIENT") {
+        setUnreadCountState(0);
+        lastKnownUnreadCountRef.current = 0;
+        return 0;
+      }
 
       setUnreadCountState(nextUnreadCount);
       setNotificationsErrorState("");
@@ -81,17 +184,25 @@ export const NotificationProvider = ({ children }) => {
       setNotificationsErrorState(message);
       return 0;
     }
-  }, [canUseDoctorNotifications]);
+  }, [canUseNotifications, currentRole, fetchUnreadApi]);
 
   const checkForNewNotifications = useCallback(
     async ({ silent = false } = {}) => {
-      if (!canUseDoctorNotifications) {
-        return { unreadCount: 0, latestNotification: null };
+      if (!canUseNotifications) {
+        return {
+          unreadCount: 0,
+          latestNotification: null
+        };
       }
 
       try {
-        const unreadResponse = await getDoctorUnreadNotificationCount();
-        const nextUnreadCount = Number(unreadResponse?.unreadCount ?? 0);
+        const unreadResponse = await fetchUnreadApi();
+        let nextUnreadCount = Number(unreadResponse?.unreadCount ?? 0);
+
+        if (forceClearedUnreadRef.current && currentRole === "PATIENT") {
+          nextUnreadCount = 0;
+        }
+
         const previousUnreadCount = lastKnownUnreadCountRef.current;
 
         setUnreadCountState(nextUnreadCount);
@@ -99,15 +210,20 @@ export const NotificationProvider = ({ children }) => {
 
         const shouldInspectLatest =
           nextUnreadCount > 0 &&
-          (!isInitialLoadDoneRef.current || nextUnreadCount > previousUnreadCount);
+          (!isInitialLoadDoneRef.current ||
+            nextUnreadCount > previousUnreadCount);
 
         if (!shouldInspectLatest) {
           lastKnownUnreadCountRef.current = nextUnreadCount;
           isInitialLoadDoneRef.current = true;
-          return { unreadCount: nextUnreadCount, latestNotification: null };
+
+          return {
+            unreadCount: nextUnreadCount,
+            latestNotification: null
+          };
         }
 
-        const latestResponse = await getDoctorNotifications({
+        const latestResponse = await fetchLatestApi({
           page: 0,
           size: NOTIFICATION_PAGE_SIZE
         });
@@ -147,49 +263,63 @@ export const NotificationProvider = ({ children }) => {
           "Unable to check notifications right now.";
 
         setNotificationsErrorState(message);
-        return { unreadCount: 0, latestNotification: null };
+
+        return {
+          unreadCount: 0,
+          latestNotification: null
+        };
       }
     },
-    [canUseDoctorNotifications, showToast]
+    [
+      canUseNotifications,
+      currentRole,
+      fetchLatestApi,
+      fetchUnreadApi,
+      showToast
+    ]
   );
 
   const handleNotificationActionSuccess = useCallback(
     async ({ showToastOnNew = true } = {}) => {
-      if (!canUseDoctorNotifications) return;
-      await checkForNewNotifications({ silent: !showToastOnNew });
+      if (!canUseNotifications) {
+        resetNotificationState();
+        return;
+      }
+
+      await checkForNewNotifications({
+        silent: !showToastOnNew
+      });
     },
-    [canUseDoctorNotifications, checkForNewNotifications]
+    [canUseNotifications, checkForNewNotifications, resetNotificationState]
   );
 
   useEffect(() => {
-    if (!canUseDoctorNotifications) {
-      lastKnownUnreadCountRef.current = 0;
-      lastToastNotificationIdRef.current = null;
-      isInitialLoadDoneRef.current = false;
-
-      if (toastTimerRef.current) {
-        clearTimeout(toastTimerRef.current);
+    const timeoutId = setTimeout(() => {
+      if (!canUseNotifications) {
+        resetNotificationState();
+        return;
       }
 
-      return;
-    }
-
-    const timeoutId = setTimeout(() => {
       checkForNewNotifications({ silent: true }).catch(() => {});
     }, 0);
 
     return () => clearTimeout(timeoutId);
-  }, [canUseDoctorNotifications, checkForNewNotifications]);
+  }, [
+    canUseNotifications,
+    currentRole,
+    checkForNewNotifications,
+    resetNotificationState
+  ]);
 
   useEffect(() => {
-    if (!canUseDoctorNotifications) return;
+    if (!canUseNotifications) return undefined;
 
     const intervalId = setInterval(() => {
       checkForNewNotifications({ silent: false }).catch(() => {});
     }, UNREAD_COUNT_REFRESH_MS);
 
     return () => clearInterval(intervalId);
-  }, [canUseDoctorNotifications, checkForNewNotifications]);
+  }, [canUseNotifications, checkForNewNotifications]);
 
   useEffect(() => {
     return () => {
@@ -201,23 +331,29 @@ export const NotificationProvider = ({ children }) => {
 
   const contextValue = useMemo(
     () => ({
-      unreadCount: canUseDoctorNotifications ? unreadCountState : 0,
-      notificationsError: canUseDoctorNotifications ? notificationsErrorState : "",
+      unreadCount: canUseNotifications ? unreadCountState : 0,
+      notificationsError: canUseNotifications ? notificationsErrorState : "",
       fetchUnreadCount,
       checkForNewNotifications,
       handleNotificationActionSuccess,
-      toast: canUseDoctorNotifications ? toastState : EMPTY_TOAST,
-      hideToast
+      clearUnreadCountLocally,
+      markAllPatientNotificationsReadAndClear,
+      toast: canUseNotifications ? toastState : EMPTY_TOAST,
+      hideToast,
+      notificationHomeRoute
     }),
     [
-      canUseDoctorNotifications,
+      canUseNotifications,
       unreadCountState,
       notificationsErrorState,
       fetchUnreadCount,
       checkForNewNotifications,
       handleNotificationActionSuccess,
+      clearUnreadCountLocally,
+      markAllPatientNotificationsReadAndClear,
       toastState,
-      hideToast
+      hideToast,
+      notificationHomeRoute
     ]
   );
 

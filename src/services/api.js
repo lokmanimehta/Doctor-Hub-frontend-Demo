@@ -149,18 +149,33 @@ api.interceptors.response.use(
 
     const backendData = error.response?.data;
 
-    const message =
-      backendData?.message ||
-      backendData?.error ||
-      backendData?.reason ||
-      backendData?.details ||
-      error.message ||
-      "Something went wrong";
+let message =
+  backendData?.message ||
+  backendData?.error ||
+  backendData?.reason ||
+  backendData?.details ||
+  "";
 
-    return Promise.reject({
-      ...error,
-      message
-    });
+if (!message && backendData && typeof backendData === "object") {
+  const fieldErrors = Object.values(backendData).filter(
+    (value) => typeof value === "string" && value.trim()
+  );
+
+  if (fieldErrors.length > 0) {
+    message = fieldErrors[0];
+  }
+}
+
+if (!message) {
+  message = error.message || "Something went wrong";
+}
+
+return Promise.reject({
+  ...error,
+  message,
+  fieldErrors:
+    backendData && typeof backendData === "object" ? backendData : null
+});
   }
 );
 

@@ -1,168 +1,386 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Bell,
-  Calendar,
-  FileText,
-  Pill,
-  ShieldCheck
-} from "lucide-react";
+  FiActivity,
+  FiBell,
+  FiCalendar,
+  FiChevronRight,
+  FiClock,
+  FiFileText,
+  FiFilter,
+  FiInfo,
+  FiRefreshCw,
+  FiShield,
+  FiUser
+} from "react-icons/fi";
+
+import { useNotifications } from "../../context/useNotifications";
+import {
+  getPatientNotifications,
+  markPatientNotificationAsRead
+} from "../../services/patientService";
+
 import "./notifications.css";
 
-const dummyNotifications = [
-  {
-    id: "n1",
-    type: "APPOINTMENT",
-    title: "Appointment Confirmed",
-    message:
-      "Your appointment with Dr. Sharma at Apollo Clinic is confirmed for 26 Feb, 10:30 AM.",
-    createdAt: "2026-02-26T09:30:00",
-    route: "/patient/appointments"
-  },
-  {
-    id: "n2",
-    type: "LAB_REPORT",
-    title: "Lab Report Available",
-    message:
-      "Your Blood Test report is now available. Tap to view.",
-    createdAt: "2026-02-25T18:10:00",
-    route: "/patient/lab-reports"
-  },
-  {
-    id: "n3",
-    type: "PRESCRIPTION",
-    title: "New Prescription Added",
-    message:
-      "Dr. Mehta has added a new prescription after your visit.",
-    createdAt: "2026-02-24T14:45:00",
-    route: "/patient/prescriptions"
-  },
-  {
-    id: "n4",
-    type: "REMINDER",
-    title: "Follow-up Reminder",
-    message:
-      "Your follow-up appointment is due this week.",
-    createdAt: "2026-02-23T09:00:00",
-    route: "/patient/appointments"
-  },
-  {
-    id: "n5",
-    type: "SECURITY",
-    title: "New Login Detected",
-    message:
-      "Your account was accessed from a new device.",
-    createdAt: "2026-02-22T21:20:00",
-    route: "/patient/profile"
-  }
+const NOTIFICATION_ICON_MAP = {
+  APPOINTMENT: <FiCalendar />,
+  PRESCRIPTION: <FiFileText />,
+  LAB_REPORT: <FiFileText />,
+  MEDICAL_RECORD: <FiShield />,
+  LAB_BOOKING: <FiActivity />,
+  REMINDER: <FiClock />,
+  SECURITY: <FiShield />,
+  SUPPORT: <FiInfo />,
+  SYSTEM: <FiBell />
+};
+
+const TYPE_FILTERS = [
+  "ALL",
+  "APPOINTMENT",
+  "PRESCRIPTION",
+  "LAB_REPORT",
+  "MEDICAL_RECORD",
+  "LAB_BOOKING",
+  "REMINDER",
+  "SECURITY",
+  "SUPPORT",
+  "SYSTEM"
 ];
 
-const getIcon = (type) => {
-  switch (type) {
-    case "APPOINTMENT":
-      return <Calendar size={22} />;
-    case "LAB_REPORT":
-      return <FileText size={22} />;
-    case "PRESCRIPTION":
-      return <Pill size={22} />;
-    case "SECURITY":
-      return <ShieldCheck size={22} />;
-    default:
-      return <Bell size={22} />;
+const PRIORITY_FILTERS = ["ALL", "CRITICAL", "HIGH", "NORMAL", "LOW"];
+
+const formatDateTime = (timestamp) => {
+  if (!timestamp) return "—";
+
+  try {
+    return new Intl.DateTimeFormat("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    }).format(new Date(timestamp));
+  } catch {
+    return "—";
   }
 };
 
-const Notifications = () => {
+const formatLabel = (value) => {
+  if (!value) return "SYSTEM";
+
+  return value
+    .replaceAll("_", " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+const PatientNotifications = () => {
   const navigate = useNavigate();
 
-  const [notifications, setNotifications] = useState(
-    dummyNotifications
-  );
+  const {
+    unreadCount,
+    notificationsError,
+    handleNotificationActionSuccess,
+    checkForNewNotifications
+  } = useNotifications() || {};
 
-  const sortedNotifications = useMemo(() => {
-    return [...notifications].sort(
-      (a, b) =>
-        new Date(b.createdAt) -
-        new Date(a.createdAt)
-    );
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [pageError, setPageError] = useState("");
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [selectedType, setSelectedType] = useState("ALL");
+  const [selectedPriority, setSelectedPriority] = useState("ALL");
+
+  const loadNotifications = async ({ silentUnreadRefresh = true } = {}) => {
+    try {
+      setNotificationsLoading(true);
+      setPageError("");
+
+      const response = await getPatientNotifications({
+        page: 0,
+        size: 30,
+        type: selectedType,
+        priority: selectedPriority
+      });
+
+      const content = Array.isArray(response?.content)
+        ? response.content
+        : [];
+
+      setNotifications(content);
+
+      if (silentUnreadRefresh) {
+        await checkForNewNotifications?.({ silent: true });
+      }
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Unable to load notifications right now.";
+
+      setPageError(message);
+      setNotifications([]);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadNotifications({ silentUnreadRefresh: true }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedType, selectedPriority]);
+
+  const groupedNotifications = useMemo(() => {
+    const groups = {};
+
+    notifications.forEach((notification) => {
+      const key = notification?.type || "SYSTEM";
+
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+
+      groups[key].push(notification);
+    });
+
+    return groups;
   }, [notifications]);
 
-  const getTimeLabel = (date) => {
-    const diffHours =
-      (new Date() - new Date(date)) /
-      (1000 * 60 * 60);
+  const handleNotificationClick = async (notification) => {
+    if (!notification?.id || actionLoadingId) return;
 
-    if (diffHours < 24) return "Today";
-    if (diffHours < 48) return "Yesterday";
-    return "Earlier";
+    try {
+      setActionLoadingId(notification.id);
+
+      let targetRoute =
+        notification?.targetRoute ||
+        "/patient/dashboard";
+
+      if (!notification.isRead) {
+        const response = await markPatientNotificationAsRead(notification.id);
+
+        targetRoute =
+          response?.targetRoute ||
+          notification?.targetRoute ||
+          "/patient/dashboard";
+
+        setNotifications((prev) =>
+          prev.map((item) =>
+            item.id === notification.id
+              ? {
+                  ...item,
+                  isRead: true,
+                  readAt: Date.now()
+                }
+              : item
+          )
+        );
+
+        await handleNotificationActionSuccess?.({
+          showToastOnNew: false
+        });
+      }
+
+      navigate(targetRoute);
+    } catch (error) {
+      console.error("Failed to open patient notification:", error);
+
+      alert(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Unable to open notification right now."
+      );
+    } finally {
+      setActionLoadingId(null);
+    }
   };
 
-  const handleNotificationClick = (notification) => {
-    // 🔥 remove from UI (dummy behaviour)
-    setNotifications((prev) =>
-      prev.filter((n) => n.id !== notification.id)
-    );
-
-    // 🔥 navigate to target page
-    navigate(notification.route);
+  const handleRefresh = async () => {
+    await loadNotifications({
+      silentUnreadRefresh: true
+    });
   };
+
+  const effectiveError = pageError || notificationsError;
 
   return (
-    <div className="notifications-container">
-      <div className="notifications-header">
-        <h1>Notifications</h1>
-        <p>Stay updated about your care</p>
+    <div className="doctor-notifications-page">
+      <div className="notif-page-header">
+        <div className="notif-header-left">
+          <p className="notif-eyebrow">Care Inbox</p>
+          <h2>Notifications</h2>
+          <p className="notif-subtext">
+            You have <strong>{unreadCount || 0}</strong> active unread
+            notification{Number(unreadCount || 0) === 1 ? "" : "s"}.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="notif-refresh-btn"
+          onClick={handleRefresh}
+          disabled={notificationsLoading}
+        >
+          <FiRefreshCw />
+          <span>
+            {notificationsLoading ? "Refreshing..." : "Refresh"}
+          </span>
+        </button>
       </div>
 
-      {sortedNotifications.length === 0 ? (
-        <div className="empty-state">
-          <Bell size={40} />
-          <p>You’re all caught up</p>
+      <div className="notif-filters-bar">
+        <div className="notif-filter-group">
+          <div className="notif-filter-label">
+            <FiFilter />
+            <span>Type</span>
+          </div>
+
+          <div className="notif-filter-chips">
+            {TYPE_FILTERS.map((type) => (
+              <button
+                key={type}
+                type="button"
+                className={`notif-filter-chip ${
+                  selectedType === type ? "active" : ""
+                }`}
+                onClick={() => setSelectedType(type)}
+              >
+                {type === "ALL" ? "ALL" : formatLabel(type)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="notif-filter-group">
+          <div className="notif-filter-label">
+            <FiFilter />
+            <span>Priority</span>
+          </div>
+
+          <div className="notif-filter-chips">
+            {PRIORITY_FILTERS.map((priority) => (
+              <button
+                key={priority}
+                type="button"
+                className={`notif-filter-chip ${
+                  selectedPriority === priority ? "active" : ""
+                }`}
+                onClick={() => setSelectedPriority(priority)}
+              >
+                {priority}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {notificationsLoading && notifications.length === 0 ? (
+        <div className="notif-state-card">
+          <p>Loading notifications...</p>
+        </div>
+      ) : effectiveError ? (
+        <div className="notif-state-card notif-state-error">
+          <h3>Unable to load notifications</h3>
+          <p>{effectiveError}</p>
+          <button type="button" onClick={handleRefresh}>
+            Try Again
+          </button>
+        </div>
+      ) : notifications.length === 0 ? (
+        <div className="notif-empty-state">
+          <div className="notif-empty-icon">
+            <FiBell />
+          </div>
+          <h3>No active notifications</h3>
+          <p>
+            There are no notifications matching the selected filters right now.
+          </p>
         </div>
       ) : (
-        sortedNotifications.map((item, index) => {
-          const currentLabel = getTimeLabel(
-            item.createdAt
-          );
-          const prevLabel =
-            index > 0
-              ? getTimeLabel(
-                  sortedNotifications[index - 1]
-                    .createdAt
-                )
-              : null;
-
-          return (
-            <React.Fragment key={item.id}>
-              {currentLabel !== prevLabel && (
-                <div className="date-label">
-                  {currentLabel}
-                </div>
-              )}
-
-              <div
-                className="notification-card unread"
-                onClick={() =>
-                  handleNotificationClick(item)
-                }
-              >
-                <div className="icon">
-                  {getIcon(item.type)}
-                </div>
-
-                <div className="content">
-                  <h3>{item.title}</h3>
-                  <p>{item.message}</p>
-                </div>
-
-                <span className="dot" />
+        <div className="notif-groups-wrapper">
+          {Object.entries(groupedNotifications).map(([type, items]) => (
+            <section key={type} className="notif-group-section">
+              <div className="notif-group-head">
+                <h3>{formatLabel(type)}</h3>
+                <span>{items.length}</span>
               </div>
-            </React.Fragment>
-          );
-        })
+
+              <div className="notif-list">
+                {items.map((notification) => {
+                  const isActionLoading =
+                    actionLoadingId === notification.id;
+
+                  return (
+                    <button
+                      key={notification.id}
+                      type="button"
+                      className={`notif-card-item ${
+                        notification.isRead ? "notif-card-item-read" : ""
+                      }`}
+                      onClick={() => handleNotificationClick(notification)}
+                      disabled={isActionLoading}
+                    >
+                      <div className="notif-icon-box">
+                        {NOTIFICATION_ICON_MAP[notification.type] || (
+                          <FiBell />
+                        )}
+                      </div>
+
+                      <div className="notif-content-wrapper">
+                        <div className="notif-main-row">
+                          <div className="notif-text-block">
+                            <h4 className="notif-title">
+                              {notification.title || "Notification"}
+                            </h4>
+                            <p className="notif-msg">
+                              {notification.message ||
+                                "No message available"}
+                            </p>
+                          </div>
+
+                          <span className="notif-timestamp">
+                            <FiClock className="time-icon" />
+                            {formatDateTime(notification.createdAt)}
+                          </span>
+                        </div>
+
+                        <div className="notif-meta-row">
+                          <span
+                            className={`notif-type-pill type-${(
+                              notification.type || ""
+                            ).toLowerCase()}`}
+                          >
+                            {formatLabel(notification.type || "SYSTEM")}
+                          </span>
+
+                          {notification.priority && (
+                            <span
+                              className={`notif-priority-pill priority-${notification.priority.toLowerCase()}`}
+                            >
+                              {notification.priority}
+                            </span>
+                          )}
+
+                          {!notification.isRead && (
+                            <span className="notif-unread-pill">
+                              New
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <FiChevronRight className="notif-arrow" />
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+        </div>
       )}
     </div>
   );
 };
 
-export default Notifications;
+export default PatientNotifications;

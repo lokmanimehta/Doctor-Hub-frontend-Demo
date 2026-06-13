@@ -1,7 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "./DoctorDashboard.css";
 import { useNavigate } from "react-router-dom";
-import { getDoctorDashboard } from "../../services/doctorService";
+import {
+  getDoctorDashboard,
+  submitDoctorProfileForReview,
+} from "../../services/doctorService";
 
 const REFRESH_INTERVAL_MS = 60 * 1000;
 
@@ -37,10 +40,11 @@ const formatTimeOnly = (timestamp) => {
 const statusLabelMap = {
   INCOMPLETE: "Incomplete",
   READY_FOR_REVIEW: "Ready for Review",
-  UNDER_REVIEW: "Under Review",
+  UNDER_REVIEW: "Submitted for Review",
   VERIFIED: "Verified",
   REJECTED: "Rejected",
 };
+
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
@@ -49,7 +53,7 @@ const DoctorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
-
+  const [submittingReview, setSubmittingReview] = useState(false);
   const fetchDashboard = useCallback(async (isManualRefresh = false) => {
     try {
       if (isManualRefresh) {
@@ -64,7 +68,7 @@ const DoctorDashboard = () => {
     } catch (err) {
       setError(
         err?.response?.data?.message ||
-          "Unable to load dashboard right now. Please try again."
+        "Unable to load dashboard right now. Please try again."
       );
     } finally {
       setLoading(false);
@@ -96,6 +100,73 @@ const DoctorDashboard = () => {
     const status = profileStatus?.verificationStatus || "INCOMPLETE";
     return status.toLowerCase().replace(/_/g, "-");
   }, [profileStatus?.verificationStatus]);
+  const currentVerificationStatus =
+    profileStatus?.verificationStatus || "INCOMPLETE";
+  const completionPercentage = Math.min(
+    Number(profileStatus?.completionPercentage ?? 0),
+    100
+  );
+
+  const minimumRequired = profileStatus?.minimumPercentageRequired ?? 85;
+
+  const hasMetMinimumRequirement = completionPercentage >= minimumRequired;
+
+  const requirementDisplayText = (() => {
+    switch (currentVerificationStatus) {
+      case "INCOMPLETE":
+        return hasMetMinimumRequirement
+          ? "Minimum requirement met"
+          : `Required: ${minimumRequired}%`;
+
+      case "READY_FOR_REVIEW":
+        return "Minimum requirement met";
+
+      case "UNDER_REVIEW":
+        return "Submitted for admin review";
+
+      case "VERIFIED":
+        return "Verified profile";
+
+      case "REJECTED":
+        return "Action required";
+
+      default:
+        return hasMetMinimumRequirement
+          ? "Minimum requirement met"
+          : `Required: ${minimumRequired}%`;
+    }
+  })();
+
+const isSubmittedForReview = currentVerificationStatus === "UNDER_REVIEW";
+const isVerified = currentVerificationStatus === "VERIFIED";
+const isRejected = currentVerificationStatus === "REJECTED";
+
+
+
+  const profileEditButtonLabel = (() => {
+    if (isVerified) {
+      return "View Profile";
+    }
+
+    if (completionPercentage >= 100) {
+      return "Update Profile";
+    }
+
+    return "Complete Profile";
+  })();
+
+  const hasUnsubmittedReviewChanges =
+  Boolean(profileStatus?.hasUnsubmittedReviewChanges);
+
+const shouldShowSubmitButton =
+  hasMetMinimumRequirement &&
+  !isVerified &&
+  !isRejected &&
+  (!isSubmittedForReview || hasUnsubmittedReviewChanges);
+
+const submitButtonLabel = isSubmittedForReview
+  ? "Submit Updated Profile"
+  : "Submit for Review";
 
   const canManagePatients = !!quickActionPermissions?.canAddPatient;
   const canScheduleAppointments = !!quickActionPermissions?.canScheduleAppointment;
@@ -112,7 +183,29 @@ const DoctorDashboard = () => {
       </div>
     );
   }
+const handleSubmitForReview = async () => {
+  if (!shouldShowSubmitButton || submittingReview) return;
 
+  try {
+    setSubmittingReview(true);
+    setError("");
+
+    await submitDoctorProfileForReview();
+
+    await fetchDashboard(true);
+  } catch (err) {
+    setError(
+      err?.response?.data?.message ||
+        "Unable to submit your profile for review. Please try again."
+    );
+  } finally {
+    setSubmittingReview(false);
+  }
+};
+
+const handleOpenProfile = () => {
+  navigate("/doctor/profile");
+};
   if (error) {
     return (
       <div className="doctor-dashboard-container">
@@ -164,12 +257,17 @@ const DoctorDashboard = () => {
 
             <div className="completion-meta">
               <span>
-                Profile Completion:{" "}
-                <strong>{profileStatus?.completionPercentage ?? 0}%</strong>
+                Profile Completion: <strong>{completionPercentage}%</strong>
               </span>
-              <span>
-                Required:{" "}
-                <strong>{profileStatus?.minimumPercentageRequired ?? 85}%</strong>
+
+              <span
+                className={
+                  hasMetMinimumRequirement
+                    ? "requirement-met-text"
+                    : "requirement-pending-text"
+                }
+              >
+                {requirementDisplayText}
               </span>
             </div>
 
@@ -189,19 +287,30 @@ const DoctorDashboard = () => {
           <div className="progress-shell">
             <div
               className="progress-fill"
-              style={{ width: `${profileStatus?.completionPercentage ?? 0}%` }}
+              style={{ width: `${completionPercentage}%` }}
             />
           </div>
 
-          <button
-            type="button"
-            className="primary-action-btn"
-            onClick={() => navigate("/doctor/profile")}
-          >
-            {profileStatus?.verificationStatus === "VERIFIED"
-              ? "View Profile"
-              : "Complete Profile"}
-          </button>
+          <div className="profile-actions-row">
+            {shouldShowSubmitButton && (
+              <button
+                type="button"
+                className="primary-action-btn"
+                onClick={handleSubmitForReview}
+                disabled={submittingReview}
+              >
+                {submittingReview ? "Submitting..." : submitButtonLabel}
+              </button>
+            )}
+
+            <button
+              type="button"
+              className={shouldShowSubmitButton ? "secondary-action-btn" : "primary-action-btn"}
+              onClick={handleOpenProfile}
+            >
+              {profileEditButtonLabel}
+            </button>
+          </div>
         </div>
       </section>
 
@@ -327,9 +436,8 @@ const DoctorDashboard = () => {
 
           <button
             type="button"
-            className={`quick-action-card ${
-              !canScheduleAppointments ? "disabled" : ""
-            }`}
+            className={`quick-action-card ${!canScheduleAppointments ? "disabled" : ""
+              }`}
             onClick={() =>
               handleRestrictedAction(canScheduleAppointments, "/doctor/appointments")
             }

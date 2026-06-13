@@ -60,7 +60,7 @@ import FeedbackPage from "./pages/admin/FeedbackPage";
 import AdsManagement from "./pages/admin/AdsManagement";
 import Hospitals from "./pages/patient/Hospitals";
 import LabsPage from "./pages/patient/LabsPage";
-
+import HospitalAction from "./pages/public/HospitalAction";
 
 function App() {
   return (
@@ -75,6 +75,7 @@ function App() {
       <Route path="/all-services" element={<AllServicesPage />} />
       <Route path="/care-coordinator" element={<CareCoordinator />} />
       <Route path="/insurance" element={<Insurance />} />
+      <Route path="/hospital-action/:token" element={<HospitalAction />} />
 
       {/* --- ADMIN ROUTES --- */}
       <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
@@ -90,6 +91,7 @@ function App() {
           <Route path="appointments" element={<AdminAppointments />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="system-logs" element={<SystemLogs />} />
+          <Route path="feedback" element={<FeedbackPage />} />
           <Route path="ads-management" element={<AdsManagement />} />
           <Route path="feedback" element={<FeedbackPage />} />
           <Route path="blogs" element={<AdminBlogs />} />

@@ -1,383 +1,643 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  FiCalendar,
-  FiFileText,
-  FiClock,
-  FiInfo,
-  FiCheckCircle,
-  FiLock,
   FiActivity,
-  FiExternalLink,
-  FiPlusCircle,
-  FiThumbsUp,
   FiAlertTriangle,
   FiArrowRight,
+  FiCalendar,
+  FiCheckCircle,
+  FiClock,
+  FiFileText,
+  FiHeart,
+  FiHelpCircle,
+  FiMapPin,
+  FiRefreshCw,
+  FiShield,
   FiUserCheck,
-  FiHome
+  FiUsers
 } from "react-icons/fi";
-import { patientAppointmentsDummyData } from "../../utils/patientAppointmentsDummyData";
-import { prescriptionsDummyData } from "../../utils/prescriptionsDummyData";
-import { patientDashboardData } from "../../utils/patientDashboardDummyData";
+import { getPatientDashboard } from "../../services/patientService";
+import { useProfile } from "../../context/useProfile";
+import { getPatientDailyWellnessTip } from "../../utils/dailyWellnessTips";
 import "./Dashboard.css";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [isRecovered, setIsRecovered] = useState(false);
-  const [symptomText, setSymptomText] = useState("");
-const [triageResult, setTriageResult] = useState(null);
-  const { welcomeMessage, upcomingAppointment, healthSummary } = patientDashboardData;
+  const profileContext = useProfile();
 
-  const wellnessTips = [
-    "Stay hydrated! Drinking at least 8 glasses of water daily helps maintain energy.",
-    "A 30-minute walk today can significantly improve your cardiovascular health.",
-    "Prioritize 7-8 hours of sleep tonight to boost your immune system.",
-    "Limit your salt intake to help maintain healthy blood pressure levels.",
-    "Deep breathing for 5 minutes can help reduce stress and improve focus."
-  ];
-  const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-  const dailyTip = wellnessTips[dayOfYear % wellnessTips.length];
+  const selectedProfile = profileContext?.selectedProfile || null;
 
-  const pendingLabTests = [
-    { id: 1, testName: "CBC & Lipid Profile", lab: "City Diagnostic", date: "24 Feb" },
-  ];
- const handleSymptomCheck = () => {
-  const text = symptomText.toLowerCase().trim();
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState("");
 
-  if (!text) {
-    setTriageResult({
-      level: "info",
-      title: "Enter symptoms first",
-      message: "Please type your symptoms to get guidance.",
-      cta: null,
-      specialty: null,
-      reason: null
-    });
-    return;
-  }
 
-  // Emergency symptoms
-  if (
-    text.includes("chest pain") ||
-    text.includes("breathing problem") ||
-    text.includes("breathlessness") ||
-    text.includes("stroke") ||
-    text.includes("unconscious") ||
-    text.includes("severe bleeding")
-  ) {
-    setTriageResult({
-      level: "urgent",
-      title: "Urgent Care Recommended",
-      message:
-        "Your symptoms may need urgent medical attention. Please check nearby hospitals or emergency care immediately.",
-      cta: "hospital",
-      specialty: null,
-      reason: "Emergency warning symptoms detected"
-    });
-    return;
-  }
 
-  // Specialty mapping
-  if (text.includes("rash") || text.includes("itching") || text.includes("skin allergy")) {
-    setTriageResult({
-      level: "doctor",
-      title: "Dermatologist Recommended",
-      message:
-        "Your symptoms look related to skin concerns. You may consult a Dermatologist.",
-      cta: "doctor",
-      specialty: "Dermatologist",
-      reason: "Matched symptoms: rash / itching / skin allergy"
-    });
-    return;
-  }
+  useEffect(() => {
+    loadDashboard();
+  }, []);
 
-  if (text.includes("headache") || text.includes("migraine") || text.includes("dizziness")) {
-    setTriageResult({
-      level: "doctor",
-      title: "Neurologist / Physician Recommended",
-      message:
-        "Your symptoms may need consultation with a Neurologist or General Physician.",
-      cta: "doctor",
-      specialty: "Neurologist",
-      reason: "Matched symptoms: headache / migraine / dizziness"
-    });
-    return;
-  }
+  const loadDashboard = async () => {
+    try {
+      setLoading(true);
+      setApiError("");
 
-  if (text.includes("bp") || text.includes("blood pressure")) {
-    setTriageResult({
-      level: "doctor",
-      title: "Cardiologist Recommended",
-      message:
-        "Your symptoms may be related to blood pressure or heart health. A Cardiologist may be suitable.",
-      cta: "doctor",
-      specialty: "Cardiologist",
-      reason: "Matched symptoms: BP / blood pressure"
-    });
-    return;
-  }
+      const data = await getPatientDashboard();
+      setDashboard(data);
+    } catch (error) {
+      console.error("Patient dashboard load failed:", error);
 
-  if (text.includes("diabetes") || text.includes("fever") || text.includes("cough") || text.includes("cold") || text.includes("vomiting") || text.includes("stomach pain")) {
-    setTriageResult({
-      level: "doctor",
-      title: "Physician Recommended",
-      message:
-        "Your symptoms look suitable for a General Physician consultation.",
-      cta: "doctor",
-      specialty: "Physician",
-      reason: "Matched symptoms: general illness / fever / cough / diabetes"
-    });
-    return;
-  }
-
-  setTriageResult({
-    level: "home",
-    title: "Basic Care Guidance",
-    message:
-      "Your symptoms may be mild, but if they continue or worsen, please consult a doctor. You can also use Help & Support for more guidance.",
-    cta: "help",
-    specialty: null,
-    reason: "No strong specialty match found"
-  });
-};
-  return (
-    <div className="patient-dashboard-container">
-      {/* --- HEADER --- */}
-      <header className="dashboard-header-premium">
-        <div className="hero-main-text">
-          <h1>{welcomeMessage} 👋</h1>
-          <p className="hero-subtitle"></p>
-        </div>
-        <div className="daily-tip-card">
-          <div className="tip-header"><FiInfo /> <span>Wellness Insight</span></div>
-          <p>"{dailyTip}"</p>
-        </div>
-      </header>
-      <div className="ai-symptom-card">
-  <div className="ai-symptom-card-top">
-    <div>
-      <p className="ai-symptom-label">AI TRIAGE ASSIST</p>
-      <h2>AI Symptom Checker</h2>
-      <p className="ai-symptom-subtext">
-        Enter your symptoms and get quick guidance on whether you may need home care, a doctor, or urgent hospital support.
-      </p>
-    </div>
-
-    <div className="ai-triage-badge">
-      <FiAlertTriangle />
-      <span>Preliminary Guidance Only</span>
-    </div>
-  </div>
-
-  <div className="ai-symptom-input-wrap">
-    <textarea
-      className="ai-symptom-textarea"
-      placeholder="Example: fever, cough, headache, chest pain..."
-      value={symptomText}
-      onChange={(e) => setSymptomText(e.target.value)}
-    />
-
-    <div className="ai-symptom-actions">
-      <button className="ai-check-btn" onClick={handleSymptomCheck}>
-        Check Symptoms
-      </button>
-
-      <button
-        className="ai-clear-btn"
-        onClick={() => {
-          setSymptomText("");
-          setTriageResult(null);
-        }}
-      >
-        Clear
-      </button>
-    </div>
-  </div>
-
-  {triageResult && (
-    <div className={`ai-triage-result ${triageResult.level}`}>
-      <div className="ai-result-header">
-        <h3>{triageResult.title}</h3>
-      </div>
-
-      <p>{triageResult.message}</p>
-      {triageResult.specialty && (
-  <div className="ai-specialty-box">
-    <strong>Recommended Specialty:</strong> {triageResult.specialty}
-    <br />
-    <span>{triageResult.reason}</span>
-  </div>
-)}
-
-      <div className="ai-result-actions">
-       {triageResult.cta === "doctor" && (
-  <button
-    className="ai-result-btn"
-    onClick={() =>
-      navigate("/patient/finddoctors", {
-        state: {
-          recommendedSpecialty: triageResult.specialty,
-          symptomQuery: symptomText,
-          triageTitle: triageResult.title
-        }
-      })
+      setApiError(
+        error?.response?.data?.message ||
+          "Dashboard load nahi ho paya. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
-  >
-    <FiUserCheck /> Find Matching Doctors
-  </button>
-)}
+  };
 
-        {triageResult.cta === "hospital" && (
-          <button
-            className="ai-result-btn urgent"
-            onClick={() => navigate("/patient/hospitals")}
-          >
-            <FiAlertTriangle /> Emergency Hospitals
-          </button>
-        )}
+const patient = dashboard?.patient || {};
+const stats = dashboard?.stats || {};
+const healthSummary = dashboard?.healthSummary || {};
+const upcomingAppointment = dashboard?.upcomingAppointment || null;
+const recentAppointments = dashboard?.recentAppointments || [];
 
-        {triageResult.cta === "help" && (
-          <button
-            className="ai-result-btn secondary"
-            onClick={() => navigate("/patient/help")}
-          >
-            <FiHome /> Get More Help
-          </button>
-        )}
-      </div>
-    </div>
-  )}
-</div>
+const dailyTip = useMemo(
+  () => getPatientDailyWellnessTip(patient?.accountCreatedAt),
+  [patient?.accountCreatedAt]
+);
 
-      {/* --- UPCOMING APPOINTMENT --- */}
-      {upcomingAppointment && (
-        <div className="priority-apt-card-top">
-          <div className="apt-header-top">
-            <span className="p-badge">Upcoming Appointment</span>
-            <FiExternalLink style={{cursor: 'pointer'}} />
+const displayName = patient?.fullName || "Patient";
+  const formatDate = (value) => {
+    if (!value) return "Not available";
+
+    try {
+      return new Date(value).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+    } catch {
+      return value;
+    }
+  };
+
+  const formatTime = (value) => {
+    if (!value) return "Not available";
+
+    const parts = value.split(":");
+
+    if (parts.length < 2) {
+      return value;
+    }
+
+    let hours = Number(parts[0]);
+    const minutes = parts[1];
+    const suffix = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12 || 12;
+
+    return `${hours}:${minutes} ${suffix}`;
+  };
+
+  const getInitial = (name) => {
+    if (!name || typeof name !== "string") return "D";
+    return name.trim().charAt(0).toUpperCase();
+  };
+
+  const getStatusClass = (status) => {
+    if (!status) return "neutral";
+
+    const value = status.toLowerCase();
+
+    if (value.includes("scheduled") || value.includes("confirmed")) {
+      return "success";
+    }
+
+    if (value.includes("cancel")) {
+      return "danger";
+    }
+
+    if (value.includes("complete")) {
+      return "completed";
+    }
+
+    return "neutral";
+  };
+
+  const profileCompletion = Math.min(
+    Number(stats?.profileCompletionPercentage || 0),
+    100
+  );
+
+  if (loading) {
+    return (
+      <main className="pd-page">
+        <section className="pd-state-card">
+          <div className="pd-state-icon pd-spin">
+            <FiRefreshCw />
           </div>
-          <div className="apt-content-horizontal">
-            <div className="doc-profile-main">
-              <div className="doc-avatar-large">{upcomingAppointment.doctorName.charAt(0)}</div>
-              <div className="doc-meta-info">
-                <h3 style={{margin: 0}}>{upcomingAppointment.doctorName}</h3>
-                <p style={{margin: '5px 0 0', opacity: 0.8}}>{upcomingAppointment.specialty}</p>
+          <h2>Loading your dashboard</h2>
+          <p>Latest patient overview fetch ho raha hai.</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (apiError) {
+    return (
+      <main className="pd-page">
+        <section className="pd-state-card pd-state-card--error">
+          <div className="pd-state-icon">
+            <FiAlertTriangle />
+          </div>
+          <h2>Dashboard load nahi hua</h2>
+          <p>{apiError}</p>
+          <button type="button" onClick={loadDashboard}>
+            Try Again
+          </button>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main className="pd-page">
+      <section className="pd-hero">
+        <div className="pd-hero__content">
+          <span className="pd-eyebrow">Patient Dashboard</span>
+
+          <h1>Welcome back, {displayName}</h1>
+
+          <p>
+            Appointments, health profile, care family aur medical vault ka clean
+            overview ek jagah.
+          </p>
+
+          <div className="pd-hero__meta">
+            {selectedProfile && (
+              <div className="pd-care-pill">
+                <FiUserCheck />
+                <span>
+                  Booking profile:{" "}
+                  <strong>
+                    {selectedProfile.fullName} ({selectedProfile.relation})
+                  </strong>
+                </span>
+              </div>
+            )}
+
+            {patient?.city && (
+              <div className="pd-care-pill pd-care-pill--muted">
+                <FiMapPin />
+                <span>
+                  {patient.city}
+                  {patient.state ? `, ${patient.state}` : ""}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <aside className="pd-tip-card">
+          <div className="pd-tip-card__top">
+            <div className="pd-tip-card__icon">
+              <FiHeart />
+            </div>
+
+            <div className="pd-tip-card__meta">
+              <span>Daily Wellness Tip</span>
+              <small>
+                Day {dailyTip.dayNumber} of {dailyTip.totalTips}
+              </small>
+            </div>
+          </div>
+
+          <div className="pd-tip-card__body">
+            <span className="pd-tip-category">{dailyTip.category}</span>
+            <h2>{dailyTip.title}</h2>
+            <p>{dailyTip.message}</p>
+          </div>
+        </aside>
+      </section>
+
+      <section className="pd-stats-grid">
+        <article className="pd-stat-card">
+          <div className="pd-stat-card__icon">
+            <FiCalendar />
+          </div>
+          <div>
+            <span>Upcoming Visits</span>
+            <strong>{stats.upcomingAppointments || 0}</strong>
+            <p>Scheduled appointments</p>
+          </div>
+        </article>
+
+        <article className="pd-stat-card">
+          <div className="pd-stat-card__icon">
+            <FiActivity />
+          </div>
+          <div>
+            <span>Total Bookings</span>
+            <strong>{stats.totalAppointments || 0}</strong>
+            <p>All appointments</p>
+          </div>
+        </article>
+
+        <article className="pd-stat-card">
+          <div className="pd-stat-card__icon">
+            <FiUsers />
+          </div>
+          <div>
+            <span>Family Profiles</span>
+            <strong>{stats.familyMembers || 0}</strong>
+            <p>Managed by you</p>
+          </div>
+        </article>
+
+        <article className="pd-stat-card">
+          <div className="pd-stat-card__icon">
+            <FiShield />
+          </div>
+          <div>
+            <span>Profile Strength</span>
+            <strong>{profileCompletion}%</strong>
+            <p>Health data complete</p>
+          </div>
+        </article>
+      </section>
+
+      <section className="pd-main-grid">
+        <div className="pd-left-column">
+          <section className="pd-card pd-appointment-card">
+            <div className="pd-card__header">
+              <div>
+                <span className="pd-section-label">Next appointment</span>
+                <h2>Upcoming Consultation</h2>
+              </div>
+
+              <button
+                type="button"
+                className="pd-link-button"
+                onClick={() => navigate("/patient/appointments")}
+              >
+                View all <FiArrowRight />
+              </button>
+            </div>
+
+            {upcomingAppointment ? (
+              <div className="pd-appointment">
+                <div className="pd-doctor-block">
+                  {upcomingAppointment.doctorImageUrl ? (
+                    <img
+                      src={upcomingAppointment.doctorImageUrl}
+                      alt={upcomingAppointment.doctorName || "Doctor"}
+                      className="pd-doctor-avatar"
+                    />
+                  ) : (
+                    <div className="pd-doctor-avatar pd-doctor-avatar--fallback">
+                      {getInitial(upcomingAppointment.doctorName)}
+                    </div>
+                  )}
+
+                  <div>
+                    <h3>{upcomingAppointment.doctorName || "Doctor"}</h3>
+                    <p>{upcomingAppointment.specialty || "General Physician"}</p>
+                    <span>{upcomingAppointment.clinicName || "Clinic"}</span>
+                  </div>
+                </div>
+
+                <div className="pd-appointment-details">
+                  <div>
+                    <FiCalendar />
+                    <span>{formatDate(upcomingAppointment.appointmentDate)}</span>
+                  </div>
+
+                  <div>
+                    <FiClock />
+                    <span>{formatTime(upcomingAppointment.slotStartTime)}</span>
+                  </div>
+
+                  {upcomingAppointment.location && (
+                    <div>
+                      <FiMapPin />
+                      <span>{upcomingAppointment.location}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pd-appointment-footer">
+                  <span
+                    className={`pd-status pd-status--${getStatusClass(
+                      upcomingAppointment.status
+                    )}`}
+                  >
+                    {upcomingAppointment.status || "Scheduled"}
+                  </span>
+
+                  <button
+                    type="button"
+                    className="pd-primary-button"
+                    onClick={() => navigate("/patient/appointments")}
+                  >
+                    Manage Visit
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="pd-empty-appointment">
+                <div className="pd-empty-appointment__icon">
+                  <FiCalendar />
+                </div>
+                <h3>No upcoming appointment</h3>
+                <p>
+                  Verified doctors search karke apne ya family member ke liye
+                  appointment book karo.
+                </p>
+                <button
+                  type="button"
+                  className="pd-primary-button"
+                  onClick={() => navigate("/patient/finddoctors")}
+                >
+                  Find Doctors
+                </button>
+              </div>
+            )}
+          </section>
+
+          <section className="pd-card">
+            <div className="pd-card__header">
+              <div>
+                <span className="pd-section-label">Health readiness</span>
+                <h2>Profile Completion</h2>
+              </div>
+
+              <button
+                type="button"
+                className="pd-link-button"
+                onClick={() => navigate("/patient/profile")}
+              >
+                Update <FiArrowRight />
+              </button>
+            </div>
+
+            <div className="pd-progress-card">
+              <div className="pd-progress-card__top">
+                <div>
+                  <strong>{profileCompletion}%</strong>
+                  <span>completed</span>
+                </div>
+
+                {profileCompletion >= 80 ? (
+                  <span className="pd-readiness-badge pd-readiness-badge--good">
+                    <FiCheckCircle /> Strong
+                  </span>
+                ) : (
+                  <span className="pd-readiness-badge">
+                    <FiAlertTriangle /> Needs update
+                  </span>
+                )}
+              </div>
+
+              <div className="pd-progress-track">
+                <div
+                  className="pd-progress-fill"
+                  style={{ width: `${profileCompletion}%` }}
+                />
+              </div>
+
+              <p>
+                Blood group, allergies, medications aur emergency contact update
+                karne se consultation faster aur safer hota hai.
+              </p>
+            </div>
+          </section>
+
+          <section className="pd-card">
+            <div className="pd-card__header">
+              <div>
+                <span className="pd-section-label">Medical details</span>
+                <h2>Health Summary</h2>
+              </div>
+
+              <button
+                type="button"
+                className="pd-link-button"
+                onClick={() => navigate("/patient/profile")}
+              >
+                Edit <FiArrowRight />
+              </button>
+            </div>
+
+            <div className="pd-health-grid">
+              <div className="pd-health-item">
+                <span>Blood Group</span>
+                <strong>{healthSummary.bloodGroup || "Not added"}</strong>
+              </div>
+
+              <div className="pd-health-item">
+                <span>Allergies</span>
+                <strong>{healthSummary.allergies || "Not added"}</strong>
+              </div>
+
+              <div className="pd-health-item">
+                <span>Chronic Conditions</span>
+                <strong>{healthSummary.chronicConditions || "Not added"}</strong>
+              </div>
+
+              <div className="pd-health-item">
+                <span>Current Medicines</span>
+                <strong>{healthSummary.currentMedications || "Not added"}</strong>
               </div>
             </div>
-            <div className="apt-details-box">
-              <div className="detail-item">
-                <FiCalendar /> <span>{upcomingAppointment.date}</span>
+          </section>
+
+          <section className="pd-card">
+            <div className="pd-card__header">
+              <div>
+                <span className="pd-section-label">Recent activity</span>
+                <h2>Recent Appointments</h2>
               </div>
-              <div className="detail-item">
-                <FiClock /> <span>{upcomingAppointment.time}</span>
+
+              <button
+                type="button"
+                className="pd-link-button"
+                onClick={() => navigate("/patient/appointments")}
+              >
+                View all <FiArrowRight />
+              </button>
+            </div>
+
+            {recentAppointments.length > 0 ? (
+              <div className="pd-recent-list">
+                {recentAppointments.map((appointment) => (
+                  <article className="pd-recent-item" key={appointment.id}>
+                    <div>
+                      <h3>{appointment.doctorName || "Doctor"}</h3>
+                      <p>
+                        {appointment.specialty || "General Physician"} •{" "}
+                        {appointment.clinicName || "Clinic"}
+                      </p>
+                    </div>
+
+                    <div className="pd-recent-item__right">
+                      <span>{formatDate(appointment.appointmentDate)}</span>
+                      <strong
+                        className={`pd-status pd-status--${getStatusClass(
+                          appointment.status
+                        )}`}
+                      >
+                        {appointment.status || "Scheduled"}
+                      </strong>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="pd-empty-inline">
+                <FiCalendar />
+                <p>No appointment history found.</p>
+              </div>
+            )}
+          </section>
+        </div>
+
+        <aside className="pd-right-column">
+          <section className="pd-card">
+            <div className="pd-card__header">
+              <div>
+                <span className="pd-section-label">Actions</span>
+                <h2>Quick Access</h2>
               </div>
             </div>
-            <button className="manage-btn-top" onClick={() => navigate("/patient/appointments")}>
-              Manage Visit
+
+            <div className="pd-action-list">
+              <button type="button" onClick={() => navigate("/patient/finddoctors")}>
+                <span>
+                  <FiUserCheck />
+                </span>
+                <div>
+                  <strong>Find Doctors</strong>
+                  <small>Search verified doctors</small>
+                </div>
+                <FiArrowRight />
+              </button>
+
+              <button type="button" onClick={() => navigate("/patient/appointments")}>
+                <span>
+                  <FiCalendar />
+                </span>
+                <div>
+                  <strong>Appointments</strong>
+                  <small>Manage upcoming visits</small>
+                </div>
+                <FiArrowRight />
+              </button>
+
+              <button type="button" onClick={() => navigate("/patient/records")}>
+                <span>
+                  <FiFileText />
+                </span>
+                <div>
+                  <strong>Medical Records</strong>
+                  <small>View health documents</small>
+                </div>
+                <FiArrowRight />
+              </button>
+
+              <button type="button" onClick={() => navigate("/patient/profile")}>
+                <span>
+                  <FiUsers />
+                </span>
+                <div>
+                  <strong>Family Profiles</strong>
+                  <small>Manage care profiles</small>
+                </div>
+                <FiArrowRight />
+              </button>
+            </div>
+          </section>
+
+          <section className="pd-card">
+            <div className="pd-card__header">
+              <div>
+                <span className="pd-section-label">Vault</span>
+                <h2>Medical Vault</h2>
+              </div>
+            </div>
+
+            <div className="pd-vault-grid">
+              <button
+                type="button"
+                onClick={() => navigate("/patient/prescriptions")}
+              >
+                <FiFileText />
+                <strong>{stats.activePrescriptions || 0}</strong>
+                <span>Active Prescriptions</span>
+              </button>
+
+              <button type="button" onClick={() => navigate("/patient/lab-reports")}>
+                <FiActivity />
+                <strong>{stats.labReports || 0}</strong>
+                <span>Lab Reports</span>
+              </button>
+            </div>
+
+            <div className="pd-soft-note">
+              <FiShield />
+              <p>
+                Doctor-linked prescriptions aur lab reports backend linking ke
+                baad yaha live count me show honge.
+              </p>
+            </div>
+          </section>
+
+          <section className="pd-card">
+            <div className="pd-card__header">
+              <div>
+                <span className="pd-section-label">Safety</span>
+                <h2>Emergency Contact</h2>
+              </div>
+            </div>
+
+            <div className="pd-emergency-card">
+              <div className="pd-emergency-card__icon">
+                <FiAlertTriangle />
+              </div>
+
+              <div>
+                <strong>
+                  {healthSummary.emergencyContactName || "Not added"}
+                </strong>
+                <span>
+                  {healthSummary.emergencyContactPhone ||
+                    "Emergency phone number missing"}
+                </span>
+              </div>
+
+              <button type="button" onClick={() => navigate("/patient/profile")}>
+                Update Contact
+              </button>
+            </div>
+          </section>
+
+          <section className="pd-help-card">
+            <div>
+              <FiHelpCircle />
+              <h2>Need help?</h2>
+              <p>
+                Appointment, profile ya records related issue ke liye support
+                section open karo.
+              </p>
+            </div>
+
+            <button type="button" onClick={() => navigate("/patient/help")}>
+              Help & Support
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* --- RECOVERY BANNER --- */}
-      {!isRecovered && (
-        <div className="recovery-feedback-banner">
-          <div className="feedback-info">
-            <div className="feedback-icon-ring"><FiThumbsUp size={24} /></div>
-            <div className="feedback-text">
-              <h4 style={{margin: 0}}>How are you feeling today?</h4>
-              <p style={{margin: '5px 0 0', opacity: 0.9}}>Your medication course is ending. Please update your status.</p>
-            </div>
-          </div>
-          <div className="feedback-btns">
-            <button className="btn-confirm-recovery" onClick={() => setIsRecovered(true)}>I'm Feeling Great!</button>
-            <button className="btn-still-unwell" onClick={() => navigate("/patient/help")}>Still Unwell</button>
-          </div>
-        </div>
-      )}
-
-      <div className="dashboard-main-grid">
-        {/* --- LEFT SIDE --- */}
-        <div className="grid-left">
-          <div className="premium-card-white">
-            <div className="card-header-flex" style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px'}}>
-              <h2 style={{margin: 0}}>Health Journey</h2>
-              <span className={`status-pill ${isRecovered ? "recovered" : "active"}`} 
-                    style={{
-                      padding: '6px 16px', 
-                      borderRadius: '20px', 
-                      fontSize: '12px', 
-                      fontWeight: 'bold',
-                      background: isRecovered ? '#dcfce7':'#e0f2fe',
-                      color: isRecovered ? '#166534' : '#0369a1'
-                    }}>
-                {isRecovered ? "Fully Recovered" : "Under Treatment"}
-              </span>
-            </div>
-            <div className="timeline-container">
-              <div className="timeline-item">
-                <div className="timeline-icon"><FiCheckCircle color="#10b981" /></div>
-                <div className="timeline-content">
-                  <h4 style={{margin: 0}}>Consultation</h4>
-                  <p style={{margin: '4px 0 0', color: '#64748b'}}>Completed on {healthSummary.lastVisit}</p>
-                </div>
-              </div>
-              <div className={`timeline-item ${isRecovered ? "" : "current"}`}>
-                <div className="timeline-icon"><FiActivity color={isRecovered ? "#10b981" : "#3b82f6"} /></div>
-                <div className="timeline-content">
-                  <h4 style={{margin: 0}}>Current Phase</h4>
-                  <p style={{margin: '4px 0 0', color: '#64748b'}}>{healthSummary.recentPrescription}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="premium-card-white">
-            <h2 style={{marginBottom: '15px'}}>Pending Lab Tests</h2>
-            {pendingLabTests.map(test => (
-              <div key={test.id} className="test-item-card premium-hover">
-                <div className="test-info">
-                  <h4 style={{margin: 0}}>{test.testName}</h4>
-                  <span style={{fontSize:'13px', color:'#64748b'}}>{test.lab} • {test.date}</span>
-                </div>
-                <button className="manage-btn-top" style={{padding:'8px 15px', fontSize:'12px'}}>Details</button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* --- RIGHT SIDE --- */}
-        <div className="grid-right">
-          <div className="premium-card-white">
-            <div className="card-header-flex" style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '20px'}}>
-              <h2 style={{margin: 0}}>Medical Vault</h2>
-              <FiLock color="#64748b" />
-            </div>
-            <div className="vault-grid">
-              <div className="vault-card" onClick={() => navigate("/patient/lab-reports")}>
-                <FiFileText size={24} color="var(--p-primary)" />
-                <p style={{marginTop:'10px', fontWeight:'600'}}>Reports</p>
-              </div>
-              <div className="vault-card" onClick={() => navigate("/patient/prescriptions")}>
-                <FiPlusCircle size={24} color="var(--p-primary)" />
-                <p style={{marginTop:'10px', fontWeight:'600'}}>Scripts</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="summary-stats-mini">
-             <div className="mini-stat premium-bounce">
-                <span style={{fontSize:'13px', color:'#64748b', fontWeight: '500'}}>Active Meds</span>
-                <h3 style={{margin:'5px 0 0', fontSize: '24px'}}>{prescriptionsDummyData.length}</h3>
-             </div>
-             <div className="mini-stat premium-bounce">
-                <span style={{fontSize:'13px', color:'#64748b', fontWeight: '500'}}>Total Visits</span>
-                <h3 style={{margin:'5px 0 0', fontSize: '24px'}}>{patientAppointmentsDummyData.past.length}</h3>
-             </div>
-          </div>
-        </div>
-      </div>
-    </div>
+          </section>
+        </aside>
+      </section>
+    </main>
   );
 };
 
