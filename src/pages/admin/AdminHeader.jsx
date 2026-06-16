@@ -1,138 +1,330 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  FiBell,
+  FiChevronDown,
+  FiLogOut,
+  FiMenu,
+  FiRefreshCw,
+  FiUser
+} from "react-icons/fi";
+
 import "./AdminHeader.css";
-import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { useAuthActions } from "../../services/authService";
+import { getAdminProfile } from "../../services/adminService";
+import defaultAdminAvatar from "../../assets/images/avtar.png";
+
+const routeTitles = {
+  "/admin": "Dashboard Overview",
+  "/admin/dashboard": "Dashboard Overview",
+  "/admin/doctors-management": "Doctors Management",
+  "/admin/doctors": "Doctors Directory",
+  "/admin/verify-doctors": "Pending Verifications",
+  "/admin/users": "User Management",
+  "/admin/hospitals": "Hospital Management",
+  "/admin/labs": "Laboratory Management",
+  "/admin/appointments": "Appointments Overview",
+  "/admin/profile": "Profile Settings",
+  "/admin/notifications": "Notifications",
+  "/admin/system-logs": "System Logs",
+  "/admin/feedback": "Patient Feedback",
+  "/admin/ads-management": "Ads Management",
+  "/admin/blogs": "Blog Management",
+  "/admin/settings": "System Settings"
+};
+
 const AdminHeader = ({ isCollapsed, setIsCollapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dropdownRef = useRef(null);
 
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+  const { currentUser, setCurrentUser } = useContext(AuthContext);
+  const { logoutUser } = useAuthActions(setCurrentUser);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { setCurrentUser } = useContext(AuthContext);
-const { logoutUser } = useAuthActions(setCurrentUser);
-  // 🔴 IMPORTANT: Doctor header jaisa click-outside fix
-  const dropdownRef = useRef(null);
+  const [adminProfile, setAdminProfile] = useState(null);
+  const [headerLoading, setHeaderLoading] = useState(true);
+  const [headerError, setHeaderError] = useState("");
+  const [avatarSrc, setAvatarSrc] = useState(defaultAdminAvatar);
+
+  const currentPath = location.pathname.toLowerCase();
+
+  const resolvedTitle = useMemo(() => {
+    if (currentPath.startsWith("/admin/doctors/")) {
+      return "Doctor Details";
+    }
+
+    return routeTitles[currentPath] || "Admin Panel";
+  }, [currentPath]);
+
+  const getSafeImageUrl = useCallback((url) => {
+    if (!url || typeof url !== "string") {
+      return defaultAdminAvatar;
+    }
+
+    const trimmedUrl = url.trim();
+
+    if (!trimmedUrl) {
+      return defaultAdminAvatar;
+    }
+
+    const isLocalBrowser =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
+
+    if (!isLocalBrowser && trimmedUrl.includes("localhost:8080")) {
+      return defaultAdminAvatar;
+    }
+
+    return trimmedUrl;
+  }, []);
+
+  const loadHeaderData = useCallback(async () => {
+    try {
+      setHeaderLoading(true);
+      setHeaderError("");
+
+      const response = await getAdminProfile();
+      const profileData = response?.data || null;
+
+      if (!profileData) {
+        throw new Error("Admin profile not found");
+      }
+
+      setAdminProfile(profileData);
+      setAvatarSrc(getSafeImageUrl(profileData.profileImageUrl));
+
+      setCurrentUser((previousUser) => {
+        const updatedUser = {
+          ...(previousUser || {}),
+          userId: profileData.userId,
+          fullName: profileData.fullName,
+          email: profileData.email,
+          mobile: profileData.mobile,
+          role: profileData.role,
+          username: profileData.username,
+          isVerified: profileData.verified,
+          profileImageUrl: profileData.profileImageUrl
+        };
+
+        localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+        return updatedUser;
+      });
+    } catch (error) {
+      const message =
+        error?.message ||
+        error?.response?.data?.message ||
+        "Unable to load admin header details.";
+
+      setHeaderError(message);
+      setAvatarSrc(defaultAdminAvatar);
+    } finally {
+      setHeaderLoading(false);
+    }
+  }, [getSafeImageUrl, setCurrentUser]);
+
+  useEffect(() => {
+    loadHeaderData();
+  }, [loadHeaderData]);
+
+  useEffect(() => {
+    setAvatarSrc(getSafeImageUrl(adminProfile?.profileImageUrl));
+  }, [adminProfile?.profileImageUrl, getSafeImageUrl]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () =>
+
+    return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
-  const handleLogout = () => {
-  
-  setDropdownOpen(false);
-  logoutUser(); // ✅ hook ke andar sab handle ho jayega
-};
+  const displayName =
+    adminProfile?.fullName ||
+    currentUser?.fullName ||
+    "System Admin";
 
-  const pageTitles = {
-  "/admin/dashboard": "Dashboard Overview",
+  const displayEmail =
+    adminProfile?.email ||
+    currentUser?.email ||
+    "";
 
-  "/admin/doctors": "Doctors Directory",
+  const displayRole =
+    adminProfile?.role ||
+    currentUser?.role ||
+    "ADMIN";
 
-  "/admin/verify-doctors": "Pending Verifications",
+  const handleOpenSidebar = () => {
+    setIsCollapsed(false);
+    setDropdownOpen(false);
+  };
 
-  "/admin/users": "User Management",
+  const handleNotifications = () => {
+    setDropdownOpen(false);
+    navigate("/admin/notifications");
+  };
 
-  "/admin/hospitals": "Hospital Management",
+  const handleProfileNavigation = () => {
+    setDropdownOpen(false);
+    navigate("/admin/profile");
+  };
 
-  "/admin/labs": "Laboratory Management",
-
-  "/admin/appointments": "Appointments Overview",
-
-  "/admin/system-logs": "System Logs",
-
-  "/admin/feedback": "Patient Feedback",
-
-  "/admin/profile": "My Profile",
-
-  "/admin/settings": "System Settings",
-  
-  "/admin/blogs": "Blog Management",
-};
-
-  const currentTitle =
-    pageTitles[location.pathname] || "Admin Panel";
+  const handleLogout = async () => {
+    setDropdownOpen(false);
+    await logoutUser();
+  };
 
   return (
-    <header className="admin-header">
-      {/* LEFT SECTION */}
-      <div className="header-left">
+    <header
+      className={`admin-header ${
+        isCollapsed ? "admin-header--collapsed" : ""
+      }`}
+    >
+      <div className="admin-header__left">
         <button
-          className="mobile-nav-toggle"
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          type="button"
+          className="admin-header__mobile-menu"
+          onClick={handleOpenSidebar}
+          aria-label="Open admin sidebar"
         >
-          ☰
+          <FiMenu />
         </button>
 
-        <h1 className="page-main-title">{currentTitle}</h1>
+        <div className="admin-header__title-block">
+          <span className="admin-header__eyebrow">Admin Panel</span>
+          <h1 className="admin-header__title">{resolvedTitle}</h1>
+        </div>
       </div>
 
-      {/* RIGHT SECTION (dropdownRef yahin hona MUST hai) */}
-      <div className="header-right" ref={dropdownRef}>
-        <div
-          className="profile-trigger"
-          onClick={() => setDropdownOpen(!dropdownOpen)}
+      <div className="admin-header__right" ref={dropdownRef}>
+        <button
+          type="button"
+          className="admin-header__notification-button"
+          onClick={handleNotifications}
+          aria-label="Open admin notifications"
         >
-          <div className="admin-info-text">
-            <span className="greet">Hello,</span>
-            <span className="name">
-              {user?.fullName || "Admin User"}
+          <FiBell />
+        </button>
+
+        <button
+          type="button"
+          className="admin-header__account-button"
+          onClick={() => setDropdownOpen((prev) => !prev)}
+          aria-label="Open admin account menu"
+        >
+          <span className="admin-header__account-copy">
+            <span className="admin-header__greet">Hello,</span>
+            <span className="admin-header__account-name">
+              {headerLoading ? "Loading..." : displayName}
             </span>
-          </div>
+          </span>
 
-          <div className="img-container">
+          <span className="admin-header__avatar-shell">
             <img
-              src={user?.profileImg || "https://i.pravatar.cc/40"}
-              alt="Profile"
-              className="admin-avatar"
+              src={avatarSrc}
+              alt={displayName}
+              className="admin-header__avatar"
+              onError={() => setAvatarSrc(defaultAdminAvatar)}
             />
-            <div className="online-indicator"></div>
-          </div>
-        </div>
+          </span>
 
-        {/* 🔽 DROPDOWN */}
+          <FiChevronDown className="admin-header__chevron" />
+        </button>
+
         {dropdownOpen && (
-          <div className="header-dropdown-menu">
-            <div className="dropdown-user-info">
-              <span className="name">
-                {user?.fullName || "Admin User"}
-              </span>
-              <span className="role">SYSTEM ADMIN</span>
+          <div className="admin-header__dropdown">
+            <div className="admin-header__dropdown-top">
+              <img
+                src={avatarSrc}
+                alt={displayName}
+                className="admin-header__dropdown-avatar"
+                onError={() => setAvatarSrc(defaultAdminAvatar)}
+              />
+
+              <div className="admin-header__dropdown-user">
+                <strong>{displayName}</strong>
+                <span>{displayEmail || "Admin account"}</span>
+              </div>
             </div>
+
+            {headerError && (
+              <div className="admin-header__error">
+                {headerError}
+              </div>
+            )}
+
+            <section className="admin-header__account-section">
+              <div className="admin-header__section-heading">
+                <div>
+                  <span>Account</span>
+                  <small>System administrator access</small>
+                </div>
+
+                <button
+                  type="button"
+                  className="admin-header__refresh-button"
+                  onClick={loadHeaderData}
+                  aria-label="Refresh admin profile"
+                >
+                  <FiRefreshCw />
+                </button>
+              </div>
+
+              <div className="admin-header__account-summary">
+                <div>
+                  <span>Role</span>
+                  <strong>{displayRole}</strong>
+                </div>
+
+                <div>
+                  <span>Status</span>
+                  <strong>
+                    {adminProfile?.blocked
+                      ? "Blocked"
+                      : adminProfile?.active
+                        ? "Active"
+                        : "Inactive"}
+                  </strong>
+                </div>
+              </div>
+            </section>
+
+            <div className="admin-header__divider" />
 
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate("/admin/profile");
-                setDropdownOpen(false);
-              }}
+              className="admin-header__menu-action"
+              onClick={handleProfileNavigation}
             >
-              👤 My Profile
+              <span className="admin-header__menu-icon">
+                <FiUser />
+              </span>
+              <span>My Profile</span>
             </button>
 
             <button
               type="button"
-              className="logout-btn-text"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleLogout();
-              }}
+              className="admin-header__menu-action admin-header__menu-action--logout"
+              onClick={handleLogout}
             >
-              🚪 Logout
+              <span className="admin-header__menu-icon">
+                <FiLogOut />
+              </span>
+              <span>Logout</span>
             </button>
           </div>
         )}

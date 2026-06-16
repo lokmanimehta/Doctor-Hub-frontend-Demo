@@ -1,6 +1,33 @@
 import api from "./api";
 
 /* =====================================
+   ADMIN PROFILE API
+===================================== */
+
+export const getAdminProfile = async () => {
+  const response = await api.get("/admin/profile");
+  return response.data;
+};
+
+export const updateAdminProfile = async (payload) => {
+  const response = await api.put("/admin/profile", payload);
+  return response.data;
+};
+
+export const uploadAdminProfileImage = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await api.post("/admin/profile/image", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  });
+
+  return response.data;
+};
+
+/* =====================================
    ADMIN FEEDBACK API
 ===================================== */
 

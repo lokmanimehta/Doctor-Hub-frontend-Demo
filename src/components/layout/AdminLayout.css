@@ -3,8 +3,9 @@
   --admin-bg-content: #f9fafb;
   --admin-footer-bg: #f0f4f8;
   --admin-primary-green: #10b981;
-  --sidebar-width-expanded: 280px;
---sidebar-width-collapsed: 88px; /* Fixed width matched with sidebar */  --transition-speed: 0.4s;
+  --sidebar-width-expanded: 260px;
+  --sidebar-width-collapsed: 88px;
+  --transition-speed: 0.28s;
 }
 
 .admin-layout {
@@ -37,10 +38,10 @@
 .admin-content {
   flex: 1;
   padding: clamp(15px, 3vw, 30px);
-  min-height: calc(100vh - 65px - 60px); /* Header aur Footer minus */
+  min-height: calc(100vh - 72px);
   background: var(--admin-bg-content);
-  overflow-y: auto;   /* 🔥 scroll yahin aayega */
-  height: calc(100vh - 65px); /* header minus */
+  overflow-y: auto;
+  height: calc(100vh - 72px);
 }
 
 .admin-footer {
@@ -65,5 +66,24 @@
   }
   .admin-content {
     padding: 15px;
+  }
+}
+@media (max-width: 1024px) {
+  .admin-main {
+    margin-left: 0 !important;
+  }
+
+  .admin-content {
+    padding: 15px;
+    min-height: calc(100vh - 68px);
+    height: calc(100vh - 68px);
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-content {
+    padding: 14px;
+    min-height: calc(100vh - 64px);
+    height: calc(100vh - 64px);
   }
 }

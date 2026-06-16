@@ -23,6 +23,7 @@ import SystemLogs from "./pages/admin/SystemLogs";
 import PendingVerifications from "./pages/admin/PendingVerifications";
 import AdminProfile from "./pages/admin/AdminProfile";
 import AdminBlogs from "./pages/admin/AdminBlogs";
+import AdminNotifications from "./pages/admin/AdminNotifications";
 /* DOCTOR PAGES */
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import Appointments from "./pages/doctor/Appointments";
@@ -83,6 +84,7 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="doctors-management" element={<DoctorsManagement />} />
           <Route path="doctors" element={<Doctors />} />
+          <Route path="notifications" element={<AdminNotifications />} />
           <Route path="doctors/:id" element={<PendingDoctorModal />} />
           <Route path="verify-doctors" element={<PendingVerifications />} />
           <Route path="users" element={<UserManagement />} />
@@ -93,7 +95,6 @@ function App() {
           <Route path="system-logs" element={<SystemLogs />} />
           <Route path="feedback" element={<FeedbackPage />} />
           <Route path="ads-management" element={<AdsManagement />} />
-          <Route path="feedback" element={<FeedbackPage />} />
           <Route path="blogs" element={<AdminBlogs />} />
         </Route>
       </Route>
