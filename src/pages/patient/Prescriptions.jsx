@@ -159,7 +159,7 @@ const buildCopyText = (prescription) => {
       : "No follow-up scheduled.";
 
   return [
-    "DOCTORHUB PRESCRIPTION SUMMARY",
+    "Sucura PRESCRIPTION SUMMARY",
     "================================",
     "",
     `Prescription ID: ${safeText(prescription?.prescriptionId || prescription?.id)}`,
@@ -200,7 +200,7 @@ const buildCopyText = (prescription) => {
     "---------",
     followUpLines,
     "",
-    "Generated from DoctorHub."
+    "Generated from Sucura."
   ].join("\n");
 };
 
@@ -374,7 +374,7 @@ const addPdfFooter = (doc) => {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(123, 135, 152);
-    doc.text("This is a patient copy generated from DoctorHub.", 16, 290);
+    doc.text("This is a patient copy generated from Sucura.", 16, 290);
     doc.text(`Page ${page} of ${totalPages}`, pageWidth - 34, 290);
   }
 };
@@ -404,11 +404,11 @@ const downloadPrescriptionPdf = (prescription, activeProfileName) => {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
   doc.setTextColor(255, 255, 255);
-  doc.text("DoctorHub Prescription", left, 15);
+  doc.text("Sucura Prescription", left, 15);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text("Patient copy generated from DoctorHub", left, 23);
+  doc.text("Patient copy generated from Sucura", left, 23);
 
   y = 46;
 

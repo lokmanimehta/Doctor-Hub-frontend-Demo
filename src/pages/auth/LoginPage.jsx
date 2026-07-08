@@ -36,10 +36,22 @@ const LoginPage = () => {
   const [profiles, setProfiles] = useState([]);
   const [resendActive, setResendActive] = useState(false);
   const { selectProfile } = useProfile();
-  const showPopup = (message, type) => {
-    setPopupMessage(message);
-    setPopupType(type);
-  };
+  const showPopup = (message, type = "error") => {
+  const safeMessage =
+    typeof message === "string" && message.trim()
+      ? message.trim()
+      : type === "success"
+        ? "Operation completed successfully."
+        : "Something went wrong. Please try again.";
+
+  setPopupMessage(safeMessage);
+  setPopupType(type);
+
+  setTimeout(() => {
+    setPopupMessage("");
+    setPopupType("");
+  }, 3000);
+};
 
   useEffect(() => {
 
@@ -238,7 +250,10 @@ const LoginPage = () => {
       navigate("/login");
 
     } catch (err) {
-      const msg = err.response?.data?.message || err.message;
+      const msg =
+  err.response?.data?.message ||
+  err.message ||
+  "Password reset failed. Please try again.";
       if (msg.includes("OTP expired")) {
         showPopup("⏳ OTP expired. Please request a new one.", "error");
       } else if (msg.includes("Invalid OTP")) {
@@ -265,7 +280,7 @@ const LoginPage = () => {
       <div className="auth-main-card">
 
         <div className="auth-left-visual">
-          <img src={userlogin} alt="Doctor's Hub Illustration" />
+          <img src={userlogin} alt="Sucura Illustration" />
         </div>
 
         <div className="auth-right-form">
@@ -273,7 +288,7 @@ const LoginPage = () => {
           <div className="form-inner-container">
 
             <h1 className="form-main-heading">
-              Login to <span>Doctor's Hub</span>
+              Login to <span>Sucura</span>
             </h1>
 
             {!showForgotFlow && (

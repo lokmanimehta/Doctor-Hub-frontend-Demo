@@ -30,7 +30,7 @@ import {
 import { FaHospital } from "react-icons/fa";
 
 import "./PatientSidebar.css";
-import Logo from "../../assets/images/logo.png";
+import Logo from "../../assets/images/logo.jpeg";
 import defaultPatientAvatar from "../../assets/images/avtar.png";
 
 import { AuthContext } from "../../context/AuthContext";
@@ -346,7 +346,7 @@ const PatientSidebar = ({
               <span className="patient-sidebar__logo-rail">
                 <img
                   src={Logo}
-                  alt="Doctor Hub"
+                  alt="Sucura"
                   className="patient-sidebar__logo-mini"
                 />
               </span>
@@ -354,12 +354,12 @@ const PatientSidebar = ({
               <span className="patient-sidebar__brand">
                 <img
                   src={Logo}
-                  alt="Doctor Hub"
+                  alt="Sucura"
                   className="patient-sidebar__logo"
                 />
-                <span className="patient-sidebar__brand-text">
-                  Doctor<span>Hub</span>
-                </span>
+               <h2 className="doctor-logo">
+               Sucura
+                </h2>
               </span>
             )}
           </button>

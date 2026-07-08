@@ -16,6 +16,7 @@ import {
 
 import { useNotifications } from "../../context/useNotifications";
 import {
+  deletePatientNotification,
   getPatientNotifications,
   markPatientNotificationAsRead
 } from "../../services/patientService";
@@ -78,12 +79,13 @@ const formatLabel = (value) => {
 const PatientNotifications = () => {
   const navigate = useNavigate();
 
-  const {
-    unreadCount,
-    notificationsError,
-    handleNotificationActionSuccess,
-    checkForNewNotifications
-  } = useNotifications() || {};
+const {
+  unreadCount,
+  notificationsError,
+  handleNotificationActionSuccess,
+  checkForNewNotifications,
+  decrementUnreadCountLocally
+} = useNotifications() || {};
 
   const [notifications, setNotifications] = useState([]);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
@@ -147,54 +149,97 @@ const PatientNotifications = () => {
     return groups;
   }, [notifications]);
 
-  const handleNotificationClick = async (notification) => {
-    if (!notification?.id || actionLoadingId) return;
+const handleNotificationClick = async (notification) => {
+  if (!notification?.id || actionLoadingId) {
+    return;
+  }
 
-    try {
-      setActionLoadingId(notification.id);
+  const wasUnread = !notification.isRead;
 
-      let targetRoute =
-        notification?.targetRoute ||
-        "/patient/dashboard";
+  try {
+    setActionLoadingId(notification.id);
+    setPageError("");
 
-      if (!notification.isRead) {
-        const response = await markPatientNotificationAsRead(notification.id);
+    let targetRoute =
+      notification?.targetRoute ||
+      "/patient/dashboard";
 
-        targetRoute =
-          response?.targetRoute ||
-          notification?.targetRoute ||
-          "/patient/dashboard";
-
-        setNotifications((prev) =>
-          prev.map((item) =>
-            item.id === notification.id
-              ? {
-                  ...item,
-                  isRead: true,
-                  readAt: Date.now()
-                }
-              : item
-          )
+    /*
+     * Step 1:
+     * Unread notification ko backend me read mark karo.
+     */
+    if (wasUnread) {
+      const readResponse =
+        await markPatientNotificationAsRead(
+          notification.id
         );
 
-        await handleNotificationActionSuccess?.({
-          showToastOnNew: false
-        });
-      }
-
-      navigate(targetRoute);
-    } catch (error) {
-      console.error("Failed to open patient notification:", error);
-
-      alert(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Unable to open notification right now."
-      );
-    } finally {
-      setActionLoadingId(null);
+      targetRoute =
+        readResponse?.targetRoute ||
+        notification?.targetRoute ||
+        "/patient/dashboard";
     }
-  };
+
+    /*
+     * Step 2:
+     * Notification ko inbox se permanently remove karo.
+     * Sirf frontend filter karne par refresh ke baad wapas aa sakti hai.
+     */
+    await deletePatientNotification(notification.id);
+
+    /*
+     * Step 3:
+     * Page se immediately remove karo.
+     */
+    setNotifications((previousNotifications) =>
+      previousNotifications.filter(
+        (item) => item.id !== notification.id
+      )
+    );
+
+    /*
+     * Step 4:
+     * Header/sidebar badge immediately 1 reduce karo.
+     */
+    if (wasUnread) {
+      decrementUnreadCountLocally?.();
+    }
+
+    /*
+     * Step 5:
+     * Backend ke exact unread count ke saath context sync karo.
+     */
+    await handleNotificationActionSuccess?.({
+      showToastOnNew: false
+    });
+
+    navigate(targetRoute);
+  } catch (error) {
+    console.error(
+      "Failed to consume patient notification:",
+      error
+    );
+
+    const message =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Unable to open notification right now.";
+
+    setPageError(message);
+
+    alert(message);
+
+    /*
+     * Backend par read/delete partially successful hua ho,
+     * toh list aur count dobara synchronize karo.
+     */
+    await loadNotifications({
+      silentUnreadRefresh: true
+    }).catch(() => {});
+  } finally {
+    setActionLoadingId(null);
+  }
+};
 
   const handleRefresh = async () => {
     await loadNotifications({

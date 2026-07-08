@@ -405,7 +405,7 @@ const buildInvoiceHtml = (appointment) => {
   <main class="invoice">
     <div class="top">
       <div>
-        <div class="brand">Doctor's Hub</div>
+        <div class="brand">Sucura</div>
         <h1>Appointment Invoice</h1>
         <p class="muted">Generated appointment record for patient reference.</p>
       </div>

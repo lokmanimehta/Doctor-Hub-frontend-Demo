@@ -1,14 +1,28 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./About.css";
-import Logo from "../../assets/images/logo.png";
+import Logo from "../../assets/images/logo.jpeg";
 import aboutHero1 from "../../assets/images/aboutHero1.png";
 import aboutHero2 from "../../assets/images/aboutHero2.png";
 import aboutHero3 from "../../assets/images/aboutHero3.png";
 import { AuthContext } from "../../context/AuthContext";
-import { useAuthActions } from "../../services/authService";
+import { useAuthActions, getPublicPlatformStats } from "../../services/authService";
 import { useProfile } from "../../context/useProfile";
 
+const formatPlatformStat = (value) => {
+  const numericValue = Number(value);
+
+  if (
+    !Number.isFinite(numericValue) ||
+    numericValue < 0
+  ) {
+    return "—";
+  }
+
+  return new Intl.NumberFormat(
+    "en-IN"
+  ).format(numericValue);
+};
 const AboutUs = () => {
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
@@ -21,7 +35,9 @@ const AboutUs = () => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [sidebarProfileOpen, setSidebarProfileOpen] = useState(false);
   const [heroIndex, setHeroIndex] = useState(0);
-
+  const [platformStats, setPlatformStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState(false);
   const heroSlides = useMemo(
     () => [
       {
@@ -60,7 +76,7 @@ const AboutUs = () => {
     {
       icon: "📱",
       title: "Simple Digital Experience",
-      desc: "Doctor’s Hub is designed to feel clean, readable, and comfortable for patients, doctors, and clinics."
+      desc: "Sucura is designed to feel clean, readable, and comfortable for patients, doctors, and clinics."
     }
   ];
 
@@ -82,12 +98,99 @@ const AboutUs = () => {
     }
   ];
 
-  const stats = [
-    { value: "500+", label: "Specialists" },
-    { value: "50k+", label: "Appointments" },
-    { value: "4.9/5", label: "User Rating" }
-  ];
+  const stats = useMemo(
+    () => [
+      {
+        value: statsLoading
+          ? "—"
+          : formatPlatformStat(
+            platformStats?.verifiedDoctors
+          ),
+        label: "Verified Doctors"
+      },
+      {
+        value: statsLoading
+          ? "—"
+          : formatPlatformStat(
+            platformStats?.totalAppointments
+          ),
+        label: "Appointments"
+      },
+      {
+        value: statsLoading
+          ? "—"
+          : formatPlatformStat(
+            platformStats?.availableSpecializations
+          ),
+        label: "Medical Specialities"
+      }
+    ],
+    [
+      platformStats,
+      statsLoading
+    ]
+  );
 
+  useEffect(() => {
+    const controller = new AbortController();
+    let componentMounted = true;
+
+    const loadPlatformStats = async () => {
+      setStatsLoading(true);
+      setStatsError(false);
+
+      try {
+        const response =
+          await getPublicPlatformStats({
+            signal: controller.signal
+          });
+
+        if (!componentMounted) {
+          return;
+        }
+
+        setPlatformStats({
+          verifiedDoctors:
+            response?.verifiedDoctors ?? 0,
+
+          totalAppointments:
+            response?.totalAppointments ?? 0,
+
+          availableSpecializations:
+            response?.availableSpecializations ?? 0
+        });
+      } catch (error) {
+        const requestCancelled =
+          error?.code === "ERR_CANCELED" ||
+          error?.name === "CanceledError";
+
+        if (requestCancelled) {
+          return;
+        }
+
+        console.error(
+          "Failed to load public platform statistics",
+          error
+        );
+
+        if (componentMounted) {
+          setStatsError(true);
+          setPlatformStats(null);
+        }
+      } finally {
+        if (componentMounted) {
+          setStatsLoading(false);
+        }
+      }
+    };
+
+    loadPlatformStats();
+
+    return () => {
+      componentMounted = false;
+      controller.abort();
+    };
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -169,11 +272,22 @@ const AboutUs = () => {
 
       <aside className={`mobile-sidebar ${isSidebarOpen ? "open" : ""}`}>
         <div className="about-sidebar-top">
-          <div className="about-sidebar-logo" onClick={() => navigate("/")}>
-            <img src={Logo} alt="Doctor's Hub Logo" />
-            <h2>
-              Doctor's <span>Hub</span>
-            </h2>
+          <div
+            className="about-sidebar-logo sucura-brand sucura-brand--sidebar"
+            onClick={() => {
+              navigate("/");
+              closeSidebar();
+            }}
+          >
+            <img
+              src={Logo}
+              alt="Sucura"
+              className="sucura-brand__logo"
+            />
+
+            <span className="sucura-brand__name">
+              Sucura
+            </span>
           </div>
 
           <button className="about-sidebar-close" onClick={closeSidebar}>
@@ -311,11 +425,26 @@ const AboutUs = () => {
       </aside>
 
       <header className="about-header">
-        <div className="about-header-brand" onClick={() => navigate("/")}>
-          <img src={Logo} alt="Doctor's Hub Logo" />
-          <h1>
-            Doctor's <span>Hub</span>
-          </h1>
+        <div
+          className="about-header-brand sucura-brand"
+          onClick={() => navigate("/")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              navigate("/");
+            }
+          }}
+        >
+          <img
+            src={Logo}
+            alt="Sucura"
+            className="sucura-brand__logo"
+          />
+
+          <span className="sucura-brand__name">
+            Sucura
+          </span>
         </div>
 
         <nav className="about-header-nav">
@@ -460,23 +589,42 @@ const AboutUs = () => {
 
         <section className="about-intro-section">
           <div className="about-section-heading">
-            <span>About Doctor's Hub</span>
+            <h1> <span>About Sucura</span></h1>
             <h2>One platform for simple, trusted healthcare access.</h2>
             <p>
-              Doctor’s Hub is built to reduce healthcare confusion by connecting
+              Sucura is built to reduce healthcare confusion by connecting
               patients with verified doctors, clinics, appointments, and future
               digital health workflows in one clean platform.
             </p>
           </div>
 
-          <div className="about-stats-grid">
+          <div
+            className="about-stats-grid"
+            aria-busy={statsLoading}
+          >
             {stats.map((item) => (
-              <div className="about-stat-card" key={item.label}>
+              <div
+                className={`about-stat-card ${statsLoading
+                    ? "about-stat-card--loading"
+                    : ""
+                  }`}
+                key={item.label}
+              >
                 <h3>{item.value}</h3>
                 <p>{item.label}</p>
               </div>
             ))}
           </div>
+
+          {statsError && (
+            <p
+              className="about-stats-status"
+              role="status"
+            >
+              Live platform statistics are temporarily
+              unavailable.
+            </p>
+          )}
         </section>
 
         <section className="about-values-section">
@@ -501,7 +649,7 @@ const AboutUs = () => {
             <span>How It Works</span>
             <h2>Healthcare journey made easier.</h2>
             <p>
-              From discovery to appointment management, Doctor’s Hub focuses on
+              From discovery to appointment management, Sucura focuses on
               clear steps so patients can make decisions confidently.
             </p>
           </div>
@@ -521,7 +669,7 @@ const AboutUs = () => {
         <section className="about-cta-section">
           <div>
             <span>Ready to start?</span>
-            <h2>Find trusted healthcare support with Doctor’s Hub.</h2>
+            <h2>Find trusted healthcare support with Sucura.</h2>
             <p>
               Explore doctors, clinics, services, and appointment options from a
               clean and patient-friendly experience.
@@ -535,7 +683,7 @@ const AboutUs = () => {
       <footer className="main-footer">
         <div className="footer-container">
           <div className="footer-column brand-col">
-            <h2 className="footer-logo">Doc<span style={{ color: 'var(--text-dark)', background: 'white', padding: '0 5px', borderRadius: '4px', marginLeft: '5px' }}>Hub</span></h2>
+            <h2 className="footer-logo">Suc<span style={{ color: 'var(--text-dark)', background: 'white', padding: '0 5px', borderRadius: '4px', marginLeft: '5px' }}>ura</span></h2>
             <p className="footer-desc">
               Mumbai's trusted healthcare network. Booking appointments,
               finding labs, and managing health records made simple.
@@ -609,16 +757,16 @@ const AboutUs = () => {
           <div className="footer-column">
             <h4>Contact Us</h4>
             <div className="footer-contact-info">
-              <p>📍 Andheri West, Mumbai, MH</p>
+              <p>📍 Andheri East, Mumbai, MH</p>
               <p>📞 +91 98765 - 43210</p>
-              <p>✉️ support@dochub.com</p>
+              <p>✉️ support@Sucura.com</p>
             </div>
           </div>
         </div>
 
         <div className="footer-bottom">
           <div className="footer-bottom-content">
-            <p>&copy; 2026 Doctor's Hub Mumbai. All Rights Reserved.</p>
+            <p>&copy; 2026 Sucura Mumbai. All Rights Reserved.</p>
           </div>
         </div>
       </footer>

@@ -3,7 +3,7 @@ import AdminSidebar from "../../pages/admin/AdminSidebar";
 import AdminHeader from "../../pages/admin/AdminHeader";
 import { Outlet } from "react-router-dom";
 import "./AdminLayout.css";
-
+import AdminNotificationProvider from "../../context/AdminNotificationProvider";
 const AdminLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchValue, setSearchValue] = useState("");
@@ -23,6 +23,7 @@ const AdminLayout = () => {
   }, []);
 
   return (
+    <AdminNotificationProvider>
     <div className={`admin-layout ${isCollapsed ? "sidebar-is-collapsed" : "sidebar-is-expanded"}`}>
       <AdminSidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       
@@ -41,6 +42,7 @@ const AdminLayout = () => {
       
       </div>
     </div>
+    </AdminNotificationProvider>
   );
 };
 

@@ -7,6 +7,7 @@ import React, {
   useState
 } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import useAdminNotifications from "../../context/useAdminNotifications";
 import {
   FiActivity,
   FiBell,
@@ -31,7 +32,7 @@ import {
 import { FaHospital } from "react-icons/fa";
 
 import "./AdminSidebar.css";
-import Logo from "../../assets/images/logo.png";
+import Logo from "../../assets/images/logo.jpeg";
 import defaultAdminAvatar from "../../assets/images/avtar.png";
 
 import { AuthContext } from "../../context/AuthContext";
@@ -45,7 +46,7 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
 
   const { currentUser, setCurrentUser } = useContext(AuthContext);
   const { logoutUser } = useAuthActions(setCurrentUser);
-
+  const { unreadCount } = useAdminNotifications();
   const [isMobile, setIsMobile] = useState(false);
   const [showFooterMenu, setShowFooterMenu] = useState(false);
   const [adminProfile, setAdminProfile] = useState(null);
@@ -130,6 +131,7 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
             name: "Notifications",
             path: "/admin/notifications",
             icon: <FiBell />,
+            badge: unreadCount,
             activeMatch: (pathname) =>
               pathname.startsWith("/admin/notifications")
           },
@@ -155,7 +157,7 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
         ]
       }
     ],
-    []
+    [unreadCount]
   );
 
   const getSafeAdminImage = useCallback((url) => {
@@ -366,7 +368,7 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
               <span className="admin-sidebar__logo-rail">
                 <img
                   src={Logo}
-                  alt="Doctor Hub"
+                  alt="Sucura"
                   className="admin-sidebar__logo-mini"
                 />
               </span>
@@ -374,11 +376,11 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
               <span className="admin-sidebar__brand">
                 <img
                   src={Logo}
-                  alt="Doctor Hub"
+                  alt="Sucura"
                   className="admin-sidebar__logo"
                 />
                 <span className="admin-sidebar__brand-text">
-                  Doctor<span>Hub</span>
+                  Sucura
                 </span>
               </span>
             )}
@@ -449,6 +451,16 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
 
                         {(!isCollapsed || isMobileOpen) && (
                           <span className="admin-sidebar__link-text">
+                            {item.badge > 0 && (
+                              <span
+                                className={`admin-sidebar__notification-badge ${isCollapsed && !isMobile
+                                    ? "admin-sidebar__notification-badge--collapsed"
+                                    : ""
+                                  }`}
+                              >
+                                {item.badge > 99 ? "99+" : item.badge}
+                              </span>
+                            )}
                             {item.name}
                           </span>
                         )}
@@ -482,7 +494,14 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
                   <span>{displayEmail || displayRole}</span>
                 </div>
               </div>
-
+              <button
+                type="button"
+                className="patient-sidebar__footer-action"
+                onClick={() => handleNavigate("/")}
+              >
+                <FiHome />
+                <span>Home</span>
+              </button>
               <button
                 type="button"
                 className="admin-sidebar__footer-action"
@@ -525,8 +544,8 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
             type="button"
             data-label={displayName}
             className={`admin-sidebar__user-card ${isCollapsed && !isMobile
-                ? "admin-sidebar__user-card--centered"
-                : ""
+              ? "admin-sidebar__user-card--centered"
+              : ""
               }`}
             onClick={handleUserCardClick}
             aria-label="Open admin account menu"

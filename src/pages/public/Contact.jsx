@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Contact.css";
-import Logo from "../../assets/images/logo.png";
+import Logo from "../../assets/images/logo.jpeg";
 import { Mail, MapPin, Phone, Send } from "lucide-react";
 import api from "../../services/api";
 import { AuthContext } from "../../context/AuthContext";
@@ -130,12 +130,23 @@ const ContactUs = () => {
 
       <aside className={`contact-mobile-sidebar ${isSidebarOpen ? "open" : ""}`}>
         <div className="contact-sidebar-top">
-          <div className="contact-sidebar-logo" onClick={() => navigate("/")}>
-            <img src={Logo} alt="Doctor's Hub Logo" />
-            <h2>
-              Doctor's <span>Hub</span>
-            </h2>
-          </div>
+          <div
+  className="contact-sidebar-logo sucura-brand sucura-brand--sidebar"
+  onClick={() => {
+    navigate("/");
+    closeSidebar();
+  }}
+>
+  <img
+    src={Logo}
+    alt="Sucura"
+    className="sucura-brand__logo"
+  />
+
+  <span className="sucura-brand__name">
+    Sucura
+  </span>
+</div>
 
           <button className="contact-sidebar-close" onClick={closeSidebar}>
             ×
@@ -145,9 +156,8 @@ const ContactUs = () => {
         {currentUser && (
           <div className="contact-sidebar-user-container">
             <div
-              className={`contact-sidebar-profile-card ${
-                sidebarProfileOpen ? "expanded" : ""
-              }`}
+              className={`contact-sidebar-profile-card ${sidebarProfileOpen ? "expanded" : ""
+                }`}
               onClick={() => setSidebarProfileOpen(!sidebarProfileOpen)}
             >
               <div className="contact-sidebar-avatar">{getUserInitial()}</div>
@@ -276,11 +286,26 @@ const ContactUs = () => {
       </aside>
 
       <header className="contact-header">
-        <div className="contact-header-brand" onClick={() => navigate("/")}>
-          <img src={Logo} alt="Doctor's Hub Logo" />
-          <h1>
-            Doctor's <span>Hub</span>
-          </h1>
+        <div
+          className="contact-header-brand sucura-brand"
+          onClick={() => navigate("/")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              navigate("/");
+            }
+          }}
+        >
+          <img
+            src={Logo}
+            alt="Sucura"
+            className="sucura-brand__logo"
+          />
+
+          <span className="sucura-brand__name">
+            Sucura
+          </span>
         </div>
 
         <nav className="contact-header-nav">
@@ -292,24 +317,24 @@ const ContactUs = () => {
         </nav>
 
         <div className="contact-header-actions">
-  {!currentUser ? (
-    <>
-      <button className="contact-login-btn" onClick={() => navigate("/login")}>
-        Login
-      </button>
+          {!currentUser ? (
+            <>
+              <button className="contact-login-btn" onClick={() => navigate("/login")}>
+                Login
+              </button>
 
-      <button className="contact-signup-btn" onClick={() => navigate("/signup")}>
-        Sign Up
-      </button>
-    </>
-  ) : (
-    <div className="contact-profile-wrapper desktop-only" ref={dropdownRef}>
-      <div
-        className="contact-profile-icon"
-        onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-      >
-        {getUserInitial()}
-      </div>
+              <button className="contact-signup-btn" onClick={() => navigate("/signup")}>
+                Sign Up
+              </button>
+            </>
+          ) : (
+            <div className="contact-profile-wrapper desktop-only" ref={dropdownRef}>
+              <div
+                className="contact-profile-icon"
+                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+              >
+                {getUserInitial()}
+              </div>
 
               {profileDropdownOpen && (
                 <div className="contact-dropdown-menu">
@@ -390,7 +415,7 @@ const ContactUs = () => {
               <h3>We are here to help you.</h3>
               <p>
                 Send us your query and our support team will review it from the
-                Doctor's Hub system.
+                Sucurasystem.
               </p>
 
               <div className="contact-methods">
@@ -400,7 +425,7 @@ const ContactUs = () => {
                   </div>
                   <div>
                     <h4>Email us</h4>
-                    <p>support@dochub.com</p>
+                    <p>support@Sucura.com</p>
                   </div>
                 </div>
 
@@ -420,7 +445,7 @@ const ContactUs = () => {
                   </div>
                   <div>
                     <h4>Visit us</h4>
-                    <p>Andheri West, Mumbai, MH</p>
+                    <p>Andheri East, Mumbai, MH</p>
                   </div>
                 </div>
               </div>
@@ -517,20 +542,8 @@ const ContactUs = () => {
       <footer className="main-footer">
         <div className="footer-container">
           <div className="footer-column brand-col">
-            <h2 className="footer-logo">
-              Doc
-              <span
-                style={{
-                  color: "var(--text-dark)",
-                  background: "white",
-                  padding: "0 5px",
-                  borderRadius: "4px",
-                  marginLeft: "5px",
-                }}
-              >
-                Hub
-              </span>
-            </h2>
+            <h2 className="footer-logo">Suc<span style={{ color: 'var(--text-dark)', background: 'white', padding: '0 5px', borderRadius: '4px', marginLeft: '5px' }}>ura</span></h2>
+
             <p className="footer-desc">
               Mumbai's trusted healthcare network. Booking appointments,
               finding labs, and managing health records made simple.
@@ -599,16 +612,16 @@ const ContactUs = () => {
           <div className="footer-column">
             <h4>Contact Us</h4>
             <div className="footer-contact-info">
-              <p>📍 Andheri West, Mumbai, MH</p>
+              <p>📍 Andheri East, Mumbai, MH</p>
               <p>📞 +91 98765 - 43210</p>
-              <p>✉️ support@dochub.com</p>
+              <p>✉️ support@Sucura.com</p>
             </div>
           </div>
         </div>
 
         <div className="footer-bottom">
           <div className="footer-bottom-content">
-            <p>&copy; 2026 Doctor's Hub Mumbai. All Rights Reserved.</p>
+            <p>&copy; 2026 Sucura Mumbai. All Rights Reserved.</p>
           </div>
         </div>
       </footer>

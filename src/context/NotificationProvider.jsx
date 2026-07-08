@@ -279,6 +279,19 @@ export const NotificationProvider = ({ children }) => {
     ]
   );
 
+  const decrementUnreadCountLocally = useCallback(() => {
+    setUnreadCountState((previousCount) => {
+      const nextCount = Math.max(
+        0,
+        Number(previousCount || 0) - 1
+      );
+
+      lastKnownUnreadCountRef.current = nextCount;
+
+      return nextCount;
+    });
+  }, []);
+
   const handleNotificationActionSuccess = useCallback(
     async ({ showToastOnNew = true } = {}) => {
       if (!canUseNotifications) {
@@ -300,7 +313,7 @@ export const NotificationProvider = ({ children }) => {
         return;
       }
 
-      checkForNewNotifications({ silent: true }).catch(() => {});
+      checkForNewNotifications({ silent: true }).catch(() => { });
     }, 0);
 
     return () => clearTimeout(timeoutId);
@@ -315,7 +328,7 @@ export const NotificationProvider = ({ children }) => {
     if (!canUseNotifications) return undefined;
 
     const intervalId = setInterval(() => {
-      checkForNewNotifications({ silent: false }).catch(() => {});
+      checkForNewNotifications({ silent: false }).catch(() => { });
     }, UNREAD_COUNT_REFRESH_MS);
 
     return () => clearInterval(intervalId);
@@ -336,6 +349,7 @@ export const NotificationProvider = ({ children }) => {
       fetchUnreadCount,
       checkForNewNotifications,
       handleNotificationActionSuccess,
+      decrementUnreadCountLocally,
       clearUnreadCountLocally,
       markAllPatientNotificationsReadAndClear,
       toast: canUseNotifications ? toastState : EMPTY_TOAST,
@@ -349,6 +363,7 @@ export const NotificationProvider = ({ children }) => {
       fetchUnreadCount,
       checkForNewNotifications,
       handleNotificationActionSuccess,
+      decrementUnreadCountLocally,
       clearUnreadCountLocally,
       markAllPatientNotificationsReadAndClear,
       toastState,

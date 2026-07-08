@@ -1,7 +1,7 @@
-
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute";
+
 /* PUBLIC PAGES */
 import Home from "./pages/public/Home";
 import LoginPage from "./pages/auth/LoginPage";
@@ -10,12 +10,12 @@ import AboutUs from "./pages/public/About";
 import ContactUs from "./pages/public/Contact";
 import Blogs from "./pages/public/blogs";
 import AllServicesPage from "./pages/public/AllServicesPage";
-import "./styles/global.css";
 import CareCoordinator from "./pages/public/CareCoordinator";
 import Insurance from "./pages/public/Insurance";
+import HospitalAction from "./pages/public/HospitalAction";
+
 /* ADMIN PAGES */
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import DoctorsManagement from "./pages/admin/DoctorsManagement";
 import Doctors from "./pages/admin/Doctors";
 import Labs from "./pages/admin/Labs";
 import AdminAppointments from "./pages/admin/Appointments";
@@ -24,25 +24,28 @@ import PendingVerifications from "./pages/admin/PendingVerifications";
 import AdminProfile from "./pages/admin/AdminProfile";
 import AdminBlogs from "./pages/admin/AdminBlogs";
 import AdminNotifications from "./pages/admin/AdminNotifications";
+import PendingDoctorModal from "./pages/admin/PendingDoctorModal";
+import UserManagement from "./pages/admin/UserManagement";
+import HospitalsModule from "./pages/admin/HospitalsModule";
+import FeedbackPage from "./pages/admin/FeedbackPage";
+import AdsManagement from "./pages/admin/AdsManagement";
+
 /* DOCTOR PAGES */
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import Appointments from "./pages/doctor/Appointments";
 import Patients from "./pages/doctor/Patients";
 import PatientDetails from "./pages/doctor/PatientDetails";
-import AddPatient from "./pages/doctor/AddPatient"; // ✅ New Import Added
+import AddPatient from "./pages/doctor/AddPatient";
 import DoctorNotifications from "./pages/doctor/Notifications";
 import Availability from "./pages/doctor/Availability";
 import Profile from "./pages/doctor/Profile";
+import LabsModule from "./pages/doctor/Labs";
+import DoctorFeedback from "./pages/doctor/DoctorFeedback";
+import ProfileViews from "./pages/doctor/ProfileViews";
 
 /* PATIENT PAGES */
 import PatientDashboard from "./pages/patient/Dashboard";
-import PatientProfile from "./pages/patient/PatientProfile"; // ✅ Add this import
-
-
-/* LAYOUTS */
-import AdminLayout from "./components/layout/AdminLayout";
-import DoctorLayout from "./components/layout/DoctorLayout";
-import PatientLayout from "./components/layout/PatientLayout";
+import PatientProfile from "./pages/patient/PatientProfile";
 import PatientAppointments from "./pages/patient/MyAppointments";
 import Prescriptions from "./pages/patient/Prescriptions";
 import Labreports from "./pages/patient/Labreports";
@@ -53,91 +56,296 @@ import MedicalRecords from "./pages/patient/MedicalRecords";
 import FindDoctors from "./pages/patient/FindDoctors";
 import MyDoctors from "./pages/patient/MyDoctors";
 import Doctorprofile from "./pages/patient/Doctorprofile";
-import PendingDoctorModal from "./pages/admin/PendingDoctorModal";
-import UserManagement from "./pages/admin/UserManagement";
-import HospitalsModule from "./pages/admin/HospitalsModule";
-import LabsModule from "./pages/doctor/Labs";
-import FeedbackPage from "./pages/admin/FeedbackPage";
-import AdsManagement from "./pages/admin/AdsManagement";
 import Hospitals from "./pages/patient/Hospitals";
 import LabsPage from "./pages/patient/LabsPage";
-import HospitalAction from "./pages/public/HospitalAction";
+
+/* LAYOUTS */
+import AdminLayout from "./components/layout/AdminLayout";
+import DoctorLayout from "./components/layout/DoctorLayout";
+import PatientLayout from "./components/layout/PatientLayout";
+
+import "./styles/global.css";
 
 function App() {
   return (
     <Routes>
-      {/* --- PUBLIC ROUTES --- */}
+      {/* =========================
+          PUBLIC ROUTES
+      ========================== */}
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/about" element={<AboutUs />} />
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/blogs" element={<Blogs />} />
-      <Route path="/all-services" element={<AllServicesPage />} />
-      <Route path="/care-coordinator" element={<CareCoordinator />} />
-      <Route path="/insurance" element={<Insurance />} />
-      <Route path="/hospital-action/:token" element={<HospitalAction />} />
+      <Route
+        path="/all-services"
+        element={<AllServicesPage />}
+      />
+      <Route
+        path="/care-coordinator"
+        element={<CareCoordinator />}
+      />
+      <Route
+        path="/insurance"
+        element={<Insurance />}
+      />
+      <Route
+        path="/hospital-action/:token"
+        element={<HospitalAction />}
+      />
 
-      {/* --- ADMIN ROUTES --- */}
-      <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
-        <Route path="/admin/*" element={<AdminLayout />}>
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="doctors-management" element={<DoctorsManagement />} />
-          <Route path="doctors" element={<Doctors />} />
-          <Route path="notifications" element={<AdminNotifications />} />
-          <Route path="doctors/:id" element={<PendingDoctorModal />} />
-          <Route path="verify-doctors" element={<PendingVerifications />} />
-          <Route path="users" element={<UserManagement />} />
-          <Route path="hospitals" element={<HospitalsModule />} />
-          <Route path="labs" element={<Labs />} />
-          <Route path="appointments" element={<AdminAppointments />} />
-          <Route path="profile" element={<AdminProfile />} />
-          <Route path="system-logs" element={<SystemLogs />} />
-          <Route path="feedback" element={<FeedbackPage />} />
-          <Route path="ads-management" element={<AdsManagement />} />
-          <Route path="blogs" element={<AdminBlogs />} />
+      {/* =========================
+          ADMIN ROUTES
+      ========================== */}
+      <Route
+        element={
+          <ProtectedRoute
+            allowedRoles={["ADMIN"]}
+          />
+        }
+      >
+        <Route
+          path="/admin/*"
+          element={<AdminLayout />}
+        >
+          <Route
+            path="dashboard"
+            element={<AdminDashboard />}
+          />
+
+          <Route
+            path="doctors"
+            element={<Doctors />}
+          />
+
+          <Route
+            path="notifications"
+            element={<AdminNotifications />}
+          />
+
+          <Route
+            path="doctors/:id"
+            element={<PendingDoctorModal />}
+          />
+
+          <Route
+            path="verify-doctors"
+            element={<PendingVerifications />}
+          />
+
+          <Route
+            path="users"
+            element={<UserManagement />}
+          />
+
+          <Route
+            path="hospitals"
+            element={<HospitalsModule />}
+          />
+
+          <Route
+            path="labs"
+            element={<Labs />}
+          />
+
+          <Route
+            path="appointments"
+            element={<AdminAppointments />}
+          />
+
+          <Route
+            path="profile"
+            element={<AdminProfile />}
+          />
+
+          <Route
+            path="system-logs"
+            element={<SystemLogs />}
+          />
+
+          <Route
+            path="feedback"
+            element={<FeedbackPage />}
+          />
+
+          <Route
+            path="ads-management"
+            element={<AdsManagement />}
+          />
+
+          <Route
+            path="blogs"
+            element={<AdminBlogs />}
+          />
         </Route>
       </Route>
 
-      {/* --- DOCTOR ROUTES --- */}
-      <Route element={<ProtectedRoute allowedRoles={["DOCTOR"]} />}>
-        <Route path="/doctor/*" element={<DoctorLayout />}>
-          <Route path="dashboard" element={<DoctorDashboard />} />
-          <Route path="appointments" element={<Appointments />} />
-          <Route path="patients" element={<Patients />} />
-          <Route path="patients/:patientId" element={<PatientDetails />} />
-          <Route path="add-patient" element={<AddPatient />} /> {/* ✅ New Route Added */}
-          <Route path="notifications" element={<DoctorNotifications />} />
-          <Route path="availability" element={<Availability />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="labs" element={<LabsModule />} />
+      {/* =========================
+          DOCTOR ROUTES
+      ========================== */}
+      <Route
+        element={
+          <ProtectedRoute
+            allowedRoles={["DOCTOR"]}
+          />
+        }
+      >
+        <Route
+          path="/doctor/*"
+          element={<DoctorLayout />}
+        >
+          <Route
+            path="dashboard"
+            element={<DoctorDashboard />}
+          />
+
+          <Route
+            path="appointments"
+            element={<Appointments />}
+          />
+
+          <Route
+            path="patients"
+            element={<Patients />}
+          />
+
+          <Route
+            path="patients/:patientId"
+            element={<PatientDetails />}
+          />
+
+          <Route
+            path="add-patient"
+            element={<AddPatient />}
+          />
+
+          <Route
+            path="notifications"
+            element={<DoctorNotifications />}
+          />
+
+          <Route
+            path="availability"
+            element={<Availability />}
+          />
+
+          <Route
+            path="profile"
+            element={<Profile />}
+          />
+
+          <Route
+            path="profile-views"
+            element={<ProfileViews />}
+          />
+
+          <Route
+            path="labs"
+            element={<LabsModule />}
+          />
+
+          <Route
+            path="feedback"
+            element={<DoctorFeedback />}
+          />
         </Route>
       </Route>
 
-      {/* --- PATIENT ROUTES --- */}
-      <Route element={<ProtectedRoute allowedRoles={["PATIENT"]} />}>
-        <Route path="/patient/*" element={<PatientLayout />}>
-          <Route index element={<PatientDashboard />} />
-          <Route path="dashboard" element={<PatientDashboard />} />
-          <Route path="profile" element={<PatientProfile />} />
-          <Route path="appointments" element={<PatientAppointments />} />
-          <Route path="finddoctors" element={<FindDoctors />} />
-          <Route path="mydoctors" element={<MyDoctors />} />
-          <Route path="hospitals" element={<Hospitals />} />
-          <Route path="doctorsprofile/:id" element={<Doctorprofile />} />
-          <Route path="labs" element={<LabsPage />} />
-          <Route path="records" element={<MedicalRecords />} />
-          <Route path="prescriptions" element={<Prescriptions />} />
-          <Route path="lab-reports" element={<Labreports />} />
-          <Route path="notifications" element={<Notifications />} />
-          <Route path="feedback" element={<Feedback />} />
-          <Route path="help" element={<Help />} />
+      {/* =========================
+          PATIENT ROUTES
+      ========================== */}
+      <Route
+        element={
+          <ProtectedRoute
+            allowedRoles={["PATIENT"]}
+          />
+        }
+      >
+        <Route
+          path="/patient/*"
+          element={<PatientLayout />}
+        >
+          <Route
+            index
+            element={<PatientDashboard />}
+          />
+
+          <Route
+            path="dashboard"
+            element={<PatientDashboard />}
+          />
+
+          <Route
+            path="profile"
+            element={<PatientProfile />}
+          />
+
+          <Route
+            path="appointments"
+            element={<PatientAppointments />}
+          />
+
+          <Route
+            path="finddoctors"
+            element={<FindDoctors />}
+          />
+
+          <Route
+            path="mydoctors"
+            element={<MyDoctors />}
+          />
+
+          <Route
+            path="hospitals"
+            element={<Hospitals />}
+          />
+
+          <Route
+            path="doctorsprofile/:id"
+            element={<Doctorprofile />}
+          />
+
+          <Route
+            path="labs"
+            element={<LabsPage />}
+          />
+
+          <Route
+            path="records"
+            element={<MedicalRecords />}
+          />
+
+          <Route
+            path="prescriptions"
+            element={<Prescriptions />}
+          />
+
+          <Route
+            path="lab-reports"
+            element={<Labreports />}
+          />
+
+          <Route
+            path="notifications"
+            element={<Notifications />}
+          />
+
+          <Route
+            path="feedback"
+            element={<Feedback />}
+          />
+
+          <Route
+            path="help"
+            element={<Help />}
+          />
         </Route>
       </Route>
-      {/* --- FALLBACK --- */}
+
+      {/* FALLBACK */}
       <Route path="*" element={<Home />} />
     </Routes>
-
   );
 }
 

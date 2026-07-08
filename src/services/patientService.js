@@ -493,3 +493,25 @@ export const getPatientFeedbackById = async (feedbackId) => {
   const response = await api.get(`/patient/feedback/${feedbackId}`);
   return response.data;
 };
+/* =====================================
+   DOCTOR PROFILE VIEW TRACKING
+===================================== */
+
+export const recordDoctorProfileView = async (
+  doctorProfileId
+) => {
+  if (
+    !doctorProfileId ||
+    Number.isNaN(Number(doctorProfileId))
+  ) {
+    throw new Error(
+      "Valid doctor profile ID is required"
+    );
+  }
+
+  const response = await api.post(
+    `/patient/doctors/${doctorProfileId}/profile-view`
+  );
+
+  return response.data;
+};

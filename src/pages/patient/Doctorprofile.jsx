@@ -1,9 +1,13 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import api from "../../services/api";
+import {
+  recordDoctorProfileView
+} from "../../services/patientService";
 import { AuthContext } from "../../context/AuthContext";
 import { useProfile } from "../../context/useProfile";
 import "./Doctorprofile.css";
+
 
 export default function DoctorProfile() {
   const { id } = useParams();
@@ -112,6 +116,98 @@ export default function DoctorProfile() {
 
     fetchDoctorDetail();
   }, [id]);
+
+  useEffect(() => {
+  if (
+    !doctor?.id ||
+    currentUser?.role !== "PATIENT"
+  ) {
+    return undefined;
+  }
+
+  const viewerKey =
+    currentUser?.id ||
+    currentUser?.userId ||
+    currentUser?.email ||
+    "patient";
+
+  const dateKey =
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).format(new Date());
+
+  const storageKey =
+    `doctor-profile-view:${viewerKey}:${doctor.id}:${dateKey}`;
+
+  try {
+    if (
+      window.sessionStorage.getItem(
+        storageKey
+      ) === "done"
+    ) {
+      return undefined;
+    }
+
+    window.sessionStorage.setItem(
+      storageKey,
+      "pending"
+    );
+  } catch {
+    /*
+     * Browser storage unavailable hone par
+     * backend DB deduplication handle karega.
+     */
+  }
+
+  let cancelled = false;
+
+  recordDoctorProfileView(doctor.id)
+    .then(() => {
+      if (cancelled) return;
+
+      try {
+        window.sessionStorage.setItem(
+          storageKey,
+          "done"
+        );
+      } catch {
+        /*
+         * Storage failure profile page ko
+         * affect nahi karega.
+         */
+      }
+    })
+    .catch((error) => {
+      console.warn(
+        "Profile view tracking failed:",
+        error
+      );
+
+      try {
+        window.sessionStorage.removeItem(
+          storageKey
+        );
+      } catch {
+        /*
+         * Backend/profile page ko storage
+         * failure se affect nahi karna.
+         */
+      }
+    });
+
+  return () => {
+    cancelled = true;
+  };
+}, [
+  doctor?.id,
+  currentUser?.role,
+  currentUser?.id,
+  currentUser?.userId,
+  currentUser?.email
+]);
 
   useEffect(() => {
     const fetchAvailability = async () => {

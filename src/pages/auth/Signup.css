@@ -408,32 +408,7 @@
   text-decoration: underline;
 }
 
-.popup-toast {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 13px 20px;
-  border-radius: 10px;
-  color: white;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  animation: slideIn 0.3s ease-out;
-  font-size: 14px;
-  font-weight: 700;
-  box-shadow: 0 18px 30px rgba(15, 23, 42, 0.18);
-}
 
-.success-toast {
-  background: var(--primary);
-  color: #ffffff;
-}
-
-.error-toast {
-  background: var(--danger);
-  color: #ffffff;
-}
 
 .otp-section {
   margin-top: 20px;
@@ -784,14 +759,6 @@ input::-webkit-credentials-auto-fill-button {
     line-height: 1.4;
   }
 
-  .popup-toast {
-    width: calc(100% - 40px);
-    left: 20px;
-    right: 20px;
-    top: 10px;
-    justify-content: center;
-    text-align: center;
-  }
 
   .profile-selector-popup {
     width: 90%;
@@ -886,5 +853,95 @@ input::-webkit-credentials-auto-fill-button {
 
   .auth-wrapper {
     grid-template-columns: 1fr !important;
+  }
+}
+.signup-popup-toast {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  left: auto !important;
+
+  width: auto !important;
+  min-width: 320px !important;
+  max-width: min(460px, calc(100vw - 40px)) !important;
+  min-height: 54px !important;
+
+  padding: 14px 18px !important;
+  border-radius: 12px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 11px !important;
+
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.45 !important;
+  text-align: left !important;
+
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 999999 !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.22) !important;
+  animation: signupToastSlideIn 0.3s ease-out;
+}
+
+.signup-popup-toast--success {
+  background: #087f73 !important;
+  color: #ffffff !important;
+}
+
+.signup-popup-toast--error {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+.signup-popup-toast__icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  color: #ffffff !important;
+}
+
+.signup-popup-toast__icon svg {
+  color: #ffffff !important;
+  stroke: currentColor !important;
+}
+
+.signup-popup-toast__message {
+  display: block !important;
+  flex: 1 !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+@keyframes signupToastSlideIn {
+  from {
+    transform: translateX(110%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .signup-popup-toast {
+    top: 12px !important;
+    left: 16px !important;
+    right: 16px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    justify-content: flex-start !important;
   }
 }

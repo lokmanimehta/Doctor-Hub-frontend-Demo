@@ -5,12 +5,14 @@ import {
   FiBell,
   FiCalendar,
   FiClock,
+  FiEye,
   FiGrid,
+  FiMessageSquare,
   FiUserPlus,
   FiUsers
 } from "react-icons/fi";
 import "./DoctorSidebar.css";
-import Logo from "../../assets/images/logo.png";
+import Logo from "../../assets/images/logo.jpeg";
 import defaultDoctorAvatar from "../../assets/images/avtar.png";
 
 import { AuthContext } from "../../context/AuthContext";
@@ -38,11 +40,21 @@ const DoctorSidebar = ({
   const menu = useMemo(
     () => [
       { name: "Dashboard", path: "/doctor/dashboard", icon: <FiGrid /> },
-      { name: "Appointments", path: "/doctor/appointments", icon: <FiCalendar /> },
-      { name: "Patients", path: "/doctor/patients", icon: <FiUsers /> },
       { name: "Add Patient", path: "/doctor/add-patient", icon: <FiUserPlus /> },
+      { name: "Patients Management", path: "/doctor/patients", icon: <FiUsers /> },
+      { name: "View Appointments", path: "/doctor/appointments", icon: <FiCalendar /> },
       { name: "Availability", path: "/doctor/availability", icon: <FiClock /> },
       { name: "Labs", path: "/doctor/labs", icon: <FiActivity /> },
+      {
+        name: "Profile Insights",
+        path: "/doctor/profile-views",
+        icon: <FiEye />
+      },
+      {
+        name: "Feedback",
+        path: "/doctor/feedback",
+        icon: <FiMessageSquare />
+      },
       {
         name: "Notifications",
         path: "/doctor/notifications",
@@ -157,9 +169,9 @@ const DoctorSidebar = ({
               <img src={Logo} alt="DH" className="sidebar-logo-icon" />
             ) : (
               <div className="full-logo-wrapper">
-                <img src={Logo} alt="Doctor's Hub" className="sidebar-logo-img" />
+                <img src={Logo} alt="Sucura" className="sidebar-logo-img" />
                 <h2 className="doctor-logo">
-                  Doctor's <span>Hub</span>
+               Sucura
                 </h2>
               </div>
             )}
@@ -251,7 +263,7 @@ const DoctorSidebar = ({
                 }}
               >
                 🏠 Home
-              </button>  
+              </button>
               <button
                 type="button"
                 onClick={() => {

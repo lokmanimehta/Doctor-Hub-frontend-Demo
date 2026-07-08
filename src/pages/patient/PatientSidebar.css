@@ -726,7 +726,9 @@
     width: 84vw;
     max-width: 300px;
   }
-
+  .doctor-logo {
+    font-size: 17px !important;
+  }
   .patient-sidebar__header {
     min-height: 72px;
     padding: 14px 12px;
@@ -850,4 +852,16 @@
   .patient-sidebar--collapsed .patient-sidebar__user-card::after {
     z-index: 99999;
   }
+}
+.doctor-logo {
+  margin: 0;
+  font-size: 18px !important;
+  font-weight: 800;
+  color: var(--primary);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.doctor-logo span {
+  color: var(--text-dark);
 }

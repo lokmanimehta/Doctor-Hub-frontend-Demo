@@ -10,7 +10,8 @@ import {
   FiInfo,
   FiRefreshCw,
   FiUser,
-  FiActivity
+  FiActivity,
+FiEye
 } from "react-icons/fi";
 import { useNotifications } from "../../context/useNotifications";
 import { consumeDoctorNotification, getDoctorNotifications } from "../../services/doctorService";
@@ -24,6 +25,7 @@ const NOTIFICATION_ICON_MAP = {
   VISIT: <FiClock />,
   NOTE: <FiFileText />,
   PROFILE: <FiInfo />,
+  PROFILE_VIEW: <FiEye />,
   SYSTEM: <FiBell />,
   CRITICAL_ALERT: <FiBell />,
   LAB_ORDER: <FiActivity />
@@ -36,7 +38,8 @@ const TYPE_FILTERS = [
   "PRESCRIPTION",
   "REPORT",
   "VISIT",
-  "LAB_ORDER"
+  "LAB_ORDER",
+  "PROFILE_VIEW"
 ];
 
 const PRIORITY_FILTERS = ["ALL", "CRITICAL", "HIGH", "NORMAL", "LOW"];

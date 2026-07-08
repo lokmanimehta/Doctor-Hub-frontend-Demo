@@ -1371,3 +1371,41 @@
     justify-content: center;
   }
 }
+/* =========================================
+   LIVE PLATFORM STATISTICS
+========================================= */
+
+.about-stat-card h3 {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.about-stat-card--loading h3 {
+  opacity: 0.45;
+}
+
+.about-stats-status {
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  margin: 16px auto 0;
+  padding: 9px 14px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  background: #f8fafc;
+  color: #64748b;
+
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .about-stats-status {
+    margin-top: 12px;
+    font-size: 12px;
+  }
+}

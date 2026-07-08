@@ -15,7 +15,7 @@ import {
   FiRefreshCw,
   FiUser
 } from "react-icons/fi";
-
+import useAdminNotifications from "../../context/useAdminNotifications";
 import "./AdminHeader.css";
 import { AuthContext } from "../../context/AuthContext";
 import { useAuthActions } from "../../services/authService";
@@ -48,7 +48,7 @@ const AdminHeader = ({ isCollapsed, setIsCollapsed }) => {
 
   const { currentUser, setCurrentUser } = useContext(AuthContext);
   const { logoutUser } = useAuthActions(setCurrentUser);
-
+  const { unreadCount } = useAdminNotifications();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [adminProfile, setAdminProfile] = useState(null);
   const [headerLoading, setHeaderLoading] = useState(true);
@@ -190,9 +190,8 @@ const AdminHeader = ({ isCollapsed, setIsCollapsed }) => {
 
   return (
     <header
-      className={`admin-header ${
-        isCollapsed ? "admin-header--collapsed" : ""
-      }`}
+      className={`admin-header ${isCollapsed ? "admin-header--collapsed" : ""
+        }`}
     >
       <div className="admin-header__left">
         <button
@@ -215,9 +214,15 @@ const AdminHeader = ({ isCollapsed, setIsCollapsed }) => {
           type="button"
           className="admin-header__notification-button"
           onClick={handleNotifications}
-          aria-label="Open admin notifications"
+          aria-label={`Open admin notifications. ${unreadCount} unread`}
         >
           <FiBell />
+
+          {unreadCount > 0 && (
+            <span className="admin-header__notification-badge">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
         </button>
 
         <button

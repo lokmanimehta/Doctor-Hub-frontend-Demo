@@ -443,3 +443,86 @@ export const rejectDoctorAppointmentRequest = async (appointmentId, payload = {}
 
   return response.data;
 };
+/* =====================================
+   DOCTOR FEEDBACK API
+===================================== */
+
+export const createDoctorFeedback = async (payload) => {
+  const response = await api.post(
+    "/doctor/feedback",
+    payload
+  );
+
+  return response.data;
+};
+
+export const getDoctorFeedbacks = async ({
+  page = 0,
+  size = 5
+} = {}) => {
+  const response = await api.get(
+    "/doctor/feedback",
+    {
+      params: {
+        page,
+        size
+      }
+    }
+  );
+
+  return response.data;
+};
+
+export const getDoctorFeedbackById = async (
+  feedbackId
+) => {
+  const response = await api.get(
+    `/doctor/feedback/${feedbackId}`
+  );
+
+  return response.data;
+};
+/* =====================================
+   DOCTOR PROFILE VIEW INSIGHTS API
+===================================== */
+
+export const getDoctorProfileViewAccess =
+  async () => {
+    const response = await api.get(
+      "/doctor/profile-views/access"
+    );
+
+    return response.data;
+  };
+
+export const getDoctorProfileViewSummary =
+  async () => {
+    const response = await api.get(
+      "/doctor/profile-views/summary"
+    );
+
+    return response.data;
+  };
+
+export const getDoctorProfileViews =
+  async ({
+    page = 0,
+    size = 20
+  } = {}) => {
+    const response = await api.get(
+      "/doctor/profile-views",
+      {
+        params: {
+          page: Number.isInteger(page)
+            ? page
+            : 0,
+
+          size: Number.isInteger(size)
+            ? size
+            : 20
+        }
+      }
+    );
+
+    return response.data;
+  };

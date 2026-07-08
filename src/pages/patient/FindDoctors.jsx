@@ -390,6 +390,18 @@ export default function FindDoctors() {
     return selected?.value || toLocalDateString(new Date());
   }, [bookingDateOffset, dateOptions]);
 
+  const bookableDateOptions = useMemo(() => {
+    return availableDateOptions
+      .filter(
+        (item) =>
+          item?.hasAvailableSlots === true &&
+          Number(item?.availableCount || 0) > 0
+      )
+      .sort((a, b) => a.offset - b.offset);
+  }, [availableDateOptions]);
+
+
+
   useEffect(() => {
     const loadAvailableDates = async () => {
       if (!showBooking || !bookingDoctor || !bookingClinicId) {
@@ -437,7 +449,13 @@ export default function FindDoctors() {
           })
         );
 
-        const availableDates = results.filter((item) => item.hasAvailableSlots);
+        const availableDates = results
+          .filter(
+            (item) =>
+              item?.hasAvailableSlots === true &&
+              Number(item?.availableCount || 0) > 0
+          )
+          .sort((a, b) => a.offset - b.offset);
 
         setAvailableDateOptions(availableDates);
 
@@ -607,13 +625,13 @@ export default function FindDoctors() {
         return;
       }
 
-      if (availableDateOptions.length === 0) {
+      if (bookableDateOptions.length === 0) {
         setBookingSlots([]);
         setSelectedSlot(null);
         return;
       }
 
-      const selectedDateIsAvailable = availableDateOptions.some(
+      const selectedDateIsAvailable = bookableDateOptions.some(
         (item) => item.value === bookingDate
       );
 
@@ -661,7 +679,7 @@ export default function FindDoctors() {
     bookingDate,
     availabilityRefreshKey,
     dateLoading,
-    availableDateOptions
+    bookableDateOptions
   ]);
 
   const resolveSelectedProfileType = () => {
@@ -789,32 +807,118 @@ export default function FindDoctors() {
     } finally {
       setBookingLoading(false);
     }
+
+  };
+
+  const getSlotStatus = (slot) => {
+    return clean(slot?.status).toUpperCase() || "UNAVAILABLE";
+  };
+
+  const getSlotStatusLabel = (slot) => {
+    const status = getSlotStatus(slot);
+
+    if (status === "AVAILABLE") {
+      return "AVAILABLE";
+    }
+
+    if (status.includes("BOOK")) {
+      return "BOOKED";
+    }
+
+    if (status.includes("BLOCK")) {
+      return "BLOCKED BY DOCTOR";
+    }
+
+    if (
+      status === "PAST" ||
+      status === "EXPIRED" ||
+      status.includes("PAST")
+    ) {
+      return "PAST";
+    }
+
+    return "UNAVAILABLE";
+  };
+
+  const getSlotReason = (slot) => {
+    const backendReason = clean(
+      slot?.reason ||
+      slot?.blockReason ||
+      slot?.blockedReason ||
+      slot?.statusReason ||
+      slot?.unavailableReason ||
+      slot?.message
+    );
+
+    if (backendReason) {
+      return backendReason;
+    }
+
+    const status = getSlotStatus(slot);
+
+    if (status.includes("BOOK")) {
+      return "This slot has already been booked by another patient.";
+    }
+
+    if (status.includes("BLOCK")) {
+      return "This slot has been blocked by the doctor.";
+    }
+
+    if (
+      status === "PAST" ||
+      status === "EXPIRED" ||
+      status.includes("PAST")
+    ) {
+      return "This slot time has already passed.";
+    }
+
+    return "This slot is currently unavailable. Please select another slot.";
   };
 
   const getSlotClassName = (slot) => {
-    const status = clean(slot.status).toUpperCase();
+    const status = getSlotStatus(slot);
 
-    if (selectedSlot?.startTime === slot.startTime && status === "AVAILABLE") {
+    if (
+      status === "AVAILABLE" &&
+      selectedSlot?.startTime === slot?.startTime &&
+      selectedSlot?.endTime === slot?.endTime
+    ) {
       return "fd-slot-card active";
     }
 
-    if (status === "BOOKED") {
+    if (status === "AVAILABLE") {
+      return "fd-slot-card";
+    }
+
+    if (status.includes("BOOK")) {
       return "fd-slot-card booked";
     }
 
-    if (status === "BLOCKED") {
+    if (status.includes("BLOCK")) {
       return "fd-slot-card blocked";
     }
 
-    if (status === "PAST") {
+    if (
+      status === "PAST" ||
+      status === "EXPIRED" ||
+      status.includes("PAST")
+    ) {
       return "fd-slot-card past";
     }
 
-    return "fd-slot-card";
+    return "fd-slot-card unavailable";
   };
 
-  const isSlotDisabled = (slot) => {
-    return clean(slot.status).toUpperCase() !== "AVAILABLE";
+  const handleSlotClick = (slot) => {
+    const status = getSlotStatus(slot);
+
+    if (status === "AVAILABLE") {
+      setSelectedSlot(slot);
+      return;
+    }
+
+    setSelectedSlot(null);
+    showToast(getSlotReason(slot), "error");
   };
 
   const lastUpdatedLabel = lastUpdatedAt
@@ -1389,32 +1493,43 @@ export default function FindDoctors() {
                         </div>
                       )}
 
-                      {!dateLoading && !dateError && availableDateOptions.length === 0 && (
-                        <div className="fd-date-state">
-                          No appointment dates available for this doctor right now.
-                        </div>
-                      )}
+                      {!dateLoading &&
+                        !dateError &&
+                        bookableDateOptions.length === 0 && (
+                          <div className="fd-date-state">
+                            No appointment dates with available slots found.
+                          </div>
+                        )}
 
-                      {!dateLoading && !dateError && availableDateOptions.length > 0 && (
-                        <div className="fd-date-grid">
-                          {availableDateOptions.map((item) => (
-                            <button
-                              type="button"
-                              key={item.value}
-                              className={`fd-date-card ${bookingDateOffset === item.offset ? "active" : ""
-                                }`}
-                              onClick={() => {
-                                setBookingDateOffset(item.offset);
-                                setSelectedSlot(null);
-                              }}
-                            >
-                              <strong>{item.label}</strong>
-                              <span>{item.subLabel}</span>
-                              <small>{item.availableCount} slots</small>
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                      {!dateLoading &&
+                        !dateError &&
+                        bookableDateOptions.length > 0 && (
+                          <div className="fd-date-grid">
+                            {bookableDateOptions.map((item) => (
+                              <button
+                                type="button"
+                                key={item.value}
+                                className={`fd-date-card ${bookingDateOffset === item.offset
+                                  ? "active"
+                                  : ""
+                                  }`}
+                                onClick={() => {
+                                  setBookingDateOffset(item.offset);
+                                  setSelectedSlot(null);
+                                  setBookingSlots([]);
+                                  setSlotError("");
+                                }}
+                              >
+                                <strong>{item.label}</strong>
+                                <span>{item.subLabel}</span>
+                                <small>
+                                  {item.availableCount}{" "}
+                                  {item.availableCount === 1 ? "slot" : "slots"}
+                                </small>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                     </div>
                   </div>
 
@@ -1435,28 +1550,50 @@ export default function FindDoctors() {
                       <div className="fd-slot-state error">{slotError}</div>
                     )}
 
-                    {!slotLoading && !slotError && bookingSlots.length === 0 && (
-                      <div className="fd-slot-state">
-                        No slots configured for this date.
-                      </div>
-                    )}
+                    {!slotLoading &&
+                      !slotError &&
+                      bookingSlots.length === 0 && (
+                        <div className="fd-slot-state">
+                          No slots configured for this date.
+                        </div>
+                      )}
 
-                    {!slotLoading && !slotError && bookingSlots.length > 0 && (
-                      <div className="fd-slot-grid">
-                        {bookingSlots.map((slot) => (
-                          <button
-                            type="button"
-                            key={`${slot.startTime}-${slot.endTime}`}
-                            className={getSlotClassName(slot)}
-                            disabled={isSlotDisabled(slot)}
-                            onClick={() => setSelectedSlot(slot)}
-                          >
-                            <strong>{clean(slot.displayTime).toUpperCase()}</strong>
-                            <span>{clean(slot.status).toUpperCase()}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                    {!slotLoading &&
+                      !slotError &&
+                      bookingSlots.length > 0 && (
+                        <div className="fd-slot-grid">
+                          {bookingSlots.map((slot) => {
+                            const status = getSlotStatus(slot);
+                            const isUnavailable = status !== "AVAILABLE";
+
+                            return (
+                              <button
+                                type="button"
+                                key={`${slot.startTime}-${slot.endTime}`}
+                                className={getSlotClassName(slot)}
+                                aria-disabled={isUnavailable}
+                                data-slot-status={status}
+                                title={
+                                  isUnavailable
+                                    ? getSlotReason(slot)
+                                    : "Select this available slot"
+                                }
+                                onClick={() => handleSlotClick(slot)}
+                              >
+                                <strong>
+                                  {clean(
+                                    slot.displayTime ||
+                                    slot.startTime ||
+                                    "Slot"
+                                  ).toUpperCase()}
+                                </strong>
+
+                                <span>{getSlotStatusLabel(slot)}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                   </div>
 
                   <div className="fd-form-section">

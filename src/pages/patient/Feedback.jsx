@@ -170,7 +170,7 @@ const Feedback = () => {
             <span className="feedback-kicker">Patient Feedback</span>
             <h1>Share your experience</h1>
             <p>
-              Help Doctor&apos;s Hub improve appointments, consultations, reports,
+              Help Sucura improve appointments, consultations, reports,
               hospital services and overall care experience.
             </p>
           </div>

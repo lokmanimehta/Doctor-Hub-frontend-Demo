@@ -123,3 +123,19 @@ export const createDoctorPatient = async (payload) => {
   const response = await api.post("/doctor/patients", payload);
   return response.data;
 };
+/* =====================================
+   PUBLIC PLATFORM STATISTICS
+===================================== */
+
+export const getPublicPlatformStats = async ({
+  signal
+} = {}) => {
+  const response = await api.get(
+    "/public/platform-stats",
+    {
+      signal
+    }
+  );
+
+  return response.data;
+};

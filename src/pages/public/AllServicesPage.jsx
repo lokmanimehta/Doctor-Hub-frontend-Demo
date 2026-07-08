@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import "./AllServices.css";
-import Logo from "../../assets/images/logo.png";
+import Logo from "../../assets/images/logo.jpeg";
 import { AuthContext } from "../../context/AuthContext";
 import { useAuthActions } from "../../services/authService";
 import { useProfile } from "../../context/useProfile";
@@ -840,10 +840,29 @@ const AllServicesPage = () => {
 
       <aside className={`mobile-sidebar ${isSidebarOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <h2 className="brand-logo-sidebar">
-            Doctor's <span>Hub</span>
-          </h2>
-          <button className="close-sidebar-btn" onClick={() => setIsSidebarOpen(false)}>
+          <div
+            className="sucura-brand sucura-brand--sidebar"
+            onClick={() => {
+              navigate("/");
+              setIsSidebarOpen(false);
+            }}
+          >
+            <img
+              src={Logo}
+              alt="Sucura"
+              className="sucura-brand__logo"
+            />
+
+            <span className="sucura-brand__name">
+              Sucura
+            </span>
+          </div>
+
+          <button
+            className="close-sidebar-btn"
+            onClick={() => setIsSidebarOpen(false)}
+            aria-label="Close navigation"
+          >
             ×
           </button>
         </div>
@@ -979,11 +998,26 @@ const AllServicesPage = () => {
       </aside>
 
       <header className="home-header">
-        <div className="header-brand" onClick={() => navigate("/")}>
-          <img src={Logo} alt="Doctor's Hub Logo" className="logo-img" />
-          <h1>
-            Doctor's <span>Hub</span>
-          </h1>
+        <div
+          className="header-brand sucura-brand"
+          onClick={() => navigate("/")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              navigate("/");
+            }
+          }}
+        >
+          <img
+            src={Logo}
+            alt="Sucura"
+            className="logo-img sucura-brand__logo"
+          />
+
+          <span className="sucura-brand__name">
+            Sucura
+          </span>
         </div>
 
         <nav className="header-nav desktop-only">
@@ -2166,7 +2200,7 @@ const AllServicesPage = () => {
       <footer className="main-footer">
         <div className="footer-container">
           <div className="footer-column brand-col">
-            <h2 className="footer-logo">Doc<span style={{ color: 'var(--text-dark)', background: 'white', padding: '0 5px', borderRadius: '4px', marginLeft: '5px' }}>Hub</span></h2>
+            <h2 className="footer-logo">Suc<span style={{ color: 'var(--text-dark)', background: 'white', padding: '0 5px', borderRadius: '4px', marginLeft: '5px' }}>ura</span></h2>
             <p className="footer-desc">
               Mumbai's trusted healthcare network. Booking appointments,
               finding labs, and managing health records made simple.
@@ -2240,16 +2274,16 @@ const AllServicesPage = () => {
           <div className="footer-column">
             <h4>Contact Us</h4>
             <div className="footer-contact-info">
-              <p>📍 Andheri West, Mumbai, MH</p>
+              <p>📍 Andheri East, Mumbai, MH</p>
               <p>📞 +91 98765 - 43210</p>
-              <p>✉️ support@dochub.com</p>
+              <p>✉️ support@Sucura.com</p>
             </div>
           </div>
         </div>
 
         <div className="footer-bottom">
           <div className="footer-bottom-content">
-            <p>&copy; 2026 Doctor's Hub Mumbai. All Rights Reserved.</p>
+            <p>&copy; 2026 Sucura Mumbai. All Rights Reserved.</p>
           </div>
         </div>
       </footer>

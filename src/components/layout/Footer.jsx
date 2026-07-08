@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="footer-container">
         <div className="footer-left">
           <h3>HealthCare+</h3>
-          <p>© 2026 Doctor's Hub. All rights reserved.</p>
+          <p>© 2026Sucura. All rights reserved.</p>
         </div>
 
         <div className="footer-links">

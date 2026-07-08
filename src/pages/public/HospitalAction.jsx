@@ -222,7 +222,7 @@ export default function HospitalAction() {
       <main className="ha-shell">
         <section className="ha-brand-card">
           <div>
-            <span className="ha-kicker">Doctor’s Hub</span>
+            <span className="ha-kicker">Sucura</span>
             <h1>Hospital request review</h1>
             <p>
               Review the patient’s hospital bed request and submit the final
@@ -439,7 +439,7 @@ export default function HospitalAction() {
                     )}
 
                     <button type="button" onClick={() => navigate("/")}>
-                      Go to Doctor’s Hub
+                      Go to Sucura
                     </button>
                   </div>
                 )}

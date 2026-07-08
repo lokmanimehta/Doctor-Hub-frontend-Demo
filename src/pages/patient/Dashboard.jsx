@@ -582,14 +582,6 @@ const displayName = patient?.fullName || "Patient";
                 <span>Lab Reports</span>
               </button>
             </div>
-
-            <div className="pd-soft-note">
-              <FiShield />
-              <p>
-                Doctor-linked prescriptions aur lab reports backend linking ke
-                baad yaha live count me show honge.
-              </p>
-            </div>
           </section>
 
           <section className="pd-card">

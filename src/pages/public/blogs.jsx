@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./blogs.css";
-import Logo from "../../assets/images/logo.png";
+import Logo from "../../assets/images/logo.jpeg";
 import api from "../../services/api";
 import { AuthContext } from "../../context/AuthContext";
 import { useAuthActions } from "../../services/authService";
@@ -39,7 +39,7 @@ const BlogImage = ({ blog, className }) => {
         <div className="blogs-image-fallback">
           <span>{getCategoryIcon(blog?.category)}</span>
           <strong>{blog?.category || "Health Article"}</strong>
-          <p>Doctor's Hub Medical Journal</p>
+          <p>Sucura Medical Journal</p>
         </div>
       )}
     </div>
@@ -53,7 +53,8 @@ const Blogs = () => {
   const { currentUser, setCurrentUser } = useContext(AuthContext);
   const { logoutUser } = useAuthActions(setCurrentUser);
   const { clearProfile } = useProfile();
-
+  const [openingBlogSlug, setOpeningBlogSlug] =
+    useState("");
   const [blogs, setBlogs] = useState([]);
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -112,17 +113,36 @@ const Blogs = () => {
     });
   };
 
-  const getReadTime = (content) => {
-    if (!content) {
-      return "2 min read";
-    }
-
-    const words = content.trim().split(/\s+/).length;
-    const minutes = Math.max(2, Math.ceil(words / 180));
+  const getReadTime = (blog) => {
+    const minutes =
+      Number(blog?.readTimeMinutes) || 1;
 
     return `${minutes} min read`;
-  };
+  }
+  const openFullBlog = async (blog) => {
+    if (!blog?.slug) {
+      return;
+    }
 
+    try {
+      setOpeningBlogSlug(blog.slug);
+
+      const response = await api.get(
+        `/public/blogs/${encodeURIComponent(
+          blog.slug
+        )}`
+      );
+
+      setSelectedBlog(response.data);
+    } catch (error) {
+      window.alert(
+        error?.response?.data?.message ||
+        "Unable to open this article."
+      );
+    } finally {
+      setOpeningBlogSlug("");
+    }
+  };
   const getParagraphs = (content) => {
     if (!content) {
       return [];
@@ -193,11 +213,22 @@ const Blogs = () => {
 
       <aside className={`blogs-mobile-sidebar ${isSidebarOpen ? "open" : ""}`}>
         <div className="blogs-sidebar-top">
-          <div className="blogs-sidebar-logo" onClick={() => navigate("/")}>
-            <img src={Logo} alt="Doctor's Hub Logo" />
-            <h2>
-              Doctor's <span>Hub</span>
-            </h2>
+          <div
+            className="blogs-sidebar-logo sucura-brand sucura-brand--sidebar"
+            onClick={() => {
+              navigate("/");
+              closeSidebar();
+            }}
+          >
+            <img
+              src={Logo}
+              alt="Sucura"
+              className="sucura-brand__logo"
+            />
+
+            <span className="sucura-brand__name">
+              Sucura
+            </span>
           </div>
 
           <button className="blogs-sidebar-close" onClick={closeSidebar}>
@@ -338,11 +369,26 @@ const Blogs = () => {
       </aside>
 
       <header className="blogs-header">
-        <div className="blogs-header-brand" onClick={() => navigate("/")}>
-          <img src={Logo} alt="Doctor's Hub Logo" />
-          <h1>
-            Doctor's <span>Hub</span>
-          </h1>
+        <div
+          className="blogs-header-brand sucura-brand"
+          onClick={() => navigate("/")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              navigate("/");
+            }
+          }}
+        >
+          <img
+            src={Logo}
+            alt="Sucura"
+            className="sucura-brand__logo"
+          />
+
+          <span className="sucura-brand__name">
+            Sucura
+          </span>
         </div>
 
         <nav className="blogs-header-nav">
@@ -483,7 +529,7 @@ const Blogs = () => {
               <div className="blogs-featured-content">
                 <div className="blogs-meta-row">
                   <small>{formatDate(featuredBlog.publishedAt)}</small>
-                  <small>{getReadTime(featuredBlog.content)}</small>
+                  <small>{getReadTime(featuredBlog)}</small>
                 </div>
 
                 <h3>{featuredBlog.title}</h3>
@@ -497,8 +543,15 @@ const Blogs = () => {
                   </div>
                 </div>
 
-                <button onClick={() => setSelectedBlog(featuredBlog)}>
-                  Read Full Article
+                <button
+                  onClick={() => openFullBlog(featuredBlog)}
+                  disabled={
+                    openingBlogSlug === featuredBlog.slug
+                  }
+                >
+                  {openingBlogSlug === featuredBlog.slug
+                    ? "Opening..."
+                    : "Read Full Article"}
                 </button>
               </div>
             </article>
@@ -513,7 +566,7 @@ const Blogs = () => {
                   <div className="blogs-card-body">
                     <div className="blogs-card-meta">
                       <span>{formatDate(blog.publishedAt)}</span>
-                      <span>{getReadTime(blog.content)}</span>
+                      <span>{getReadTime(blog)}</span>
                     </div>
 
                     <h3>{blog.title}</h3>
@@ -525,7 +578,16 @@ const Blogs = () => {
                         <small>Medical editorial content</small>
                       </div>
 
-                      <button onClick={() => setSelectedBlog(blog)}>Read</button>
+                      <button
+                        onClick={() => openFullBlog(blog)}
+                        disabled={
+                          openingBlogSlug === blog.slug
+                        }
+                      >
+                        {openingBlogSlug === blog.slug
+                          ? "Opening..."
+                          : "Read Article"}
+                      </button>
                     </div>
                   </div>
                 </article>
@@ -569,7 +631,7 @@ const Blogs = () => {
                 <div className="blogs-modal-meta">
                   <span>Clinical Review</span>
                   <span>{formatDate(selectedBlog.publishedAt)}</span>
-                  <span>{getReadTime(selectedBlog.content)}</span>
+                  <span>{getReadTime(selectedBlog)}</span>
                 </div>
 
                 <h2>{selectedBlog.title}</h2>
@@ -605,7 +667,7 @@ const Blogs = () => {
       <footer className="main-footer">
         <div className="footer-container">
           <div className="footer-column brand-col">
-            <h2 className="footer-logo">Doc<span style={{ color: 'var(--text-dark)', background: 'white', padding: '0 5px', borderRadius: '4px', marginLeft: '5px' }}>Hub</span></h2>
+            <h2 className="footer-logo">Suc<span style={{ color: 'var(--text-dark)', background: 'white', padding: '0 5px', borderRadius: '4px', marginLeft: '5px' }}>ura</span></h2>
             <p className="footer-desc">
               Mumbai's trusted healthcare network. Booking appointments,
               finding labs, and managing health records made simple.
@@ -679,16 +741,16 @@ const Blogs = () => {
           <div className="footer-column">
             <h4>Contact Us</h4>
             <div className="footer-contact-info">
-              <p>📍 Andheri West, Mumbai, MH</p>
+              <p>📍 Andheri East, Mumbai, MH</p>
               <p>📞 +91 98765 - 43210</p>
-              <p>✉️ support@dochub.com</p>
+              <p>✉️ support@Sucura.com</p>
             </div>
           </div>
         </div>
 
         <div className="footer-bottom">
           <div className="footer-bottom-content">
-            <p>&copy; 2026 Doctor's Hub Mumbai. All Rights Reserved.</p>
+            <p>&copy; 2026 Sucura Mumbai. All Rights Reserved.</p>
           </div>
         </div>
       </footer>

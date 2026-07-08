@@ -57,10 +57,25 @@ const SignupPage = () => {
   const [popup, setPopup] = useState({ message: "", type: "", visible: false });
 
 
-  const showPopup = (message, type) => {
-    setPopup({ message, type, visible: true });
+  const showPopup = (message, type = "error") => {
+    const safeMessage =
+      typeof message === "string" && message.trim()
+        ? message.trim()
+        : type === "success"
+          ? "Operation completed successfully."
+          : "Something went wrong. Please try again.";
+
+    setPopup({
+      message: safeMessage,
+      type,
+      visible: true
+    });
+
     setTimeout(() => {
-      setPopup(prev => ({ ...prev, visible: false }));
+      setPopup((prev) => ({
+        ...prev,
+        visible: false
+      }));
     }, 3000);
   };
   useEffect(() => {
@@ -190,16 +205,22 @@ const SignupPage = () => {
 
       await signupUser(payload);
 
-      const maskedEmail = formData.email
-        .trim()
-        .replace(/(.{2}).+(@.+)/, "$1****$2");
+const originalEmail = formData.email.trim();
 
-      setEmailForOtp(formData.email);
+const maskedEmail = originalEmail.replace(
+  /^(.{2})(.*)(@.*)$/,
+  (_, firstTwo, middle, domain) =>
+    `${firstTwo}${"*".repeat(Math.min(Math.max(middle.length, 4), 8))}${domain}`
+);
 
-      showPopup(`📧 OTP sent successfully to ${maskedEmail}`, "success");
+setEmailForOtp(originalEmail);
+setSignupStep("otp");
+setTimer(60);
 
-      setSignupStep("otp");
-      setTimer(60);
+showPopup(
+  `OTP sent successfully to ${maskedEmail}`,
+  "success"
+);
 
 
     } catch (err) {
@@ -273,13 +294,25 @@ const SignupPage = () => {
   return (
     <div className="auth-container">
       {popup.visible && (
-        <div className={`popup-toast ${popup.type === "success" ? "success-toast" : "error-toast"}`}>
-          {/* {popup.type === "success" ? <HeartPulse size={20}/> : <Lock size={20}/>} */}
-          {popup.type === "success"
-            ? <HeartPulse size={20} color="#fff" />
-            : <Lock size={20} color="#fff" />
-          }
-          {popup.message}
+        <div
+          className={`signup-popup-toast ${popup.type === "success"
+              ? "signup-popup-toast--success"
+              : "signup-popup-toast--error"
+            }`}
+          role="alert"
+          aria-live="assertive"
+        >
+          <span className="signup-popup-toast__icon">
+            {popup.type === "success" ? (
+              <HeartPulse size={20} />
+            ) : (
+              <Lock size={20} />
+            )}
+          </span>
+
+          <span className="signup-popup-toast__message">
+            {popup.message}
+          </span>
         </div>
       )}
 
@@ -302,7 +335,7 @@ const SignupPage = () => {
           </div>
 
           <div className="form-header">
-            <h1>Let's register you on <span>Doctor's Hub</span></h1>
+            <h1>Let's register you on <span>Sucura</span></h1>
             <p>Join our professional healthcare community today.</p>
           </div>
 

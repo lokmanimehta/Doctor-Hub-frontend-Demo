@@ -1,115 +1,367 @@
 .admin-notifications-page {
   min-height: 100%;
-  padding: 28px;
+  padding: 24px;
   background: #f8fafc;
   color: #0f172a;
 }
 
-.admin-notifications-shell {
-  max-width: 1120px;
-  margin: 0 auto;
-}
-
 .admin-notifications-header {
-  margin-bottom: 22px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px;
+  margin-bottom: 18px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
 }
 
 .admin-notifications-eyebrow {
-  margin: 0 0 6px;
+  display: block;
+  margin-bottom: 7px;
+  color: #0f766e;
   font-size: 12px;
   font-weight: 800;
-  color: #64748b;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .admin-notifications-header h1 {
   margin: 0;
-  font-size: 28px;
-  line-height: 1.2;
-  color: #0f172a;
-  font-weight: 900;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
 }
 
 .admin-notifications-header p {
-  margin: 8px 0 0;
-  max-width: 680px;
+  margin: 9px 0 0;
   color: #64748b;
   font-size: 14px;
-  line-height: 1.7;
 }
 
-.admin-notifications-card {
-  min-height: 320px;
+.admin-notifications-refresh {
+  min-height: 42px;
+  padding: 0 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 12px;
+  background: #0f766e;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-notifications-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-notifications-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.admin-notifications-summary article {
+  padding: 18px;
   background: #ffffff;
-  border: 1px solid #e5edf6;
-  border-radius: 22px;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+}
+
+.admin-notifications-summary span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.admin-notifications-summary strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 28px;
+}
+
+.admin-notifications-filters {
+  display: flex;
+  gap: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+}
+
+.admin-notifications-filters > div {
+  min-width: 220px;
+}
+
+.admin-notifications-filters label {
+  display: block;
+  margin-bottom: 7px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-notifications-filters select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  color: #0f172a;
+  outline: none;
+}
+
+.admin-notifications-error {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border: 1px solid #fecaca;
+  border-radius: 13px;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.admin-notifications-state {
+  min-height: 280px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  padding: 34px;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  color: #64748b;
 }
 
-.admin-notifications-empty-icon {
-  width: 68px;
-  height: 68px;
-  border-radius: 22px;
-  background: #ecfdf5;
-  color: #059669;
+.admin-notifications-state svg {
+  font-size: 32px;
+}
+
+.admin-notifications-state h3,
+.admin-notifications-state p {
+  margin: 0;
+}
+
+.admin-notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-notification-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 15px;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #64748b;
+  border-radius: 16px;
+}
+
+.admin-notification-card.priority-critical {
+  border-left-color: #dc2626;
+}
+
+.admin-notification-card.priority-high {
+  border-left-color: #ea580c;
+}
+
+.admin-notification-card.priority-normal {
+  border-left-color: #0f766e;
+}
+
+.admin-notification-card.priority-low {
+  border-left-color: #64748b;
+}
+
+.admin-notification-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: #f0fdfa;
+  color: #0f766e;
+  font-size: 20px;
+}
+
+.admin-notification-content {
+  min-width: 0;
+}
+
+.admin-notification-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-notification-heading h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.admin-notification-heading > div > span {
+  display: block;
+  margin-top: 5px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.admin-notification-content p {
+  margin: 11px 0;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.admin-notification-priority {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.admin-notification-priority.priority-critical {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.admin-notification-priority.priority-high {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.admin-notification-priority.priority-normal {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.admin-notification-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.admin-notification-meta span {
+  padding: 5px 8px;
+  border-radius: 7px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.admin-notification-open {
+  min-height: 38px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #0f766e;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-notification-open:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-notifications-pagination {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
-  margin-bottom: 18px;
+  gap: 14px;
+  margin-top: 20px;
 }
 
-.admin-notifications-card h2 {
-  margin: 0;
-  color: #0f172a;
-  font-size: 22px;
-  font-weight: 900;
+.admin-notifications-pagination button {
+  min-height: 38px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #ffffff;
+  cursor: pointer;
 }
 
-.admin-notifications-card p {
-  margin: 10px 0 0;
-  max-width: 520px;
-  color: #64748b;
-  font-size: 14px;
-  line-height: 1.7;
+.admin-notifications-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-notifications-pagination span {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-notifications-spin {
+  animation: admin-notification-spin 0.8s linear infinite;
+}
+
+@keyframes admin-notification-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 768px) {
   .admin-notifications-page {
-    padding: 22px;
-  }
-
-  .admin-notifications-header h1 {
-    font-size: 24px;
-  }
-}
-
-@media (max-width: 480px) {
-  .admin-notifications-page {
     padding: 14px;
   }
 
-  .admin-notifications-card {
-    min-height: 280px;
-    padding: 24px 18px;
-    border-radius: 18px;
+  .admin-notifications-header {
+    flex-direction: column;
   }
 
-  .admin-notifications-empty-icon {
-    width: 58px;
-    height: 58px;
-    border-radius: 18px;
-    font-size: 26px;
+  .admin-notifications-summary {
+    grid-template-columns: 1fr;
   }
 
-  .admin-notifications-card h2 {
-    font-size: 19px;
+  .admin-notifications-filters {
+    flex-direction: column;
+  }
+
+  .admin-notifications-filters > div {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-notification-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .admin-notification-open {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
+  .admin-notification-heading {
+    flex-direction: column;
   }
 }

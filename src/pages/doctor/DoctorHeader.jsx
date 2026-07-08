@@ -68,10 +68,12 @@ const DoctorHeader = ({ setIsMobileOpen }) => {
     "/doctor/appointments": "Appointment Management",
     "/doctor/patients": "Patient Records",
     "/doctor/profile": "Professional Profile",
+    "/doctor/profile-views": "Profile Insights",
     "/doctor/add-patient": "Add New Patient",
     "/doctor/availability": "Schedule & Availability",
     "/doctor/labs": "Laboratory Services",
-    "/doctor/notifications": "Notifications Center"
+    "/doctor/notifications": "Notifications Center",
+    "/doctor/feedback": "Feedback & Support",
   };
 
   const currentPath = location.pathname.toLowerCase();
